@@ -12,7 +12,6 @@ expect:
     Content-Range: 0-1/2
   body_exact: [{"name":"Final Fantasy I","designer":{"name":"Hironobu Sakaguchi"}},{"name":"Final Fantasy II","designer":{"name":"Hironobu Sakaguchi"}}]
 schema: test
-preconditions: []
 notes: >
   A computed relationship works with !inner and a filter on the embedded
   resource: only videogames whose computed designer matches name like

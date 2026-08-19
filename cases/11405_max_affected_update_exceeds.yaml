@@ -8,7 +8,6 @@ request:
     Prefer: handling=strict, max-affected=0
   body: [{ "name": "Java", "rank": 19 }]
 schema: mutations
-preconditions: []
 expect:
   status: 400
   body_exact: { "code": "PGRST124", "details": "The query affects 1 rows", "hint": null, "message": "Query result exceeds max-affected preference constraint" }

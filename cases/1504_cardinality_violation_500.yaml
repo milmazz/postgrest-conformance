@@ -5,7 +5,6 @@ request:
   path: /bad_subquery
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 500
 notes: >

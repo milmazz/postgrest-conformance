@@ -15,7 +15,6 @@ request:
       "due_at": "invalid but should be ignored",
     }
 schema: domain_representations
-preconditions: []
 expect:
   status: 201
   headers:

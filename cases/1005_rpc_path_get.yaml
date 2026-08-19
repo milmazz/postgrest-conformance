@@ -5,7 +5,6 @@ request:
   path: /rpc/get_parents_below?id=6
   headers: { Accept: application/json }
 schema: multi
-preconditions: []
 expect:
   status: 200
   headers:

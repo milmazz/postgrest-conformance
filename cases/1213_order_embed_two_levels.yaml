@@ -5,7 +5,6 @@ request:
   path: /projects?id=eq.1&select=id,name,tasks(id,name,users(id,name))&tasks.order=name.asc&tasks.users.order=name.desc
   headers: { Accept: application/json }
 schema: ordering
-preconditions: []
 expect:
   status: 200
   headers:

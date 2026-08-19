@@ -10,7 +10,6 @@ request:
 schema: auth
 config:
   jwt-aud: null
-preconditions: []
 expect:
   status: 200
 notes: "With jwt-aud unset, any aud value is ignored -> 200."

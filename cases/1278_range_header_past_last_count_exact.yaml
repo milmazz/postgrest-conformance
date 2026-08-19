@@ -9,7 +9,6 @@ request:
     Range: 100-199
     Prefer: count=exact
 schema: pagination
-preconditions: []
 expect:
   status: 416
   headers:

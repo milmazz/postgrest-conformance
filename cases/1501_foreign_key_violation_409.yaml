@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: { id: 1, parent_id: 999 }
 schema: test
-preconditions: []
 expect:
   status: 409
   body_jsonpath:

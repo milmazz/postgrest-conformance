@@ -5,7 +5,6 @@ request:
   path: /projects
   headers: { Accept: application/json }
 schema: headers
-preconditions: []
 expect:
   status: 200
   headers:

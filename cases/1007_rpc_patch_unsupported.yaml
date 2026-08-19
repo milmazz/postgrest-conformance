@@ -5,7 +5,6 @@ request:
   path: /rpc/get_parents_below
   headers: { Accept: application/json }
 schema: multi
-preconditions: []
 expect:
   status: 405
 notes: "PATCH on /rpc/<fn> is InvalidRpcMethod (405). Mirrors RpcSpec 'PATCH fails' (v16.0 it at L628, request at L629, 405 at L630)."

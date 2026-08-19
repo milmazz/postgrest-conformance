@@ -5,7 +5,6 @@ request:
   path: /tsearch?text_search_vector=wfts.impossible%20or%20possible
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

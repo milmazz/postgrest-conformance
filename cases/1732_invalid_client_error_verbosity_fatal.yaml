@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_CLIENT_ERROR_VERBOSITY: "invalid"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Invalid client-error-verbosity. Check your configuration."

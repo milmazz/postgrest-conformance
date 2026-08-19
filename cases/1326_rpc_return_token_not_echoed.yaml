@@ -9,7 +9,6 @@ request:
     Prefer: "return=representation"
   body: { "a": 3, "b": 4 }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

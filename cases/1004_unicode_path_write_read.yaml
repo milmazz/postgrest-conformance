@@ -8,7 +8,6 @@ request:
     Prefer: tx=commit, return=representation
   body: { "هویت": 1 }
 schema: unicode
-preconditions: []
 expect:
   status: 201
   body_exact: [{ "هویت": 1 }]

@@ -8,7 +8,6 @@ request:
     Accept: application/json
   body_json: { "name": "Lu" }
 schema: domain_representations
-preconditions: []
 expect:
   status: 201
   headers:

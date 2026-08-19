@@ -5,7 +5,6 @@ request:
   path: /no_pk?select=a&a=isdistinct.2
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

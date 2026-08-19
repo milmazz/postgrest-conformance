@@ -5,7 +5,6 @@ request:
   path: /grandchild_entities?or=(jsonb_col->a->>b.eq.foo, jsonb_col->>b.eq.bar)&select=id
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

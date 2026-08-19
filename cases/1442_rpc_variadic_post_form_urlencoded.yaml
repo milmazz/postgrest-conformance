@@ -8,7 +8,6 @@ request:
     Accept: application/json
   body_raw: "v=hi&v=there"
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

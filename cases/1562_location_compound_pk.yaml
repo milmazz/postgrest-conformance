@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "name": "Enzo", "year": 2021 }
 schema: headers
-preconditions: []
 expect:
   status: 201
   headers:

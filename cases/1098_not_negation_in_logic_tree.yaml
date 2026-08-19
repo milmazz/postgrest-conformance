@@ -5,7 +5,6 @@ request:
   path: /entities?and=(arr.not.cs.{1,2,3},and(id.not.eq.2,name.not.like.*3))&select=id
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

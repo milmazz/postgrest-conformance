@@ -14,7 +14,6 @@ schema: mutations
 # (code, id) -> students(code, id) covering the full pk on both sides, so the
 # embed renders as an object, not an array. The conformance server runs every
 # request with db-tx-end=rollback, so the update never persists.
-preconditions: []
 expect:
   status: 200
   headers:

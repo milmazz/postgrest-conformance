@@ -5,7 +5,6 @@ request:
   path: /simple_pk?k=imatch.^xy&order=extra.asc
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

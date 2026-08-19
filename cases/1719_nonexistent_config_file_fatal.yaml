@@ -5,7 +5,6 @@ request:
   flag: "does_not_exist.conf"
 schema: config
 config: {}
-preconditions: []
 expect:
   exit_code: nonzero
 notes: "Pointing PostgREST at a nonexistent config file aborts startup. Mirrors cli fixture 'non-existant config file' (expect: error)."

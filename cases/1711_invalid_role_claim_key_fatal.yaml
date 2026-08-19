@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_JWT_ROLE_CLAIM_KEY: ".role.other"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "failed to parse role-claim-key value (.role.other)"

@@ -7,7 +7,6 @@ request:
     Accept-Profile: 'SPECIAL "@/\#~_-'
     Accept: application/json
 schema: headers
-preconditions: []
 expect:
   status: 200
   headers:

@@ -5,7 +5,6 @@ request:
   path: /datarep_next_two_todos?select=id,name,datarep_todos!datarep_next_two_todos_first_item_id_fkey(label_color,due_at)&datarep_todos.label_color=neq.000100&order=id
   headers: { Accept: application/json }
 schema: domain_representations
-preconditions: []
 expect:
   status: 200
   headers:

@@ -5,7 +5,6 @@ request:
   path: /fav_numbers?select=num->>i
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

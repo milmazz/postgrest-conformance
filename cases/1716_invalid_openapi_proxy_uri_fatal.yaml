@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_OPENAPI_SERVER_PROXY_URI: "htp:/@@localhorst.invalid"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Malformed proxy uri, a correct example: https://example.com:8443/basePath"

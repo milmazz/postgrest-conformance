@@ -5,7 +5,6 @@ request:
   path: /rpc/fake
   headers: { Accept: application/json }
 schema: rpc
-preconditions: []
 expect:
   status: 404
 notes: >

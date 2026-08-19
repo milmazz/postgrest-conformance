@@ -8,7 +8,6 @@ request:
     Prefer: return=representation, missing=default
   body: { "name": "Tres" }
 schema: mutations
-preconditions: []
 expect:
   status: 200
   headers:

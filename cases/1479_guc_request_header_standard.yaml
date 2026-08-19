@@ -9,7 +9,6 @@ request:
     Origin: http://example.com
   body: { "prefix": "request.headers", "name": "origin" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   headers:

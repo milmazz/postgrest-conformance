@@ -8,7 +8,6 @@ request:
     sign_with: hs256_test_secret
     payload: { "role": "postgrest_test_author", "iat": 1300819380 }
 schema: auth
-preconditions: []
 expect:
   status: 200
 notes: >-

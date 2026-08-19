@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_CLIENT_ERROR_VERBOSITY: "minimal"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

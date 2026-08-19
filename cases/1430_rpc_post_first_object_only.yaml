@@ -9,7 +9,6 @@ request:
     - { "a": 4, "b": 6 }
     - { "a": 100, "b": 200 }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

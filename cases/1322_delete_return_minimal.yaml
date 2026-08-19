@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "return=minimal"
 schema: representations
-preconditions: []
 expect:
   status: 204
   headers:

@@ -10,7 +10,6 @@ request:
       "https://www.example.com/roles": [{ "value": "postgrest_test_author" }]
       other: 666
 schema: auth
-preconditions: []
 config:
   jwt-role-claim-key: '$["https://www.example.com/roles"][0].value'
 expect:

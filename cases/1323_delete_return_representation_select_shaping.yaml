@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "return=representation"
 schema: representations
-preconditions: []
 expect:
   status: 200
   headers:

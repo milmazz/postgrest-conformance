@@ -10,7 +10,6 @@ request:
     - { "id": 4, "name": "Vier" }
     - { "id": 6, "name": "Sechs", "field-with_sep": 6, "arr_data": "{1,2,3}" }
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers:

@@ -16,7 +16,6 @@ config:
   # `config` profile label, so pinning db-schemas to `test` would make the
   # declared config contradict the Accept-Profile the harness sends.
   server-cors-allowed-origins: ""
-preconditions: []
 expect:
   status: 200
   headers:

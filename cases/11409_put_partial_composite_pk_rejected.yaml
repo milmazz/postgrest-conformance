@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: [{ "name": "Supra", "year": 2021 }]
 schema: mutations
-preconditions: []
 expect:
   status: 405
   headers:

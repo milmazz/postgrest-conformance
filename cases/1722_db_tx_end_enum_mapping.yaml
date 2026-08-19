@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_DB_TX_END: "commit-allow-override"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

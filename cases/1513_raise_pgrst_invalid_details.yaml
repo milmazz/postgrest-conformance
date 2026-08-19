@@ -5,7 +5,6 @@ request:
   path: /rpc/raise_sqlstate_invalid_json_details
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 500
   body_exact:

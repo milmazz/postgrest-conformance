@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_SERVER_UNIX_SOCKET_MODE: "800"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Invalid server-unix-socket-mode: not an octal"

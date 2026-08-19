@@ -10,7 +10,6 @@ request:
       role: postgrest_test_author
       other: true
 schema: auth
-preconditions: []
 config:
   jwt-role-claim-key: "$.myRole"
 expect:

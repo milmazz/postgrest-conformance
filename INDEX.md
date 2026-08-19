@@ -1027,6 +1027,20 @@ requirement — where pagination's inert preconditions happen to be satisfied,
 these five leave a documented gate with **no case pinning the ungated 406**.
 An inert declaration is not coverage.
 
+> **Task 5 (2026-08-19) retired the `preconditions:` key entirely**, acting on
+> exactly the case made above: it never ran, so it could only ever be
+> documentation, and it is now documentation in the one place a case format has
+> for that — `notes:`. All **42** non-empty values were folded into their
+> case's `notes:` as an appended `Assumes: …` sentence (verbatim SQL/prose,
+> space-joined for multi-item lists) and the `preconditions: []` boilerplate was
+> dropped from the remaining 719 of 761 (case **1330** already had neither).
+> `case.schema.json` no longer defines the property. Every count and case id in
+> this section is a historical snapshot of the tree as it stood before that
+> pass — accurate to what existed, not to the current case shape. State
+> assumptions now live in `notes:` and are satisfied the same way they always
+> silently were: by the fixture chain (`fixtures/`) or by the documented server
+> config (`HARNESS.md`, Task 6).
+
 **3** cases assert `expect.status_text` (**1508, 1510, 1511**) and are tagged
 `:pending` / excluded by `test/conformance/conformance_test.exs`, because `Req`
 does not expose the HTTP reason phrase. That is the harness's only remaining

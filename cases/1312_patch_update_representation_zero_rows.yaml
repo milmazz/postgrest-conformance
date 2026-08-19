@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "id": 999999 }
 schema: representations
-preconditions: []
 expect:
   status: 200
   headers:

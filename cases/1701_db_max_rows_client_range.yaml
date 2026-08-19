@@ -8,7 +8,6 @@ schema: config
 config:
   # Same single override as case 1700 (QueryLimitedSpec.hs#L14).
   db-max-rows: 2
-preconditions: []
 expect:
   status: 200
   headers:

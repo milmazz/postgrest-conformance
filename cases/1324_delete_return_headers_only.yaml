@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "return=headers-only"
 schema: representations
-preconditions: []
 expect:
   status: 204
   headers:

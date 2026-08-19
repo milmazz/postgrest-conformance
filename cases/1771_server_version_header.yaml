@@ -5,7 +5,6 @@ request:
   path: /
   headers: {}
 schema: observability
-preconditions: []
 expect:
   status: 200
   headers_present: [Server]

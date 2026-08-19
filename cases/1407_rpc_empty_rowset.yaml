@@ -5,7 +5,6 @@ request:
   path: /rpc/test_empty_rowset
   headers: { Accept: application/json }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

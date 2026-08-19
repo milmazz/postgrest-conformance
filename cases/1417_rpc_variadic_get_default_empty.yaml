@@ -5,7 +5,6 @@ request:
   path: /rpc/variadic_param
   headers: { Accept: application/json }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

@@ -5,7 +5,6 @@ request:
   path: /complex_items?id=eq.3&select=id,field-with_sep
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

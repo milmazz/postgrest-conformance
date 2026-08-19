@@ -9,7 +9,6 @@ request:
     Prefer: return=representation
   body: "a,b\nNULL,foo"
 schema: test
-preconditions: []
 expect:
   status: 201
   headers:

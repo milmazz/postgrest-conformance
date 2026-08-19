@@ -13,7 +13,6 @@ config:
     role-claim-key: "$$.aliased"
     root-spec: "open_alias"
     secret-is-base64: true
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

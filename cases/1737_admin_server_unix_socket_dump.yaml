@@ -8,7 +8,6 @@ config:
   env:
     PGRST_ADMIN_SERVER_UNIX_SOCKET: "/tmp/admin_io_test.sock"
     PGRST_ADMIN_SERVER_UNIX_SOCKET_MODE: "666"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

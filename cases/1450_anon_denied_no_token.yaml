@@ -5,7 +5,6 @@ request:
   path: /authors_only
   headers: { Accept: application/json }
 schema: auth
-preconditions: []
 expect:
   status: 401
   headers:

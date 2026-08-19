@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_OPENAPI_MODE: "follow-"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Invalid openapi-mode. Check your configuration."

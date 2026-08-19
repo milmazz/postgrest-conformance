@@ -723,7 +723,9 @@ gaps:
     assertion depends on. The openapi area now has zero non-empty
     preconditions. This is the same finding COVERAGE.md tracks as follow-up 25;
     recorded here because two inert-but-wrong statements survived an entire
-    prior re-sync of this area unnoticed.
+    prior re-sync of this area unnoticed. RESOLVED (Task 5, 2026-08-19): the
+    `preconditions:` key was retired from case.schema.json tree-wide, closing
+    follow-up 25 for good rather than area by area.
   - >
     needed_assertion: nothing. Every behavior cased this pass was expressible
     with the existing case.schema.json keys — `body_jsonpath` with `equals`

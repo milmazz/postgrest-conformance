@@ -12,9 +12,6 @@ request:
 schema: mutations
 # (1,1) MUST exist (updated to B) and (1,2) MUST be absent (inserted) so the
 # status is 201. Reset to the seed for order-independence.
-preconditions:
-  - "DELETE FROM test.compound_unique;"
-  - "INSERT INTO test.compound_unique (key1, key2, value) VALUES (1, 1, 'A');"
 expect:
   status: 201
   headers:
@@ -23,5 +20,5 @@ expect:
   body_exact:
     - { "key1": 1, "key2": 1, "value": "B" }
     - { "key1": 1, "key2": 2, "value": "C" }
-notes: "?on_conflict=key1,key2 targets a compound UNIQUE; (1,1) updated, (1,2) inserted -> 201."
+notes: '?on_conflict=key1,key2 targets a compound UNIQUE; (1,1) updated, (1,2) inserted -> 201. Assumes: DELETE FROM test.compound_unique; INSERT INTO test.compound_unique (key1, key2, value) VALUES (1, 1, ''A'');'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L94

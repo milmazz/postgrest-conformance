@@ -15,7 +15,6 @@ request:
       "due_at": "2018-01-03T11:00:00+00",
     }
 schema: domain_representations
-preconditions: []
 expect:
   status: 201
   headers:

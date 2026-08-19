@@ -5,7 +5,6 @@ request:
   path: /Server%20Today?select=Just%20A%20Server%20Model&Just%20A%20Server%20Model=like.*91*
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

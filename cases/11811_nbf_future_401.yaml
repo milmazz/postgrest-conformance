@@ -8,7 +8,6 @@ request:
     sign_with: hs256_test_secret
     payload: { "nbf": 9999999999 }
 schema: auth
-preconditions: []
 expect:
   status: 401
   body_exact:

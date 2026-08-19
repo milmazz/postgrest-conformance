@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "handling=lenient, timezone=Invalid/Timezone"
 schema: headers
-preconditions: []
 expect:
   status: 400
   body_exact:

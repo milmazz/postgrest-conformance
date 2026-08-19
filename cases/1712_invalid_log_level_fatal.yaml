@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_LOG_LEVEL: "never"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Invalid logging level. Check your configuration."

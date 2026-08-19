@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_DB_SCHEMAS: "public, information_schema"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "db-schemas does not allow schema: 'information_schema'"

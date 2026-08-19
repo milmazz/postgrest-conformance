@@ -7,7 +7,6 @@ schema: config
 config:
   file:
     db-schema: "aliased_schema"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

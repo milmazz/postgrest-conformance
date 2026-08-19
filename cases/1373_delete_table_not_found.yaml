@@ -5,7 +5,6 @@ request:
   path: /foozle?id=eq.101
   headers: {}
 schema: mutations
-preconditions: []
 expect:
   status: 404
   body_exact: { "code": "PGRST205", "details": null, "hint": null, "message": "Could not find the table 'test.foozle' in the schema cache" }

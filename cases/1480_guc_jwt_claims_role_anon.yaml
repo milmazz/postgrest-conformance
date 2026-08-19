@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "prefix": "request.jwt.claims", "name": "role" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   headers:

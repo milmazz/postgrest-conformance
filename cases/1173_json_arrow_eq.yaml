@@ -5,7 +5,6 @@ request:
   path: /json_table?data->foo->>bar=eq.baz
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

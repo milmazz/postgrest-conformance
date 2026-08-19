@@ -5,7 +5,6 @@ request:
   path: /json_table?order=data->foo->>bar.nullsfirst
   headers: { Accept: application/json }
 schema: ordering
-preconditions: []
 expect:
   status: 200
   headers:

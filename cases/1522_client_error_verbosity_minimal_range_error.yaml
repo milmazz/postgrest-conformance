@@ -9,7 +9,6 @@ request:
 schema: test
 config:
   client-error-verbosity: minimal
-preconditions: []
 expect:
   status: 416
   headers:

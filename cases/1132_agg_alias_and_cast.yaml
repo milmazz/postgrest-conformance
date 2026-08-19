@@ -5,7 +5,6 @@ request:
   path: /project_invoices?select=total_charged:invoice_total.sum()::text,project_id&order=project_id.desc
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 config:
   db-aggregates-enabled: true
 expect:

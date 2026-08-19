@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: [{ "a": "one", "b": "two" }]
 schema: mutations
-preconditions: []
 expect:
   status: 405
   headers:

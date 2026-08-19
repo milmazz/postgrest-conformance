@@ -5,7 +5,6 @@ request:
   path: /items_with_different_col_types?int_data=in.( ,3,4)
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 400
   headers:

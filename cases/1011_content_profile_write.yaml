@@ -9,7 +9,6 @@ request:
     Prefer: return=representation
   body: { "id": 0, "name": "child v2-3", "parent_id": 3 }
 schema: multi
-preconditions: []
 expect:
   status: 201
   headers:

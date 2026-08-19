@@ -5,7 +5,6 @@ request:
   path: /items?select=id&order=id.asc
   headers: { Accept: application/json }
 schema: pagination
-preconditions: []
 expect:
   status: 200
   headers:

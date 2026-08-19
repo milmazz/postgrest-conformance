@@ -12,7 +12,6 @@ schema: mutations
 # conformance server runs every request with db-tx-end=rollback, so the delete
 # never persists. `mutations.tasks`/`mutations.projects` are auto-updatable view
 # mirrors of `test`, through which DELETE ... RETURNING works.
-preconditions: []
 expect:
   status: 200
   headers:

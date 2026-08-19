@@ -5,7 +5,6 @@ request:
   path: /grandchild_entities?or=(and_starting_col.eq.smth, or_starting_col.eq.smth)
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

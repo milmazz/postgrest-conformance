@@ -5,7 +5,6 @@ request:
   path: /infinite_recursion?select=*
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 500
   headers:

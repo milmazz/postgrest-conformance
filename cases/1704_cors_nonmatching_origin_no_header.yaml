@@ -11,7 +11,6 @@ config:
   # Only the CORS key is declared; see case 1702 for why db-schemas/db-anon-role
   # are deliberately absent.
   server-cors-allowed-origins: "http://example.com, http://example2.com"
-preconditions: []
 expect:
   status: 200
   headers_absent: [Access-Control-Allow-Origin]

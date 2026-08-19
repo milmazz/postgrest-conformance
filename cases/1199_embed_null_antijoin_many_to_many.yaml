@@ -5,7 +5,6 @@ request:
   path: /users?select=name,tasks()&tasks.id=eq.1&tasks=is.null
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

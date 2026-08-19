@@ -9,7 +9,6 @@ request:
 schema: auth
 config:
   db-anon-role: null
-preconditions: []
 expect:
   status: 200
 notes: "With anon disabled, a valid token still authenticates normally."

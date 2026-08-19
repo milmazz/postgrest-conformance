@@ -5,7 +5,6 @@ request:
   path: /clients?id=eq.1&select=id,projects:projects!client(id,tasks(id))
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

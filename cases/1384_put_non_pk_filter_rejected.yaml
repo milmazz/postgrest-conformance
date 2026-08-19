@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: [{ "name": "Go", "rank": 19 }]
 schema: mutations
-preconditions: []
 expect:
   status: 405
   headers:

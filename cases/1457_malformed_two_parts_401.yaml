@@ -7,7 +7,6 @@ request:
     Accept: application/json
     Authorization: "Bearer ey9zdGdyZXN0X3Rlc3RfYXV0aG9yIiwiaWQiOiJqZG9lIn0.y4vZuu1dDdwAl0-S00MCRWRYMlJ5YAMSir6Es6WtWx0"
 schema: auth
-preconditions: []
 expect:
   status: 401
   headers:

@@ -10,7 +10,6 @@ request:
 schema: observability
 config:
   server-timing-enabled: true
-preconditions: []
 expect:
   status: 200
   headers_present: [Server-Timing]

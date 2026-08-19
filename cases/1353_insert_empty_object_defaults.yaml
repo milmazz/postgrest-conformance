@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: {}
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers_absent: [Content-Type]

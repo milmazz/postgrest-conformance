@@ -9,7 +9,6 @@ request:
     Range: 1-1
   body: [{ "name": "Java", "rank": 5 }]
 schema: mutations
-preconditions: []
 expect:
   status: 200
   body_exact: [{ "name": "Java", "rank": 5 }]

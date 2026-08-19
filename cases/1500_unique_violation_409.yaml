@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: { k: "xyyx", extra: "e1" }
 schema: test
-preconditions: []
 expect:
   status: 409
   body_exact:

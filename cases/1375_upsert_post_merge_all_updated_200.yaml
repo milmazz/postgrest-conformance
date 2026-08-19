@@ -13,9 +13,6 @@ request:
 schema: mutations
 # All three names (Python, Java, C) MUST already exist so every row is an
 # UPDATE and nothing is inserted -> 200. Reset to the seed to guarantee this.
-preconditions:
-  - "DELETE FROM test.tiobe_pls;"
-  - "INSERT INTO test.tiobe_pls (name, rank) VALUES ('Java', 1), ('C', 2), ('Python', 4);"
 expect:
   status: 200
   headers:
@@ -24,7 +21,5 @@ expect:
     - { "name": "Python", "rank": 6 }
     - { "name": "Java", "rank": 2 }
     - { "name": "C", "rank": 1 }
-notes: >-
-  When every row already exists (all updates, nothing inserted) merge-duplicates
-  returns 200. Mirrors UpsertSpec.hs#L34-L44.
+notes: 'When every row already exists (all updates, nothing inserted) merge-duplicates returns 200. Mirrors UpsertSpec.hs#L34-L44. Assumes: DELETE FROM test.tiobe_pls; INSERT INTO test.tiobe_pls (name, rank) VALUES (''Java'', 1), (''C'', 2), (''Python'', 4);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L34

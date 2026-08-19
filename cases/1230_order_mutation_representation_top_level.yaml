@@ -8,7 +8,6 @@ request:
     Prefer: return=representation
   body: { "b": "1" }
 schema: mutations
-preconditions: []
 expect:
   status: 200
   headers:

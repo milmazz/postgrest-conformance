@@ -5,7 +5,6 @@ request:
   path: /users?select=*,tasks:users_tasks(...tasks(*))&limit=1
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

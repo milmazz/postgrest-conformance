@@ -10,7 +10,6 @@ request:
     - { "id": 200, "name": "Doscientos" }
     - { "id": 201, "name": "Doscientos Uno" }
 schema: representations
-preconditions: []
 expect:
   status: 201
   headers:

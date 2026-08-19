@@ -4,7 +4,6 @@ request:
   method: DELETE
   path: /items?id=eq.1
 schema: representations
-preconditions: []
 expect:
   status: 204
   headers:

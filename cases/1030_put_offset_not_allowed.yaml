@@ -8,7 +8,6 @@ request:
     Accept: application/json
   body: [{ "name": "Javascript", "rank": 1 }]
 schema: test
-preconditions: []
 expect:
   status: 400
   headers:

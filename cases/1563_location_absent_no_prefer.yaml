@@ -7,7 +7,6 @@ request:
     Content-Type: application/json
   body: { "id": 12, "name": "New Project", "client_id": 2 }
 schema: headers
-preconditions: []
 expect:
   status: 201
   headers:

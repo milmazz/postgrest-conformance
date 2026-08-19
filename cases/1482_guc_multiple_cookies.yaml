@@ -9,7 +9,6 @@ request:
     Cookie: acookie=cookievalue;secondcookie=anothervalue
   body: { "prefix": "request.cookies", "name": "secondcookie" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   body_exact: "anothervalue"

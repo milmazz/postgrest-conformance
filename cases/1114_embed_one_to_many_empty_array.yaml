@@ -5,7 +5,6 @@ request:
   path: /projects?id=in.(5)&select=id,tasks(id)
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

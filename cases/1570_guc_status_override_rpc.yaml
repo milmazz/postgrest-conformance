@@ -5,7 +5,6 @@ request:
   path: /rpc/send_body_status_403
   headers: { Accept: application/json }
 schema: headers
-preconditions: []
 expect:
   status: 403
   headers:

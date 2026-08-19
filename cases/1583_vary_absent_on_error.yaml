@@ -6,7 +6,6 @@ request:
   headers:
     Accept-Profile: unknown
 schema: headers
-preconditions: []
 expect:
   status: 406
   headers_absent: [Vary]

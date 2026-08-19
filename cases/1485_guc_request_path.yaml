@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "name": "request.path" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   body_exact: "/rpc/get_guc_value"

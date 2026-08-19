@@ -197,7 +197,9 @@ $$ LANGUAGE sql;
 
 -- -------------------------------------------------------------------------
 -- PostGIS-dependent objects (GeoJSON cases). These require the postgis
--- extension; cases that touch them carry preconditions noting the dependency.
+-- extension; cases that touch them note the dependency in `notes:` (an
+-- "Assumes: ..." sentence, since the case format's `preconditions:` key
+-- was retired).
 -- -------------------------------------------------------------------------
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 -- CREATE TABLE shops (

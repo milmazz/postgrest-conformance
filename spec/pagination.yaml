@@ -711,7 +711,12 @@ gaps:
     precondition lists are therefore documentation of an assumption, not an
     executed setup step; if the loader's ANALYZE is ever removed the three cases
     become planner-flaky. Recorded for the harness owner rather than worked
-    around, since `test/**` is frozen.
+    around, since `test/**` is frozen. RESOLVED (Task 5, 2026-08-19): the
+    `preconditions:` key was retired from case.schema.json; the three cases'
+    `ANALYZE` statements are now folded into their `notes:` as an appended
+    `Assumes: ...` sentence. The underlying flakiness risk is unchanged — it
+    was never mitigated by the key, only documented by it, and it still
+    depends on the loader's post-load `ANALYZE`.
   - >
     No pagination case asserts the v16.0 `Proxy-Status` error header (PAG-022).
     PostgREST's own RangeSpec never asserts it for PGRST103, and it is emitted

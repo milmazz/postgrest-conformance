@@ -7,7 +7,6 @@ request:
     Content-Type: application/json
   body: { "id": "1", "c": "c1" }
 schema: headers
-preconditions: []
 expect:
   status: 201
   headers_no_blank: true

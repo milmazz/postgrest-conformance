@@ -8,7 +8,6 @@ request:
     Content-Profile: unknown
   body: { "name": "child 4", "parent_id": 4 }
 schema: multi
-preconditions: []
 expect:
   status: 406
   body_jsonpath:

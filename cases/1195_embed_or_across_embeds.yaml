@@ -5,7 +5,6 @@ request:
   path: /projects?select=name,clients(),tasks()&clients.name=eq.Apple&tasks.name=eq.Design w7&or=(clients.not.is.null,tasks.not.is.null)
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

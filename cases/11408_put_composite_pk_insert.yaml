@@ -8,7 +8,6 @@ request:
     Prefer: return=representation
   body: [{ "name": "Supra", "year": 2021 }]
 schema: mutations
-preconditions: []
 expect:
   status: 201
   body_exact: [{ "name": "Supra", "year": 2021 }]

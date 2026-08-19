@@ -11,8 +11,6 @@ request:
     - { "id": 202, "body": "zzz", "garbage": "%%$&", "kkk": "jjj" }
     - { "id": 203, "body": "aaa", "hey": "ho" }
 schema: mutations
-preconditions:
-  - "DELETE FROM test.articles WHERE id IN (201, 202, 203);"
 expect:
   status: 201
   headers:
@@ -22,10 +20,5 @@ expect:
     - { "id": 201, "body": "yyy" }
     - { "id": 202, "body": "zzz" }
     - { "id": 203, "body": "aaa" }
-notes: >-
-  Bulk array insert with ?columns=id,body: JSON keys NOT listed in ?columns
-  (smth, other, fake_id, garbage, kkk, hey) are ignored rather than rejected,
-  and ?select=id,body shapes the returned representation. The extra-keys-ignored
-  behavior REQUIRES ?columns (without it, unknown keys are treated as columns and
-  error). Mirrors InsertSpec.hs#L442-L452.
+notes: 'Bulk array insert with ?columns=id,body: JSON keys NOT listed in ?columns (smth, other, fake_id, garbage, kkk, hey) are ignored rather than rejected, and ?select=id,body shapes the returned representation. The extra-keys-ignored behavior REQUIRES ?columns (without it, unknown keys are treated as columns and error). Mirrors InsertSpec.hs#L442-L452. Assumes: DELETE FROM test.articles WHERE id IN (201, 202, 203);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L442

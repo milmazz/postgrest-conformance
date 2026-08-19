@@ -5,7 +5,6 @@ request:
   path: /json_arr?select=data->>--34
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 400
   headers:

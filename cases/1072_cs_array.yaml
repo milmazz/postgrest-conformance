@@ -5,7 +5,6 @@ request:
   path: /complex_items?select=id&arr_data=cs.{2}
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

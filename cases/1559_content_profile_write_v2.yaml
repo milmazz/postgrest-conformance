@@ -9,7 +9,6 @@ request:
     Content-Type: application/json
   body: { "id": 0, "name": "child v2-3", "parent_id": 3 }
 schema: headers
-preconditions: []
 expect:
   status: 201
   headers:

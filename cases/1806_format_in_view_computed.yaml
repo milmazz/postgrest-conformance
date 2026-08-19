@@ -5,7 +5,6 @@ request:
   path: /datarep_todos_computed?select=id,label_color,dark_color
   headers: { Accept: application/json }
 schema: domain_representations
-preconditions: []
 expect:
   status: 200
   headers:

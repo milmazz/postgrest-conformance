@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body_json: { "label_color": "#221100", "due_at": "2019-01-03T11:00:00Z" }
 schema: domain_representations
-preconditions: []
 expect:
   status: 204
   headers:

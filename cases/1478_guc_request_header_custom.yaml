@@ -9,7 +9,6 @@ request:
     Custom-Header: test
   body: { "prefix": "request.headers", "name": "custom-header" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   headers:

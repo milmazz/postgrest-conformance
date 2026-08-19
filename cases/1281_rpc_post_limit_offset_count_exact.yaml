@@ -9,7 +9,6 @@ request:
     Prefer: count=exact
   body_json: { "min": 2, "max": 4 }
 schema: pagination
-preconditions: []
 expect:
   status: 206
   headers:

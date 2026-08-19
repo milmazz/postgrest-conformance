@@ -5,7 +5,6 @@ request:
   path: /rpc/get_lines
   headers: { Accept: application/vnd.geo2+json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

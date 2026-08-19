@@ -8,7 +8,6 @@ request:
     Range-Unit: items
     Range: 0-
 schema: pagination
-preconditions: []
 expect:
   status: 200
   headers:

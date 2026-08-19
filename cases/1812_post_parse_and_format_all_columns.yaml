@@ -18,7 +18,6 @@ request:
       "budget": "-100000000000000.13",
     }
 schema: domain_representations
-preconditions: []
 expect:
   status: 201
   headers:

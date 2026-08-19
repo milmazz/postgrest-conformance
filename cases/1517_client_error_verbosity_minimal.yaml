@@ -7,7 +7,6 @@ request:
 schema: test
 config:
   client-error-verbosity: minimal
-preconditions: []
 expect:
   status: 404
   body_exact:

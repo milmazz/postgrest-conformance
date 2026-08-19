@@ -5,7 +5,6 @@ request:
   path: /projects?select=name,project_invoices(invoice_total.sum())
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 config:
   db-aggregates-enabled: true
 expect:

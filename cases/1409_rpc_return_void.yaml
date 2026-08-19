@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: {}
 schema: rpc
-preconditions: []
 expect:
   status: 204
   headers_absent: [Content-Type, Content-Length]

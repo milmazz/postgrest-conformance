@@ -10,7 +10,6 @@ request:
     Range: 0-1
   body_json: { "min": 0, "max": 15 }
 schema: pagination
-preconditions: []
 expect:
   status: 200
   headers:

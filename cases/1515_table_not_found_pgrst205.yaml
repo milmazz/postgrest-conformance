@@ -5,7 +5,6 @@ request:
   path: /non_existent_table
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 404
   headers:

@@ -5,7 +5,6 @@ request:
   path: /rpc/add_them?a=3&b=4
   headers: { Accept: application/json }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

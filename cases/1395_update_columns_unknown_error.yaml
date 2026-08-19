@@ -8,7 +8,6 @@ request:
     Prefer: return=representation
   body: { "body": "yyy" }
 schema: mutations
-preconditions: []
 expect:
   status: 400
   body_exact: { "code": "PGRST204", "details": null, "hint": null, "message": "Could not find the 'helicopter' column of 'articles' in the schema cache" }

@@ -6,12 +6,9 @@ request:
   headers:
     Prefer: handling=strict, max-affected=10
 schema: mutations
-preconditions:
-  - "DELETE FROM test.items;"
-  - "INSERT INTO test.items (id) SELECT generate_series(1, 15);"
 expect:
   status: 204
   headers:
     Preference-Applied: handling=strict, max-affected=10
-notes: "9 matching rows under the cap of 10 -> 204; Preference-Applied echoes both."
+notes: '9 matching rows under the cap of 10 -> 204; Preference-Applied echoes both. Assumes: DELETE FROM test.items; INSERT INTO test.items (id) SELECT generate_series(1, 15);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L22

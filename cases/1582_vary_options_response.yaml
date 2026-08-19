@@ -4,7 +4,6 @@ request:
   method: OPTIONS
   path: /items
 schema: headers
-preconditions: []
 expect:
   status: 200
   headers:

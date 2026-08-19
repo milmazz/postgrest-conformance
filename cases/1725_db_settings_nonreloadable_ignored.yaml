@@ -19,7 +19,6 @@ config:
     # one that honours every pgrst.* setting. With '3001' a wrong
     # implementation dumps `server-port = 3001` and the case fails.
     - "ALTER ROLE db_config_authenticator SET pgrst.server_port = '3001'"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

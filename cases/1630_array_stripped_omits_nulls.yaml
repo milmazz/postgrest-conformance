@@ -5,7 +5,6 @@ request:
   path: /organizations?select=*
   headers: { Accept: application/vnd.pgrst.array+json;nulls=stripped }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

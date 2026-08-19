@@ -8,7 +8,6 @@ request:
     sign_with: hs256_test_secret
     payload: { "aud": [{ "invalid": "value" }, "test"], "role": "postgrest_test_author" }
 schema: auth
-preconditions: []
 expect:
   status: 401
   body_exact: { "code": "PGRST303", "details": null, "hint": null, "message": "The JWT 'aud' claim must be a string or an array of strings" }

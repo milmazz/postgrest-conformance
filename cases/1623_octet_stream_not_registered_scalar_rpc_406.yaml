@@ -5,7 +5,6 @@ request:
   path: /rpc/add_them?a=3&b=4
   headers: { Accept: application/octet-stream }
 schema: test
-preconditions: []
 expect:
   status: 406
   headers:

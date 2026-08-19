@@ -10,7 +10,6 @@ request:
 schema: auth
 config:
   jwt-aud: youraudience
-preconditions: []
 expect:
   status: 200
 notes: "Array aud containing the configured value (any position) -> 200."

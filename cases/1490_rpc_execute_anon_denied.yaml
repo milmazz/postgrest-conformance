@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "name": "anonymous" }
 schema: auth
-preconditions: []
 expect:
   status: 401
 notes: "Anonymous lacks EXECUTE on privileged_hello -> 401."

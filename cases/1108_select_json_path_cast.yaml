@@ -5,7 +5,6 @@ request:
   path: /complex_items?id=eq.1&select=settings->foo->>int::integer
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

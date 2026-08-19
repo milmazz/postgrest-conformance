@@ -17,7 +17,6 @@ config:
   # KNOWN HARNESS GAP: this block is inert today (see config.yaml gaps,
   # "needed_assertion: the runner must honour `config` on HTTP cases").
   server-cors-allowed-origins: ""
-preconditions: []
 expect:
   status: 200
   headers:

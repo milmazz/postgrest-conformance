@@ -5,7 +5,6 @@ request:
   path: '/grandchild_entities?or=(name.like."*ity,4*",name.ilike."*ITY,5)")&select=id'
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

@@ -8,7 +8,6 @@ request:
     Prefer: return=representation
   body: []
 schema: mutations
-preconditions: []
 expect:
   status: 201
   body_exact: []

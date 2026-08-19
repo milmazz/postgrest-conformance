@@ -5,7 +5,6 @@ request:
   path: /rpc/ret_any_mt
   headers: { Accept: "*/*" }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

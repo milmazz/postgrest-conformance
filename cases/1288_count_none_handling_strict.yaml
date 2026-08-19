@@ -7,7 +7,6 @@ request:
     Accept: application/json
     Prefer: "count=none, handling=strict"
 schema: pagination
-preconditions: []
 expect:
   status: 400
   body_exact:

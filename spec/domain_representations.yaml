@@ -606,8 +606,8 @@ gaps:
             (test/support/conformance_server.ex), which is exactly what makes
             cases 1811-1836 safe but also means `tx=commit` cannot be honored.
             Compounding this, spec/case.schema.json carries a SINGLE `request`
-            (properties: config,id,feature,request,schema,preconditions,expect,
-            notes,source) with no step/sequence key, so a sequence whose later
+            (properties: config,id,feature,request,schema,expect,notes,source)
+            with no step/sequence key, so a sequence whose later
             assertions depend on an earlier request having committed cannot be
             expressed at all. Only the L110 PATCH is single-request expressible,
             since its own 200 body is computed inside the mutation's transaction

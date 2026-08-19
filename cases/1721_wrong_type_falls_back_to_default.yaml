@@ -7,7 +7,6 @@ schema: config
 config:
   file:
     db-max-rows: true        # integer key given a bool -> falls back to default (unset)
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

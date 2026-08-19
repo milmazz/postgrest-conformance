@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: { "real": false }
 schema: mutations
-preconditions: []
 expect:
   status: 404
   body_exact: { "code": "PGRST205", "details": null, "hint": null, "message": "Could not find the table 'test.fake' in the schema cache" }

@@ -5,7 +5,6 @@ request:
   path: /chores?done=is.nil
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 400
 notes: >

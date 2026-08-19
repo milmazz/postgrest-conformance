@@ -5,7 +5,6 @@ request:
   path: /rpc/get_int_and_guc_headers?num=1
   headers: { Accept: application/json }
 schema: headers
-preconditions: []
 expect:
   status: 200
   headers:

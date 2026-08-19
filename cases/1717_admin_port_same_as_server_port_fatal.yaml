@@ -8,7 +8,6 @@ config:
   env:
     PGRST_SERVER_PORT: "3000"
     PGRST_ADMIN_SERVER_PORT: "3000"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "admin-server-port cannot be the same as server-port"

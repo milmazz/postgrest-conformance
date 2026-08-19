@@ -101,11 +101,6 @@
       "type": "string",
       "minLength": 1
     },
-    "preconditions": {
-      "description": "Optional SQL statements to run before the request.",
-      "type": "array",
-      "items": { "type": "string" }
-    },
     "expect": {
       "description": "Assertions on the outcome. HTTP cases assert `status` (+ headers/body); CLI cases assert `exit_code` (+ dump_contains / stderr_contains). At least one of `status` or `exit_code` MUST be present.",
       "type": "object",

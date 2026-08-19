@@ -9,7 +9,6 @@ request:
   body:
     - { "a": "1", "b": "0" }
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers:

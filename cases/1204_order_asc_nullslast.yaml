@@ -5,7 +5,6 @@ request:
   path: /no_pk?order=a.asc.nullslast
   headers: { Accept: application/json }
 schema: ordering
-preconditions: []
 expect:
   status: 200
   headers:

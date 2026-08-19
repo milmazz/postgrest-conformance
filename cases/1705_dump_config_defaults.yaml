@@ -5,7 +5,6 @@ request:
   flag: "--dump-config"
 schema: config
 config: {}
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

@@ -12,9 +12,6 @@ request:
 schema: mutations
 # 'PHP' MUST be absent (inserted) and 'Python' MUST exist (skipped). Reset to
 # the seed so the returned set is deterministically just [PHP].
-preconditions:
-  - "DELETE FROM test.tiobe_pls;"
-  - "INSERT INTO test.tiobe_pls (name, rank) VALUES ('Java', 1), ('C', 2), ('Python', 4);"
 expect:
   status: 201
   headers:
@@ -22,7 +19,5 @@ expect:
     Preference-Applied: resolution=ignore-duplicates, return=representation
   body_exact:
     - { "name": "PHP", "rank": 9 }
-notes: >-
-  ignore-duplicates skips conflicting rows (Python exists, ON CONFLICT DO
-  NOTHING); only the newly inserted PHP is returned. Mirrors UpsertSpec.hs#L165-L175.
+notes: 'ignore-duplicates skips conflicting rows (Python exists, ON CONFLICT DO NOTHING); only the newly inserted PHP is returned. Mirrors UpsertSpec.hs#L165-L175. Assumes: DELETE FROM test.tiobe_pls; INSERT INTO test.tiobe_pls (name, rank) VALUES (''Java'', 1), (''C'', 2), (''Python'', 4);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L165

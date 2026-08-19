@@ -11,7 +11,6 @@ schema: config
 # is declared here (db-schemas/db-anon-role would only contradict the `config`
 # profile label the harness sends as Accept-Profile).
 config: {}
-preconditions: []
 expect:
   status: 200
   headers:

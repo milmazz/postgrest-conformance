@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "id": "jdoe", "pass": "1234" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   body_exact: { "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xuYW1lIjoicG9zdGdyZXN0X3Rlc3RfYXV0aG9yIiwiaWQiOiJqZG9lIn0.KO-0PGp_rU-utcDBP6qwdd-Th2Fk-ICVt01I7QtTDWs" }

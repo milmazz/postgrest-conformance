@@ -9,7 +9,6 @@ request:
     Content-Type: application/json
   body_json: { "name": "Demon" }
 schema: test
-preconditions: []
 expect:
   status: 201
   headers:

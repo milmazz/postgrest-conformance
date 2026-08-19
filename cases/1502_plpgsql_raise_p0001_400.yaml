@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: {}
 schema: test
-preconditions: []
 expect:
   status: 400
   headers:

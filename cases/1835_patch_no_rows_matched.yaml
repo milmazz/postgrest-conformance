@@ -15,7 +15,6 @@ request:
       "fake_id": 13,
     }
 schema: domain_representations
-preconditions: []
 expect:
   status: 200
 notes: >

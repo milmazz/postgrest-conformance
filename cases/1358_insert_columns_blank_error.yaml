@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: [{ "id": 204, "body": "yyy" }]
 schema: mutations
-preconditions: []
 expect:
   status: 400
   body_jsonpath:

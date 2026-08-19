@@ -5,7 +5,6 @@ request:
   path: /rpc/bad_guc_headers_1
   headers: { Accept: application/json }
 schema: headers
-preconditions: []
 expect:
   status: 500
   headers:

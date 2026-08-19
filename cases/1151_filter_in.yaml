@@ -5,7 +5,6 @@ request:
   path: /grandchild_entities?id=in.(1,2,3)&select=id
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

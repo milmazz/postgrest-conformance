@@ -5,7 +5,6 @@ request:
   path: /unknown
   headers: {}
 schema: test
-preconditions: []
 expect:
   status: 404
 notes: >-

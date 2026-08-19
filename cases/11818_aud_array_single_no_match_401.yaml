@@ -10,7 +10,6 @@ request:
 schema: auth
 config:
   jwt-aud: youraudience
-preconditions: []
 expect:
   status: 401
   body_exact: { "code": "PGRST303", "details": null, "hint": null, "message": "JWT not in audience" }

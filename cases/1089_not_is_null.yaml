@@ -5,7 +5,6 @@ request:
   path: /no_pk?a=not.is.null
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

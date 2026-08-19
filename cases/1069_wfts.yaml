@@ -5,7 +5,6 @@ request:
   path: /tsearch?text_search_vector=wfts.The%20Fat%20Rats
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

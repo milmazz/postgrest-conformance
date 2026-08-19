@@ -5,7 +5,6 @@ request:
   path: /entities?select=count()
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 config:
   db-aggregates-enabled: true
 expect:

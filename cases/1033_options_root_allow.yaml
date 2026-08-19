@@ -5,7 +5,6 @@ request:
   path: /
   headers: {}
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

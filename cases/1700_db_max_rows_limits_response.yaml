@@ -11,7 +11,6 @@ config:
   # else is declared, so the declared config stays consistent with the `config`
   # profile label the harness sends as Accept-Profile.
   db-max-rows: 2
-preconditions: []
 expect:
   status: 200
   headers:

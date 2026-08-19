@@ -5,7 +5,6 @@ request:
   path: /ranges?range=nxr.[4,7]&select=id
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

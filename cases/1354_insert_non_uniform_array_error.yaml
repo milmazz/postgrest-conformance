@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: [{ "id": 100, "body": "x" }, { "id": 111, "body": "y", "owner": "me" }]
 schema: mutations
-preconditions: []
 expect:
   status: 400
   headers:

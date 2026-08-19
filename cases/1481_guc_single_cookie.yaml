@@ -9,7 +9,6 @@ request:
     Cookie: acookie=cookievalue
   body: { "prefix": "request.cookies", "name": "acookie" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   body_exact: "cookievalue"

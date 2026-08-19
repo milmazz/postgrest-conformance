@@ -5,7 +5,6 @@ request:
   path: /items?id=eq.1
   headers: { Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

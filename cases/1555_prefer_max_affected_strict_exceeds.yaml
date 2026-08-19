@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "handling=strict, max-affected=10"
 schema: headers
-preconditions: []
 expect:
   status: 400
   body_exact:

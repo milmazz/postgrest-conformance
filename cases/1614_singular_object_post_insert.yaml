@@ -10,7 +10,6 @@ request:
   body_json:
     - { "id": 102, "address": "xxx" }
 schema: test
-preconditions: []
 expect:
   status: 201
   headers:

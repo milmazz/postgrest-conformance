@@ -14,7 +14,6 @@ schema: mutations
 # (name, year) and seeds ZERO rows, so both payload rows insert and the assertion
 # below holds regardless of run order. The conformance server runs every request
 # with db-tx-end=rollback, so the inserts never persist.
-preconditions: []
 expect:
   status: 201
   headers:

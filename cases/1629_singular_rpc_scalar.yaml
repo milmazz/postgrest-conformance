@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "name": "world" }
 schema: test
-preconditions: []
 expect:
   status: 200
 notes: >-

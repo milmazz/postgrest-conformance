@@ -5,7 +5,6 @@ request:
   path: /
   headers: { Accept: text/csv }
 schema: test
-preconditions: []
 expect:
   status: 406
 notes: "Unsupported media type (text/csv) at root is 406. Mirrors OpenApiSpec.hs:35-38"

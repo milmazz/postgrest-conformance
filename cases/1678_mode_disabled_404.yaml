@@ -7,7 +7,6 @@ request:
 schema: test
 config:
   openapi-mode: disabled
-preconditions: []
 expect:
   status: 404
   headers:

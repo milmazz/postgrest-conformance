@@ -10,7 +10,6 @@ request:
       myDomain: ["other", "postgrest_test_author"]
       other: 1.23
 schema: auth
-preconditions: []
 config:
   jwt-role-claim-key: "$.myDomain[3]"
 expect:

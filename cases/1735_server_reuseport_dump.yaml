@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_SERVER_REUSEPORT: "true"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

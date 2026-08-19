@@ -5,7 +5,6 @@ request:
   path: /
   headers: { Accept: text/csv }
 schema: test
-preconditions: []
 expect:
   status: 406
 notes: "An unsupported Accept (text/csv) on the root path returns 406; the root only produces openapi+json / json / */*. Mirrors OpenApiSpec 'should respond to openapi request with unsupported media type with 406'."

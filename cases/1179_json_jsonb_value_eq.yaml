@@ -5,7 +5,6 @@ request:
   path: '/jsonb_test?data->a=eq.{"b":2}'
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

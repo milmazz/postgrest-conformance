@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_DB_SCHEMAS: "pg_catalog"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "db-schemas does not allow schema: 'pg_catalog'"

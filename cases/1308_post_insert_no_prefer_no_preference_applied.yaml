@@ -7,7 +7,6 @@ request:
     Content-Type: application/json
   body: { "id": 101, "name": "Ciento Uno" }
 schema: representations
-preconditions: []
 expect:
   status: 201
   headers:

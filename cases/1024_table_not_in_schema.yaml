@@ -7,7 +7,6 @@ request:
     Accept: application/json
     Accept-Profile: v1
 schema: multi
-preconditions: []
 expect:
   status: 404
   body_exact:

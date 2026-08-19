@@ -5,7 +5,6 @@ request:
   path: /entities?or=()
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 400
   headers:

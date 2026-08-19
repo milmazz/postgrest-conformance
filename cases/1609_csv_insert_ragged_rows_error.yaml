@@ -7,7 +7,6 @@ request:
     Content-Type: text/csv
   body_raw: "a,b\nfoo,bar\nbaz"
 schema: test
-preconditions: []
 expect:
   status: 400
   headers:

@@ -4,7 +4,6 @@ request:
   method: GET
   path: /rpc/set_cookie_twice
 schema: headers
-preconditions: []
 expect:
   status: 204
   headers:

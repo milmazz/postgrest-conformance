@@ -5,7 +5,6 @@ request:
   path: /parents
   headers: { Accept: application/json }
 schema: multi
-preconditions: []
 expect:
   status: 200
   headers:

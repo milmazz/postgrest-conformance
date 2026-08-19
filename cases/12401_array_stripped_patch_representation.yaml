@@ -9,7 +9,6 @@ request:
     Prefer: return=representation
   body_json: { "name": "John", "referee": null }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

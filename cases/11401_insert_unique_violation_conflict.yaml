@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json }
   body: { "unique_key": 1, "value": "dup" }
 schema: mutations
-preconditions: []
 expect:
   status: 409
   body_jsonpath:

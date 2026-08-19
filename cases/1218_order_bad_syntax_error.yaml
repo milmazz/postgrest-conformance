@@ -5,7 +5,6 @@ request:
   path: /items?order=id.asc.nullslasttt
   headers: { Accept: application/json }
 schema: ordering
-preconditions: []
 expect:
   status: 400
   headers:

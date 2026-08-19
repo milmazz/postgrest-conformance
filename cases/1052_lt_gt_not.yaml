@@ -5,7 +5,6 @@ request:
   path: /items?id=not.lt.14&order=id.asc
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

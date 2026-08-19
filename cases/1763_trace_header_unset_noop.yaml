@@ -7,7 +7,6 @@ request:
 schema: observability
 config:
   server-trace-header: ""
-preconditions: []
 expect:
   status: 200
   headers:

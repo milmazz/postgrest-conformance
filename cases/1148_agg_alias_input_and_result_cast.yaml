@@ -5,7 +5,6 @@ request:
   path: /trash_details?select=s:jsonb_col->>key::integer.sum()::text
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 config:
   db-aggregates-enabled: true
 expect:

@@ -11,7 +11,6 @@ request:
 schema: auth
 config:
   db-pre-request: test.switch_role
-preconditions: []
 expect:
   status: 400
   body_exact: { "hint": "Please contact administrator", "details": null, "code": "P0001", "message": "Disabled ID --> 3" }

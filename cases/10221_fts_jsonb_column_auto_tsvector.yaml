@@ -5,7 +5,6 @@ request:
   path: /tsearch_to_tsvector?select=jsonb_search&jsonb_search=fts.impossible
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

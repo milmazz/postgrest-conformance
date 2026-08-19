@@ -5,7 +5,6 @@ request:
   path: /tsearch_to_tsvector?select=text_search_rec_domain&text_search_rec_domain=fts(simple).of
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

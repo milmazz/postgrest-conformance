@@ -5,7 +5,6 @@ request:
   path: /projects?id=gt(all).{4,3}
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

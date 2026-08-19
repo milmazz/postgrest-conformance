@@ -5,7 +5,6 @@ request:
   path: /videogames?select=name,designer:computed_designers(name)
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

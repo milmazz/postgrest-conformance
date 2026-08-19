@@ -5,7 +5,6 @@ request:
   path: /projects?select=id,clients(name)&order=clientsx(name).nullsfirst
   headers: { Accept: application/json }
 schema: ordering
-preconditions: []
 expect:
   status: 400
   headers:

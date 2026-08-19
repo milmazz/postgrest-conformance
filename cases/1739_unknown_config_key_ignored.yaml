@@ -7,7 +7,6 @@ schema: config
 config:
   file:
     not-existing: "should succeed"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

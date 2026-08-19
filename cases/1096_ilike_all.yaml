@@ -5,7 +5,6 @@ request:
   path: /articles?body=ilike(all).{%plan%,%greatness%}&select=id
   headers: { Accept: application/json }
 schema: operators
-preconditions: []
 expect:
   status: 200
   headers:

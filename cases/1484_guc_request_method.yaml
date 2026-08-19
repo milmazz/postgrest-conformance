@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "name": "request.method" }
 schema: auth
-preconditions: []
 expect:
   status: 200
   body_exact: "POST"

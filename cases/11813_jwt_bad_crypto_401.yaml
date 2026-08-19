@@ -7,7 +7,6 @@ request:
     Accept: application/json
     Authorization: "Bearer quifquirndsjagnrgniur.fonvoienqhhdj.iuqvnvhojah"
 schema: auth
-preconditions: []
 expect:
   status: 401
   body_exact:

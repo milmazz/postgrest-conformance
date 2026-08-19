@@ -9,7 +9,6 @@ config:
     db-channel-enabled: "true"
     db-prepared-statements: "FALSE"
     jwt-secret-is-base64: '"true"'
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

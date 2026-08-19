@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_DB_TX_END: "random"
-preconditions: []
 expect:
   exit_code: nonzero
   stderr_contains: "Invalid transaction termination. Check your configuration."

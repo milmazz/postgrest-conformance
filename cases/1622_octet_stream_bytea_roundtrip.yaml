@@ -8,7 +8,6 @@ request:
     Accept: application/octet-stream
   body: "hello-bytes"
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

@@ -6,11 +6,8 @@ request:
   headers:
     Prefer: handling=strict, max-affected=10
 schema: mutations
-preconditions:
-  - "DELETE FROM test.items;"
-  - "INSERT INTO test.items (id) SELECT generate_series(1, 15);"
 expect:
   status: 400
   body_exact: { "code": "PGRST124", "details": "The query affects 14 rows", "hint": null, "message": "Query result exceeds max-affected preference constraint" }
-notes: "handling=strict + max-affected=10 with 14 matching rows -> 400 PGRST124 (transaction rolled back)."
+notes: 'handling=strict + max-affected=10 with 14 matching rows -> 400 PGRST124 (transaction rolled back). Assumes: DELETE FROM test.items; INSERT INTO test.items (id) SELECT generate_series(1, 15);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L14

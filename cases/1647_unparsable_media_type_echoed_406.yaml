@@ -5,7 +5,6 @@ request:
   path: /items
   headers: { Accept: undefined }
 schema: test
-preconditions: []
 expect:
   status: 406
   headers:

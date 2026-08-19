@@ -10,7 +10,6 @@ request:
       customObject: { "manyRoles": ["other", "postgrest_test_author"] }
       other: {}
 schema: auth
-preconditions: []
 config:
   jwt-role-claim-key: "$.customObject.manyRoles[1]"
 expect:

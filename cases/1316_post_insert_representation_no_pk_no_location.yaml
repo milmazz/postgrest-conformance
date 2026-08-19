@@ -8,7 +8,6 @@ request:
     Content-Type: application/json
   body: { "a": "bar", "b": "baz" }
 schema: representations
-preconditions: []
 expect:
   status: 201
   headers:

@@ -10,7 +10,6 @@ request:
     - { "name": "Java", "rank": 1 }
     - { "name": "C", "rank": 2 }
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers:

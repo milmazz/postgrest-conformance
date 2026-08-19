@@ -13,7 +13,6 @@ config:
     - "ALTER ROLE db_config_authenticator SET pgrst.db_max_rows = '500'"
   file:
     db-max-rows: 1000
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

@@ -15,7 +15,6 @@ config:
   # contradict the `schema: config` profile label the harness sends as
   # Accept-Profile.
   server-cors-allowed-origins: "http://example.com, http://example2.com"
-preconditions: []
 expect:
   status: 200
   headers:

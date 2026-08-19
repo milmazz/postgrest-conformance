@@ -15,7 +15,6 @@ config:
   file:
     db-max-rows: 1000
     db-schemas: "public"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

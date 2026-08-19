@@ -6,7 +6,6 @@ request:
   headers:
     Prefer: "timezone=-4"
 schema: headers
-preconditions: []
 expect:
   status: 200
   headers:

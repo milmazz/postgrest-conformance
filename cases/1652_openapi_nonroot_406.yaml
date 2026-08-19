@@ -5,7 +5,6 @@ request:
   path: /entities
   headers: { Accept: application/openapi+json }
 schema: test
-preconditions: []
 expect:
   status: 406
 notes: "application/openapi+json on a non-root path is 406. Mirrors OpenApiSpec.hs:30-33"

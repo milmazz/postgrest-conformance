@@ -5,7 +5,6 @@ request:
   path: /projects?select=name,clients()&clients=is.null
   headers: { Accept: application/json }
 schema: test
-preconditions: []
 expect:
   status: 200
   headers:

@@ -13,10 +13,11 @@
 -- single_unique, compound_unique, ...). To keep them order-independent the
 -- runner SHOULD wrap each case in a transaction that is ROLLED BACK after the
 -- assertion (the PostgREST suite itself runs every it-block in a rolled-back
--- transaction). As defence-in-depth, every order-sensitive case ALSO carries
--- explicit `preconditions` that reset just the rows it depends on, so a runner
--- without per-case rollback still produces the documented status/body. Do not
--- rely on the seed alone for any mutating assertion.
+-- transaction). Order-sensitive cases document the row state they assume as
+-- an "Assumes: ..." sentence in `notes:` (folded there when the case
+-- format's `preconditions:` key was retired — it was parsed but never
+-- executed, so it was documentation, never defence-in-depth). Do not rely
+-- on the seed alone for any mutating assertion; roll back per case.
 
 create schema if not exists test;
 set search_path = test, public;
@@ -80,8 +81,10 @@ insert into test.complex_items (id, name, settings, arr_data) values
 --   data.sql:403  INSERT INTO tiobe_pls VALUES ('Java', 1), ('C', 2), ('Python', 4);
 -- https://github.com/PostgREST/postgrest/blob/v14.12/test/spec/fixtures/data.sql#L403
 -- IMPORTANT: 'Javascript' and 'Go' are intentionally NOT seeded; cases that
--- insert them rely on their absence to assert 201. The mutating cases also
--- reset this table via `preconditions` so run order cannot flip a status.
+-- insert them rely on their absence to assert 201. The mutating cases note
+-- this table's expected reset state in `notes:` (an "Assumes: ..." sentence)
+-- so run order cannot flip a status; per-case rollback is what actually
+-- enforces it, not an executed precondition.
 create table test.tiobe_pls (
   name text primary key,
   rank smallint

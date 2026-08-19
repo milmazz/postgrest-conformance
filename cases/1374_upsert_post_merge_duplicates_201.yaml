@@ -14,9 +14,6 @@ schema: mutations
 # Reset tiobe_pls to the seeded state so this case is order-independent:
 # 'Javascript' MUST be absent (so it is inserted -> 201) and Java/C MUST exist
 # (so they are updated). Mirrors data.sql:403 (Java,C,Python only).
-preconditions:
-  - "DELETE FROM test.tiobe_pls;"
-  - "INSERT INTO test.tiobe_pls (name, rank) VALUES ('Java', 1), ('C', 2), ('Python', 4);"
 expect:
   status: 201
   headers:
@@ -26,7 +23,5 @@ expect:
     - { "name": "Javascript", "rank": 6 }
     - { "name": "Java", "rank": 2 }
     - { "name": "C", "rank": 1 }
-notes: >-
-  resolution=merge-duplicates upserts on pk; status is 201 because at least one
-  row (Javascript, not seeded) was inserted. Mirrors UpsertSpec.hs#L19-L32.
+notes: 'resolution=merge-duplicates upserts on pk; status is 201 because at least one row (Javascript, not seeded) was inserted. Mirrors UpsertSpec.hs#L19-L32. Assumes: DELETE FROM test.tiobe_pls; INSERT INTO test.tiobe_pls (name, rank) VALUES (''Java'', 1), (''C'', 2), (''Python'', 4);'
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L19

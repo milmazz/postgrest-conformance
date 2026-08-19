@@ -9,7 +9,6 @@ request:
     payload:
       realm_access: { "roles": ["other", "postgrest_test_author"] }
 schema: auth
-preconditions: []
 config:
   jwt-role-claim-key: '$.realm_access.roles[?(@ == "postgrest_test_author")]'
 expect:

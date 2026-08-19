@@ -5,7 +5,6 @@ request:
   path: /rpc/raise_pt402
   headers: { Accept: application/json }
 schema: rpc
-preconditions: []
 expect:
   status: 402
   headers:

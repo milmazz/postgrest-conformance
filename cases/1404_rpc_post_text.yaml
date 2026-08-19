@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/json, Accept: application/json }
   body: { "name": "world" }
 schema: rpc
-preconditions: []
 expect:
   status: 200
   headers:

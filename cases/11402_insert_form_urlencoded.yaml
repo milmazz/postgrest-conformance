@@ -6,7 +6,6 @@ request:
   headers: { Content-Type: application/x-www-form-urlencoded }
   body_raw: "integer=7&double=2.71828&varchar=forms+are+fun&boolean=false&date=1900-01-01&money=$3.99&enum=foo"
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers:

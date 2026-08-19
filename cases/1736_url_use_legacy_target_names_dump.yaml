@@ -7,7 +7,6 @@ schema: config
 config:
   env:
     PGRST_URL_USE_LEGACY_TARGET_NAMES: "false"
-preconditions: []
 expect:
   exit_code: 0
   dump_contains:

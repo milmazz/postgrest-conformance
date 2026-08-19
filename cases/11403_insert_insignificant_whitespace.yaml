@@ -8,7 +8,6 @@ request:
     Prefer: return=representation
   body_raw: "\t \n \r { \"data\": { \"foo\":\"bar\" } }\t \n \r "
 schema: mutations
-preconditions: []
 expect:
   status: 201
   headers:
