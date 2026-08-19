@@ -101,7 +101,7 @@ else is a fixed value the cases assert against:
 | `db_max_rows` | `nil` | No global cap. |
 | `db_max_rows_by_schema` | `%{"config" => 2}` | `db-max-rows=2` applies **only** to the `config` schema (cases 1700/1701); every other area is uncapped on the same instance. |
 | `db_plan_enabled` | `true` | |
-| `db_tx_end` | `:rollback` | Every request's transaction is rolled back after the response is computed (so concurrent async cases on the shared fixture DB don't contaminate each other); a `Prefer: tx=commit`/`tx=rollback` header overrides this per request the same way PostgREST's `db-tx-end` default does. |
+| `db_tx_end` | `:rollback` | Every request's transaction is rolled back after the response is computed, so writes never persist — keeping concurrent async cases on the shared fixture DB from contaminating each other. This instance does **not** honor a `Prefer: tx=` override: PostgREST only honors a per-request `tx=` override when `db-tx-end` is configured to *allow* it, which this harness's config does not. `tx=commit`/`tx=rollback` remain valid, accepted Prefer tokens — a client may send either and it is recognized like any other preference — but neither changes whether the transaction actually commits. Case 1230's note pins this explicitly ("no `Prefer: tx=commit` override path"); cases 1004 and 1021 each send `Prefer: tx=commit` and their writes must still not persist. |
 | `db_safe_update_tables` | `["safe_update_items", "safe_delete_items"]` | |
 | `jwt_aud` | `nil` | |
 | `server_cors_allowed_origins` | `"http://example.com, http://example2.com"` | |
@@ -168,7 +168,7 @@ config it would otherwise use:
 | 1522 | bulk | `client-error-verbosity: minimal` | `client_error_verbosity: "minimal"` |
 | 1758 | bulk | `server-timing-enabled: false` | `server_timing_enabled: false` |
 | 1763 | bulk | `server-trace-header: ""` | `server_trace_header: ""` (unset — the trace header must NOT be echoed) |
-| **1764** | auth (root path) | *(none — hard-coded, see §2.5)* | `jwt_secret: nil` (auth base's `db_anon_role` stays set, so the request still routes through JWT resolution and hits the no-secret 500) |
+| **1764** | auth (root path) | `log-level: error` | `log_level: :error` **plus** the hard-coded `jwt_secret: nil` from §2.5 (both apply — auth base's `db_anon_role` stays set, so the request still routes through JWT resolution and hits the no-secret 500) |
 | 11800 | auth | `jwt-role-claim-key: '$["https://www.example.com/roles"][0].value'` | same key |
 | 11802 | auth | `jwt-role-claim-key: "$.myRole"` | same key |
 | 11803 | auth | `jwt-role-claim-key: '$.realm_access.roles[?(@ == "postgrest_test_author")]'` | same key |
@@ -220,10 +220,13 @@ In plain terms:
 
 ### 2.5 Hard-coded extra options (`variant_extra_opts`)
 
-Two cases need an option that is **not** expressed in their case YAML's
-`config:` block at all — it's a fact about the harness's fixture layout, not
-about PostgREST config. Copied verbatim from
-`ConformanceServer.variant_extra_opts/1` (lines 112–117):
+Two cases need an extra option that is **not** expressed anywhere in their
+case YAML's `config:` block — it's a fact about the harness's fixture layout,
+not about PostgREST config. (Case 1764 also happens to carry an ordinary
+`config: {log-level: error}` block of its own, translated the normal way per
+§2.4 — that part is unrelated to the hard-coded option below; see its §2.3
+table row.) Copied verbatim from `ConformanceServer.variant_extra_opts/1`
+(lines 112–117):
 
 ```elixir
 # Case 1654 asserts the default title/description when the exposed schema has
