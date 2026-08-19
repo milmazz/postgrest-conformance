@@ -1,0 +1,1 @@
+-- Folded into ../fixtures.sql on 2026-08-09 (test."Server Today" + its 5 upstream seed rows, case 1035); empty until the next delta.

@@ -1,0 +1,1 @@
+-- Folded into ../fixtures.sql on 2026-08-08 (test.get_vary_header_override() + its GRANT); empty until the next delta.

@@ -1,0 +1,1 @@
+-- Folded into ../fixtures.sql on 2026-08-08 (test.arrays + its two upstream seed rows); empty until the next delta.
