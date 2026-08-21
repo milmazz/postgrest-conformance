@@ -1,0 +1,82 @@
+name: validate
+on: [push, pull_request]
+jobs:
+  tree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml jsonschema
+      - run: python3 tools/validate.py
+
+  fixtures:
+    runs-on: ubuntu-latest
+    services:
+      # Pinned to PostgreSQL 17 / PostGIS 3.5 to match the server that
+      # `fixtures/06_area_schemas.sql` was generated against (PG 17.10 +
+      # PostGIS 3.6.4 locally; `postgis/postgis:17-3.6` isn't published as a
+      # non-alpine tag, so this uses the closest existing 17-3.x tag —
+      # verified against the Docker Hub registry API). The `fixtures` job
+      # itself only loads SQL, so the exact PostGIS point release doesn't
+      # matter here as much as it does for `freshness`; kept in sync anyway
+      # so both jobs build the DB the same way.
+      postgres:
+        image: postgis/postgis:17-3.5
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env: { PGHOST: localhost, PGUSER: postgres, PGPASSWORD: postgres, PGTZ: UTC }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load chain
+        run: |
+          psql -d postgres -v ON_ERROR_STOP=1 -q -f fixtures/01_roles.sql
+          psql -d postgres -q -c "CREATE DATABASE conf TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'C'"
+          for f in fixtures/0[2-7]_*.sql; do psql -d conf -v ON_ERROR_STOP=1 -q -f "$f"; done
+
+  freshness:
+    runs-on: ubuntu-latest
+    services:
+      # Same PostgreSQL 17 / PostGIS 3.5 pin as `fixtures` (see comment
+      # there). This job is the one that actually matters for the pin:
+      # `06_area_schemas.sql` is raw `pg_dump` output, which is stable only
+      # per pg_dump *major* version (DDL formatting, comment ordering, etc.
+      # can shift between majors even for byte-identical schemas). It was
+      # generated locally against server 17 with pg_dump 18.4, so this job
+      # must dump against a PG17 server with a v18 pg_dump to diff clean —
+      # hence installing postgresql-client-18 below instead of using
+      # ubuntu-latest's default client. (The generator also strips the
+      # `\restrict`/`\unrestrict` lines pg_dump 18 adds and the "-- Dumped
+      # ..." version-stamp comments, so those particular lines are already
+      # deterministic across hosts; the remaining DDL body is not
+      # guaranteed to be, which is what this pin protects.)
+      postgres:
+        image: postgis/postgis:17-3.5
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env: { PGHOST: localhost, PGPORT: 5432, PGUSER: postgres, PGPASSWORD: postgres }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with: { elixir-version: "1.18", otp-version: "27" }
+      - name: Install postgresql-client-18 (PGDG apt repo)
+        # ubuntu-latest doesn't ship a v18 client by default, so pull it
+        # from the PGDG apt repo. This also puts /usr/lib/postgresql/18/bin
+        # first on PATH so `pg_dump`/`psql` resolve to v18 (the pg_wrapper
+        # default otherwise picks the newest installed version, which would
+        # already be 18 here, but pinning PATH explicitly makes the
+        # resolution non-ambiguous for whichever `psql`/`pg_dump` the
+        # generator's `System.cmd`/`System.find_executable` calls resolve).
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - run: elixir tools/regen_area_schemas.exs
+      - run: git diff --exit-code fixtures/06_area_schemas.sql
