@@ -12,17 +12,22 @@ jobs:
 
   fixtures:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Bier supports PG 15/16/17 (its CI matrix), so the fixture chain
+        # must load cleanly on all three — not just the PG17 server that
+        # `fixtures/06_area_schemas.sql` (raw pg_dump output) happens to be
+        # generated against. `freshness` below stays pinned to 17-3.5 since
+        # that job diffs the generator's output byte-for-byte against a
+        # server matching the generation environment; this job only loads
+        # SQL, so the exact PostGIS point release per major doesn't matter
+        # as much — 15-3.5/16-3.5/17-3.5 are each the closest existing tag
+        # (verified against the Docker Hub registry API).
+        postgis_tag: ["15-3.5", "16-3.5", "17-3.5"]
     services:
-      # Pinned to PostgreSQL 17 / PostGIS 3.5 to match the server that
-      # `fixtures/06_area_schemas.sql` was generated against (PG 17.10 +
-      # PostGIS 3.6.4 locally; `postgis/postgis:17-3.6` isn't published as a
-      # non-alpine tag, so this uses the closest existing 17-3.x tag —
-      # verified against the Docker Hub registry API). The `fixtures` job
-      # itself only loads SQL, so the exact PostGIS point release doesn't
-      # matter here as much as it does for `freshness`; kept in sync anyway
-      # so both jobs build the DB the same way.
       postgres:
-        image: postgis/postgis:17-3.5
+        image: postgis/postgis:${{ matrix.postgis_tag }}
         env: { POSTGRES_PASSWORD: postgres }
         ports: ["5432:5432"]
         options: >-

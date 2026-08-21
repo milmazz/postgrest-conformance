@@ -87,7 +87,23 @@ defmodule Regen do
     clean =
       dump
       |> String.split("\n")
-      |> Enum.reject(&String.starts_with?(&1, ["-- Dumped", "\\restrict", "\\unrestrict"]))
+      # pg_dump >= 17 emits `SET transaction_timeout = 0;` in the preamble; that
+      # GUC only exists on PostgreSQL 17+, so loading it under ON_ERROR_STOP on
+      # PG 15/16 fails with "unrecognized configuration parameter". Dropping the
+      # line is semantically safe — it merely resets a session GUC to its
+      # already-default value in a fresh session. Every other preamble SET
+      # (statement_timeout, lock_timeout, idle_in_transaction_session_timeout,
+      # client_encoding, standard_conforming_strings, check_function_bodies,
+      # xmloption, client_min_messages, row_security) exists on PG >= 15 and
+      # stays.
+      |> Enum.reject(
+        &String.starts_with?(&1, [
+          "-- Dumped",
+          "\\restrict",
+          "\\unrestrict",
+          "SET transaction_timeout"
+        ])
+      )
       |> Enum.join("\n")
 
     File.write!("fixtures/06_area_schemas.sql", header <> clean)
