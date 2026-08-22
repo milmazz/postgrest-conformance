@@ -7,13 +7,15 @@ DB_PORT ?= 6432
 # this repo, only tags: https://github.com/eradman/pg-safeupdate/tags).
 SAFEUPDATE_REF ?= 1.7
 
-.PHONY: test build fetch db-up db-down
+.PHONY: test build fetch run db-up db-down
 build:
 	go build ./...
 test:
 	go test ./...
 fetch:
 	go run ./cmd/oracle fetch
+run:
+	go run ./cmd/oracle run -report report.json
 db-up:
 	docker run -d --name $(DB_CONTAINER) --platform=linux/amd64 -p $(DB_PORT):5432 \
 	  -e POSTGRES_PASSWORD=postgres postgis/postgis:17-3.5

@@ -92,6 +92,7 @@ var harnessVariantIDs = []int{
 func BaseConfigs() map[string]map[string]string {
 	bulk := map[string]string{
 		"PGRST_DB_SCHEMAS":                  "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,openapi,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست",
+		"PGRST_DB_ANON_ROLE":                "postgrest_test_anonymous",
 		"PGRST_DB_EXTRA_SEARCH_PATH":        "public",
 		"PGRST_DB_POOL":                     "10",
 		"PGRST_DB_TX_END":                   "rollback",
