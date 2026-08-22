@@ -14,8 +14,7 @@ func DecodeJSON(b []byte) (any, error) {
 	if err := dec.Decode(&v); err != nil {
 		return nil, err
 	}
-	var trailing any
-	if err := dec.Decode(&trailing); err == nil {
+	if rest := bytes.TrimSpace(b[dec.InputOffset():]); len(rest) != 0 {
 		return nil, fmt.Errorf("trailing JSON data")
 	}
 	return v, nil

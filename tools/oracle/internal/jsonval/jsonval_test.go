@@ -41,3 +41,25 @@ func TestDeepEqualNumbers(t *testing.T) {
 		t.Fatal("nil handling")
 	}
 }
+
+func TestDecodeRejectsTrailingData(t *testing.T) {
+	for _, tc := range []struct {
+		input string
+		valid bool
+	}{
+		{"{}{}", false},
+		{"{} garbage", false},
+		{"{}]", false},
+		{"[1,2] extra", false},
+		{`{"a":1}`, true},
+		{"[1,2]\n  ", true},
+	} {
+		_, err := DecodeJSON([]byte(tc.input))
+		if tc.valid && err != nil {
+			t.Fatalf("%q: want valid, got %v", tc.input, err)
+		}
+		if !tc.valid && err == nil {
+			t.Fatalf("%q: want error, got nil", tc.input)
+		}
+	}
+}
