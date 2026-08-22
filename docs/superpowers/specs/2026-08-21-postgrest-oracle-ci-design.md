@@ -299,6 +299,11 @@ exist, compile from source inside the container (it is a single C file). This
 is the design's main unverified dependency — **verify first during
 implementation** (milestone 0 risk item).
 
+**Verified outcome (2026-08-22):** the PGDG apt package does not exist
+(confirmed both via `apt-cache` inside the container and the Debian package
+archive); `make db-up` compiles pg-safeupdate from source, pinned to release
+tag `1.7`.
+
 ### Reporting & failure routing
 
 - Per-case: pass/fail, and on failure the full expected-vs-actual diff

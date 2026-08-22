@@ -100,7 +100,7 @@ booted:
 | `-bin` | (fetched per `PIN`) | Path to a PostgREST binary to use instead of fetching the pinned release. |
 | `-db` | `postgrest_conf_oracle` | Target database name (must already be loaded via `db-setup`). |
 | `-report` | `report.json` | Path to write the machine-readable JSON report (`{results, findings, total, passed}`). |
-| `-skip-cli` | `false` | Skip `request.kind: cli` cases (the `config`/`observability` `--dump-config` and startup-validation cases). |
+| `-skip-cli` | `false` | Skip `request.kind: cli` cases (the `config` `--dump-config` and startup-validation cases). |
 | `-skip-http` | `false` | Skip HTTP cases. |
 
 `run` prints a human-readable summary to stdout (per-area `passed/total`,
