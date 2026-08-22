@@ -87,6 +87,13 @@ All verified against the pinned tag's sources / live registries during design
 
 ## Architecture
 
+**Naming note:** "oracle" is the software-testing term — a *test oracle* is
+the authoritative mechanism that decides what the correct output is, which is
+exactly the role real PostgREST plays here. It is not a reference to Oracle
+Database; `tools/oracle/`'s package documentation (`doc.go`) carries this
+one-line definition so readers in a PostgreSQL-ecosystem repo don't misread
+it.
+
 ```
 tools/oracle/                  Go module (go.mod lives here; repo root stays clean)
   cmd/oracle/main.go           CLI entry: run all / --cases / --areas / --report
