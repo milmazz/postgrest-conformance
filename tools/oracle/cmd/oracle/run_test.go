@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -353,6 +355,28 @@ func TestCheckSelection(t *testing.T) {
 	t.Run("non-empty selection is fine", func(t *testing.T) {
 		if err := checkSelection([]*cases.Case{{ID: 1}}); err != nil {
 			t.Fatalf("got error %v, want nil", err)
+		}
+	})
+}
+
+// TestNoResultsError covers the re-review ordering fix: a cancelled run
+// context must be reported as "interrupted" even when the belt-and-
+// suspenders zero-results guard also fires, since a SIGINT/SIGTERM landing
+// before any case records a result (e.g. mid instance-boot) is a distinct
+// situation from an empty case selection and must not be misattributed to
+// it.
+func TestNoResultsError(t *testing.T) {
+	t.Run("cancelled context takes priority and reports interrupted", func(t *testing.T) {
+		err := noResultsError(context.Canceled)
+		if err == nil || err.Error() != "interrupted" {
+			t.Fatalf("noResultsError(context.Canceled) = %v, want \"interrupted\"", err)
+		}
+	})
+
+	t.Run("nil context error reports no cases selected", func(t *testing.T) {
+		err := noResultsError(nil)
+		if !errors.Is(err, errNoCasesSelected) {
+			t.Fatalf("noResultsError(nil) = %v, want errNoCasesSelected", err)
 		}
 	})
 }

@@ -187,7 +187,7 @@ func cmdRun(args []string) error {
 	// recorded, fail loudly here rather than print a vacuous "TOTAL 0/0"
 	// summary and exit 0.
 	if len(results) == 0 {
-		return errNoCasesSelected
+		return noResultsError(ctx.Err())
 	}
 
 	findings = findingsForRun(findings, ranHTTP)
@@ -371,6 +371,19 @@ func checkSelection(selected []*cases.Case) error {
 		return errNoCasesSelected
 	}
 	return nil
+}
+
+// noResultsError picks the error to report when the run loops produced zero
+// results despite effectiveSelection having guaranteed a non-empty set
+// up front: if the run context was cancelled (SIGINT/SIGTERM landed before
+// any case recorded a result — e.g. mid instance-boot), that takes priority
+// and is reported as "interrupted"; otherwise the empty-results outcome is
+// attributed to case selection, matching checkSelection's error.
+func noResultsError(ctxErr error) error {
+	if ctxErr != nil {
+		return fmt.Errorf("interrupted")
+	}
+	return errNoCasesSelected
 }
 
 // effectiveSelection narrows selected to the cases that will actually be
