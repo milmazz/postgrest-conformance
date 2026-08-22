@@ -123,6 +123,10 @@ dir. `POSTGREST_BIN` env overrides for a pre-installed binary. The version is
 read from `PIN`, not hard-coded, so a future re-pin fails loudly on a missing
 checksum instead of silently testing the wrong version.
 
+**Implementation note (2026-08-22):** ships as a `-bin` flag
+(`oracle run -bin PATH`) rather than a `POSTGREST_BIN` env override; see
+`tools/oracle/README.md`.
+
 ### Instance model
 
 All HTTP instances run **`db-tx-end=rollback`** (HARNESS §2.1; fact 3 makes
