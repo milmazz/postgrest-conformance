@@ -17,7 +17,10 @@
  * with real commands, and the result is synthesized into COVERAGE.md.
  *
  * Design source of truth: docs/workflows/bier-spec.md (read it before editing).
- * Writes ONLY under spec/. Does not touch lib/, test/, or mix.exs.
+ * Writes only the suite content: cases/, spec/, fixtures/provenance/,
+ * COVERAGE.md, INDEX.md (and, in Synthesize, spec/README.md). Does not touch
+ * fixtures/inputs/, fixtures/02_base.sql...07_analyze.sql, tools/, or the
+ * repo config.
  *
  * Robustness / determinism notes (2026-07 revision, adversarially reviewed):
  *   - Agent results use the runtime's `schema:` StructuredOutput option —
@@ -149,7 +152,7 @@ const CONSOLIDATE_SCHEMA = {
     deltas_folded: { type: "array", items: { type: "string" }, description: "delta files folded into fixtures/02_base.sql and emptied; [] when none existed" },
     conflicts_resolved: { type: "array", items: { type: "string" } },
     loads_clean: { type: "boolean" },
-    verified_with: { type: "string", enum: ["mix bier.fixtures.load", "psql", "static-check"] },
+    verified_with: { type: "string", enum: ["chain-load", "psql", "static-check"] },
     notes: { type: "array", items: { type: "string" } },
   },
 };
@@ -195,7 +198,8 @@ repository root (the current directory).
 AUTHORIZATION: CLAUDE.md declares spec/ frozen — that freeze governs
 conformance-IMPLEMENTATION work. This run is the operator-approved spec
 re-sync; you MAY write under spec/ within the rules below. You may still never
-touch lib/, test/, or mix.exs.
+touch fixtures/inputs/, fixtures/02_base.sql...07_analyze.sql, tools/, or the
+repo config.
 
 Area scope: ${area.scope}
 
@@ -238,10 +242,13 @@ band is exhausted, use ONLY [${overflow} .. ${overflowEnd}] (this area's closed
 overflow range — never stray outside it). Never renumber existing cases.
 
 FIXTURE RULES (fixtures/README.md is authoritative):
-  - Seed-data ground truth is the CONSOLIDATED database as built by
-    'mix bier.fixtures.load' (e.g. test.items has rows 1..15 — a superset of
-    what any historical fragment seeds). Derive and verify every expected body
-    against a freshly loaded bier_test, NEVER against a fragment file.
+  - Seed-data ground truth is the CONSOLIDATED database as built by the
+    numbered fixture chain (fixtures/01_roles.sql...fixtures/07_analyze.sql,
+    per fixtures/README.md: psql -v ON_ERROR_STOP=1 under PGTZ=UTC, into a
+    LC_COLLATE 'C' database) — e.g. test.items has rows 1..15, a superset of
+    what any historical fragment seeds. Derive and verify every expected body
+    against a freshly loaded scratch database (e.g. conf_scratch; drop it
+    afterwards), NEVER against a fragment file.
   - NEVER edit fixtures/02_base.sql, fixtures/03_supplement.sql, or any
     existing fixtures/*.sql (fixtures/inputs/rpc.sql and fixtures/inputs/headers.sql are LIVE loader inputs
     with fragile invariants). New fixture objects go ONLY in
@@ -294,8 +301,9 @@ For EVERY entry in the model and EVERY case:
      features that have NO case.
   3. Validate each case against case.schema.json (note if it is absent),
      and flag any case whose expected body contradicts the CONSOLIDATED seed
-     data (the loaded bier_test / fixtures/02_base.sql — e.g.
-     test.items is rows 1..15), which is the seed ground truth — not the
+     data (a database loaded from the numbered fixture chain —
+     fixtures/02_base.sql through 07_analyze.sql, per fixtures/README.md —
+     e.g. test.items is rows 1..15), which is the seed ground truth — not the
      historical fragment files.
 
 Verdict "pass" ONLY if every citation genuinely supports its claim at ${PINNED}
@@ -309,19 +317,26 @@ fixtures/02_base.sql is the PRIMARY fixture artifact. NEVER regenerate
 it from the historical fixtures/*.sql fragments — it embeds merge decisions
 (superset seeds, renames, later additions) that exist only in it and that the
 frozen case expectations depend on (fixtures/README.md is
-authoritative). Work from the repository root; write ONLY under spec/.
+authoritative). Work from the repository root; write only the suite content —
+cases/, spec/, fixtures/provenance/, COVERAGE.md, INDEX.md.
 
 Your job: fold every fixtures/provenance/*.delta.sql into fixtures/02_base.sql.
 - Integrate each delta's objects at the dependency-correct position, deduping
   against what fixtures/02_base.sql already has; resolve real collisions by renaming
   (note each one).
 - After folding a delta and verifying the load, EMPTY that delta file down to a
-  one-line comment recording the fold (do not delete the file).
+  one-line comment recording the fold (do not delete the file). A fold also
+  means fixtures/06_area_schemas.sql is now stale — regenerate it with
+  'elixir tools/regen_area_schemas.exs' before the load-verification step below,
+  or the chain will not load cleanly.
 - NEVER touch fixtures/03_supplement.sql (human-owned), fixtures/inputs/rpc.sql / fixtures/inputs/headers.sql (live
   loader inputs), or any other historical fragment.
-- Verify the result loads, preferring in this order: 'mix bier.fixtures.load'
-  (its normal behavior is to drop+recreate the local bier_test database), else
-  psql into a throwaway database, else a careful static check. Report which.
+- Verify the result loads, preferring in this order: the numbered fixture
+  chain (fixtures/01_roles.sql...fixtures/07_analyze.sql, per
+  fixtures/README.md: psql -v ON_ERROR_STOP=1 under PGTZ=UTC) into a fresh
+  scratch database (e.g. conf_scratch; drop it when done) — report this as
+  "chain-load" — else psql into a throwaway database ("psql"), else a careful
+  static check ("static-check"). Report which.
 If there are NO delta files, just run the load verification on the current
 fixtures/02_base.sql and report deltas_folded: [].`;
 
@@ -331,10 +346,12 @@ modify any file in the repository; throwaway scripts go OUTSIDE the repo (e.g.
 your scratchpad or /tmp). Run these checks and report FACTS from real command
 output — if a check cannot run, report its flag as false (or its list as
 ["check-not-run: <why>"]) and say why in "evidence":
-  1. Fixture load: run 'mix bier.fixtures.load' (dropping+recreating the local
-     bier_test database is its normal, intended behavior). If mix or Postgres is
-     unavailable, fall back to loading fixtures/02_base.sql plus
-     fixtures/03_supplement.sql with psql into a throwaway database.
+  1. Fixture load: build a fresh SCRATCH database (e.g. conf_scratch) by
+     running fixtures/01_roles.sql through fixtures/07_analyze.sql in order
+     via psql -v ON_ERROR_STOP=1 under PGTZ=UTC, into a LC_COLLATE 'C' database
+     (see fixtures/README.md for the exact commands), then drop the scratch
+     database when done. If Postgres is unavailable, fall back to a static
+     check of fixtures/02_base.sql plus fixtures/03_supplement.sql.
   2. Case schema: validate EVERY cases/*.yaml against
      case.schema.json (e.g. python3 with pyyaml+jsonschema, or
      check-jsonschema). List every invalid case id.
@@ -353,7 +370,8 @@ Put the exact command tails you relied on in "evidence".`;
 function synthesisPrompt(reviewSummary, verify) {
   return `You are the Spec Synthesizer for the Bier project. The per-area spec/
 files and conformance cases now exist on disk. Work from the repository root;
-write ONLY under spec/. REFRESH these to match what is on disk NOW — read the
+write only the suite content — spec/README.md, COVERAGE.md, INDEX.md, and
+case.schema.json if absent. REFRESH these to match what is on disk NOW — read the
 actual files, never trust stale counts:
   - spec/README.md        overview + the pinned version (${PINNED})
   - COVERAGE.md      a table mapping every PostgREST docs page (${DOCS})
