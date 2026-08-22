@@ -1,23 +1,18 @@
 package httpexec
 
 import (
-	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 )
 
 const HS256TestSecret = "reallyreallyreallyreallyverysafe"
 
 func MintHS256(payload map[string]any, secret string) (string, error) {
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false) // claim values may contain URLs; keep bytes literal
-	if err := enc.Encode(payload); err != nil {
+	pl, err := marshalNoHTMLEscape(payload) // claim values may contain URLs; keep bytes literal
+	if err != nil {
 		return "", err
 	}
-	pl := bytes.TrimRight(buf.Bytes(), "\n")
 	b64 := base64.RawURLEncoding
 	signing := b64.EncodeToString([]byte(`{"alg":"HS256","typ":"JWT"}`)) + "." + b64.EncodeToString(pl)
 	mac := hmac.New(sha256.New, []byte(secret))
