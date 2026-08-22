@@ -30,6 +30,49 @@ func TestBuildSpecProfileInjection(t *testing.T) {
 	}
 }
 
+// TestBuildSpecProfileInjectionWriteMethodsUseContentProfile guards the
+// method-aware profile header choice (PostgREST docs, schemas.rst: GET/HEAD
+// -> Accept-Profile, POST/PATCH/PUT/DELETE -> Content-Profile). Reproduced
+// against real PostgREST v16.0: Accept-Profile on a write is silently
+// ignored (the request resolves against the default schema instead), so
+// injecting it there would misroute every auto-injected write case.
+func TestBuildSpecProfileInjectionWriteMethodsUseContentProfile(t *testing.T) {
+	for _, method := range []string{"POST", "PATCH", "PUT", "DELETE"} {
+		c := &cases.Case{Request: cases.Request{Method: method, Path: "/x"}}
+		s, _ := BuildSpec(c, "mutations")
+		if s.Headers["Content-Profile"] != "mutations" {
+			t.Fatalf("%s: must inject Content-Profile, got headers %v", method, s.Headers)
+		}
+		if _, ok := s.Headers["Accept-Profile"]; ok {
+			t.Fatalf("%s: must not also inject Accept-Profile", method)
+		}
+	}
+
+	// put-new: an explicit Content-Profile in the case's own headers wins.
+	c := &cases.Case{Request: cases.Request{Method: "POST", Path: "/x",
+		Headers: map[string]string{"Content-Profile": "v2"}}}
+	s, _ := BuildSpec(c, "mutations")
+	if s.Headers["Content-Profile"] != "v2" {
+		t.Fatal("explicit Content-Profile must win")
+	}
+}
+
+// TestBuildSpecProfileInjectionReadMethodsUseAcceptProfile guards the read
+// side of the same method-aware choice: GET/HEAD/OPTIONS still get
+// Accept-Profile, matching the pre-existing behavior.
+func TestBuildSpecProfileInjectionReadMethodsUseAcceptProfile(t *testing.T) {
+	for _, method := range []string{"GET", "HEAD", "OPTIONS"} {
+		c := &cases.Case{Request: cases.Request{Method: method, Path: "/x"}}
+		s, _ := BuildSpec(c, "observability")
+		if s.Headers["Accept-Profile"] != "observability" {
+			t.Fatalf("%s: must inject Accept-Profile, got headers %v", method, s.Headers)
+		}
+		if _, ok := s.Headers["Content-Profile"]; ok {
+			t.Fatalf("%s: must not also inject Content-Profile", method)
+		}
+	}
+}
+
 func TestBuildSpecJWT(t *testing.T) {
 	c := &cases.Case{Request: cases.Request{Method: "GET", Path: "/x",
 		JWT: &cases.JWT{SignWith: "hs256_test_secret", Payload: map[string]any{"role": "r"}}}}

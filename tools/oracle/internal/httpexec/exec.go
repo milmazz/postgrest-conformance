@@ -52,8 +52,43 @@ var client = &http.Client{
 	},
 }
 
+// writeMethods are the HTTP methods for which PostgREST selects the
+// request's schema via Content-Profile rather than Accept-Profile.
+//
+// Per PostgREST's own docs (docs/references/api/schemas.rst, "Multiple
+// schemas"): GET/HEAD select the schema with Accept-Profile; "other
+// methods" — POST, PATCH, PUT, DELETE — select it with Content-Profile.
+// This applies uniformly to tables *and* functions (RPC), including a POST
+// to /rpc/<fn>, which PostgREST treats as a write for profile-selection
+// purposes regardless of the function's own volatility.
+//
+// Confirmed empirically against the pinned v16.0 binary: sending
+// Accept-Profile on a write is not an error, it is silently ignored and
+// the request resolves against the *default* schema instead (reproduced
+// with case 1755, POST /rpc/ret_point_overloaded, schema: observability —
+// curl -v against a manually booted instance showed the write landing in
+// the default "test" schema's namesake object, not observability's, for
+// Accept-Profile, and correctly in observability's for Content-Profile).
+// Case 1011's own note already says as much directly: "Write methods use
+// Content-Profile (not Accept-Profile) for schema selection".
+var writeMethods = map[string]bool{
+	"POST": true, "PATCH": true, "PUT": true, "DELETE": true,
+}
+
+// profileHeaderName returns the header BuildSpec should inject a case's
+// schema label into, based on its request method.
+func profileHeaderName(method string) string {
+	if writeMethods[strings.ToUpper(method)] {
+		return "Content-Profile"
+	}
+	return "Accept-Profile"
+}
+
 // BuildSpec resolves headers/body/JWT per HARNESS §3. injectProfile is the
-// Accept-Profile value to add with put-new semantics ("" = none).
+// schema label to add — as Content-Profile for a write method (POST/PATCH/
+// PUT/DELETE) or Accept-Profile otherwise (GET/HEAD/OPTIONS) — with
+// put-new semantics ("" = no injection; an explicit header of that same
+// name in the case's own request.headers wins).
 func BuildSpec(c *cases.Case, injectProfile string) (*Spec, error) {
 	h := map[string]string{}
 	for k, v := range c.Request.Headers {
@@ -67,8 +102,11 @@ func BuildSpec(c *cases.Case, injectProfile string) (*Spec, error) {
 		}
 		return false
 	}
-	if injectProfile != "" && !hasHeader("Accept-Profile") {
-		h["Accept-Profile"] = injectProfile
+	if injectProfile != "" {
+		name := profileHeaderName(c.Request.Method)
+		if !hasHeader(name) {
+			h[name] = injectProfile
+		}
 	}
 	if c.Request.JWT != nil && !hasHeader("Authorization") {
 		if c.Request.JWT.SignWith != "hs256_test_secret" {
