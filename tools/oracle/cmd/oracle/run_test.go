@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/cases"
@@ -352,6 +353,120 @@ func TestCheckSelection(t *testing.T) {
 	t.Run("non-empty selection is fine", func(t *testing.T) {
 		if err := checkSelection([]*cases.Case{{ID: 1}}); err != nil {
 			t.Fatalf("got error %v, want nil", err)
+		}
+	})
+}
+
+// cliCase and httpCase build minimal cases distinguished only by
+// Request.Kind, for effectiveSelection tests.
+func cliCase(id int) *cases.Case {
+	return &cases.Case{ID: id, Request: cases.Request{Kind: "cli"}}
+}
+
+func httpKindCase(id int) *cases.Case {
+	return &cases.Case{ID: id, Request: cases.Request{Kind: ""}}
+}
+
+// TestEffectiveSelectionAndCheckSelection covers the -skip-cli/-skip-http
+// vacuous-green gap directly: an over-narrow id/area filter combined with a
+// skip flag that excludes every remaining case (e.g. `-cases 1705
+// -skip-cli` where 1705 is cli-only) must be caught by checkSelection run on
+// the effective (post-skip) set, not the raw id/area-filtered one.
+func TestEffectiveSelectionAndCheckSelection(t *testing.T) {
+	cli := cliCase(1705)
+	httpC := httpKindCase(1700)
+
+	t.Run("cli-only selection with -skip-cli errors", func(t *testing.T) {
+		eff := effectiveSelection([]*cases.Case{cli}, true, false)
+		if len(eff) != 0 {
+			t.Fatalf("effectiveSelection = %+v, want empty", eff)
+		}
+		if err := checkSelection(eff); err == nil {
+			t.Fatal("checkSelection(empty effective set) = nil, want an error")
+		}
+	})
+
+	t.Run("http-only selection with -skip-http errors", func(t *testing.T) {
+		eff := effectiveSelection([]*cases.Case{httpC}, false, true)
+		if len(eff) != 0 {
+			t.Fatalf("effectiveSelection = %+v, want empty", eff)
+		}
+		if err := checkSelection(eff); err == nil {
+			t.Fatal("checkSelection(empty effective set) = nil, want an error")
+		}
+	})
+
+	t.Run("both skips with a nonempty selection errors", func(t *testing.T) {
+		eff := effectiveSelection([]*cases.Case{cli, httpC}, true, true)
+		if len(eff) != 0 {
+			t.Fatalf("effectiveSelection = %+v, want empty", eff)
+		}
+		if err := checkSelection(eff); err == nil {
+			t.Fatal("checkSelection(empty effective set) = nil, want an error")
+		}
+	})
+
+	t.Run("mixed selection with one skip flag still runs the other half", func(t *testing.T) {
+		eff := effectiveSelection([]*cases.Case{cli, httpC}, true, false)
+		if ids := caseIDs(eff); !reflect.DeepEqual(ids, []int{1700}) {
+			t.Fatalf("effectiveSelection(-skip-cli) ids = %v, want [1700]", ids)
+		}
+		if err := checkSelection(eff); err != nil {
+			t.Fatalf("checkSelection(non-empty effective set) = %v, want nil", err)
+		}
+
+		eff = effectiveSelection([]*cases.Case{cli, httpC}, false, true)
+		if ids := caseIDs(eff); !reflect.DeepEqual(ids, []int{1705}) {
+			t.Fatalf("effectiveSelection(-skip-http) ids = %v, want [1705]", ids)
+		}
+		if err := checkSelection(eff); err != nil {
+			t.Fatalf("checkSelection(non-empty effective set) = %v, want nil", err)
+		}
+	})
+
+	t.Run("no skips leaves the selection unchanged", func(t *testing.T) {
+		selected := []*cases.Case{cli, httpC}
+		eff := effectiveSelection(selected, false, false)
+		if !reflect.DeepEqual(eff, selected) {
+			t.Fatalf("effectiveSelection(no skips) = %+v, want unchanged %+v", eff, selected)
+		}
+	})
+}
+
+func TestHTTPDeviationFindings(t *testing.T) {
+	got := httpDeviationFindings()
+	if len(got) != 2 {
+		t.Fatalf("got %d findings, want 2: %v", len(got), got)
+	}
+	for _, f := range got {
+		if !strings.HasPrefix(f, "HARNESS deviation: §2.1 ") {
+			t.Errorf("finding %q does not start with the expected HARNESS deviation prefix", f)
+		}
+	}
+}
+
+func TestFindingsForRun(t *testing.T) {
+	t.Run("ranHTTP false leaves base untouched", func(t *testing.T) {
+		base := []string{"case 1: routed to a variant instance but not listed in HARNESS §2.3"}
+		got := findingsForRun(base, false)
+		if !reflect.DeepEqual(got, base) {
+			t.Fatalf("got %v, want unchanged %v", got, base)
+		}
+	})
+
+	t.Run("ranHTTP true appends the two deviation lines", func(t *testing.T) {
+		base := []string{"x"}
+		got := findingsForRun(base, true)
+		want := append(append([]string{}, base...), httpDeviationFindings()...)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("ranHTTP true with nil base still returns just the deviation lines", func(t *testing.T) {
+		got := findingsForRun(nil, true)
+		if !reflect.DeepEqual(got, httpDeviationFindings()) {
+			t.Fatalf("got %v, want %v", got, httpDeviationFindings())
 		}
 	})
 }

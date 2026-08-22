@@ -59,20 +59,19 @@ func (p PGEnv) URI(dbname string) string {
 	return u.String()
 }
 
-// Psql runs psql against dbname with -v ON_ERROR_STOP=1 -q, args appended,
-// PG* env vars set from p (plus PGDATABASE=dbname), and any extraEnv applied
-// on top. On failure, the returned error includes psql's stderr.
+// Psql runs psql against dbname with -v ON_ERROR_STOP=1 -q, args appended.
+// The child process's environment is built from scratch — PATH (so the
+// "psql" binary itself can be found/exec'd), the PG* connection vars from p
+// plus PGDATABASE=dbname, and extraEnv on top — rather than inheriting this
+// process's environment wholesale: an ambient PGOPTIONS/PGSSLMODE/PGTZ/etc.
+// set in the caller's shell would otherwise silently leak into fixture
+// loading, changing psql's behavior (e.g. transaction options, TLS
+// negotiation, timezone) out from under the fixture chain's own assumptions.
+// On failure, the returned error includes psql's stderr.
 func (p PGEnv) Psql(dbname string, extraEnv []string, args ...string) error {
 	fullArgs := append([]string{"-v", "ON_ERROR_STOP=1", "-q"}, args...)
 	cmd := exec.Command("psql", fullArgs...)
-	cmd.Env = append(os.Environ(),
-		"PGHOST="+p.Host,
-		"PGPORT="+p.Port,
-		"PGUSER="+p.User,
-		"PGPASSWORD="+p.Password,
-		"PGDATABASE="+dbname,
-	)
-	cmd.Env = append(cmd.Env, extraEnv...)
+	cmd.Env = childEnv(p, dbname, extraEnv)
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -80,6 +79,23 @@ func (p PGEnv) Psql(dbname string, extraEnv []string, args ...string) error {
 		return fmt.Errorf("psql -d %s %v: %w: %s", dbname, args, err, stderr.String())
 	}
 	return nil
+}
+
+// childEnv builds psql's child environment from scratch: PATH, the PG*
+// connection vars from p plus PGDATABASE=dbname, and extraEnv appended on
+// top. It deliberately does not start from os.Environ(), so ambient vars
+// like PGOPTIONS/PGSSLMODE/PGTZ set in the caller's own shell can't leak
+// into fixture loading.
+func childEnv(p PGEnv, dbname string, extraEnv []string) []string {
+	env := []string{
+		"PATH=" + os.Getenv("PATH"),
+		"PGHOST=" + p.Host,
+		"PGPORT=" + p.Port,
+		"PGUSER=" + p.User,
+		"PGPASSWORD=" + p.Password,
+		"PGDATABASE=" + dbname,
+	}
+	return append(env, extraEnv...)
 }
 
 // validDBName matches the only database names Setup/Teardown accept: bare

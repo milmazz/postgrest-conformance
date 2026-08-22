@@ -98,6 +98,32 @@ func TestRouteSpecials(t *testing.T) {
 	}
 }
 
+// TestRouteSafeupdateRejectsConfig covers Minor #2 from the PR #1 review:
+// the 1387/1388/1389 safeupdate branch returns early before config
+// translation runs, so a case in that id range that ever grows a `config:`
+// block would otherwise have it silently ignored. Route must fail loudly
+// instead.
+func TestRouteSafeupdateRejectsConfig(t *testing.T) {
+	c := httpCase(1387, "mutations", "/safe_update_items", map[string]any{"db-max-rows": 2})
+	p, err := Route(c)
+	if err == nil {
+		t.Fatalf("Route(1387 with config) = %+v, nil error, want an error", p)
+	}
+	if !strings.Contains(err.Error(), "1387") || !strings.Contains(err.Error(), "extend Route") {
+		t.Fatalf("Route(1387 with config) error = %q, want it to name the case and say to extend Route", err.Error())
+	}
+
+	// A config block present but with no keys (present-but-empty) must not
+	// trip the guard, matching the len(...) > 0 check.
+	empty := &cases.Case{ID: 1388, Schema: "mutations",
+		Request: cases.Request{Method: "GET", Path: "/safe_update_items"},
+		Config:  cases.Config{Present: true, Keys: map[string]any{}},
+	}
+	if _, err := Route(empty); err != nil {
+		t.Fatalf("Route(1388 with empty config.keys) = %v, want nil", err)
+	}
+}
+
 // repoRoot walks up from CWD until a PIN file is found (same helper shape
 // as in internal/cases tests; each test package carries its own copy).
 func repoRoot(t *testing.T) string {

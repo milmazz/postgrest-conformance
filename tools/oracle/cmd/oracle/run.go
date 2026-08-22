@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -77,7 +78,7 @@ func cmdRun(args []string) error {
 	}
 	areaSet := parseStringSet(*areasFlag)
 	selected := filterCases(all, idSet, areaSet)
-	if err := checkSelection(selected); err != nil {
+	if err := checkSelection(effectiveSelection(selected, *skipCLI, *skipHTTP)); err != nil {
 		return err
 	}
 
@@ -101,6 +102,7 @@ func cmdRun(args []string) error {
 	}()
 
 	var results []report.CaseResult
+	ranHTTP := false
 
 	if !*skipCLI {
 		for _, c := range selected {
@@ -119,8 +121,10 @@ func cmdRun(args []string) error {
 		uri := pg.URI(dbname)
 		bases := route.BaseConfigs()
 		shared := map[string]*instance.Instance{}
+		groups := groupsInOrder(placements, selected)
+		ranHTTP = len(groups) > 0
 
-		for _, g := range groupsInOrder(placements, selected) {
+		for _, g := range groups {
 			if ctx.Err() != nil {
 				break
 			}
@@ -175,6 +179,18 @@ func cmdRun(args []string) error {
 	// drop the fixture-chain role a db-config CLI case may have created.
 	reg.stopAll()
 	_ = pg.Psql("postgres", nil, "-c", "DROP ROLE IF EXISTS db_config_authenticator")
+
+	// Belt-and-suspenders: effectiveSelection above already guarantees a
+	// non-empty set before the run loops start, so this should be
+	// unreachable in practice — but if some future change to the loops
+	// above lets the effective set run to completion with zero results
+	// recorded, fail loudly here rather than print a vacuous "TOTAL 0/0"
+	// summary and exit 0.
+	if len(results) == 0 {
+		return errNoCasesSelected
+	}
+
+	findings = findingsForRun(findings, ranHTTP)
 
 	if err := report.WriteJSON(*reportFlag, results, findings); err != nil {
 		return err
@@ -337,15 +353,78 @@ func filterCases(all []*cases.Case, ids map[int]bool, areas map[string]bool) []*
 	return out
 }
 
+// errNoCasesSelected is returned both by checkSelection, run on the
+// post-filter/post-skip effective set before anything executes, and as a
+// belt-and-suspenders check after the run loops in case some future change
+// still lets the effective set produce zero results.
+var errNoCasesSelected = errors.New("no cases selected (filters/skips matched nothing)")
+
 // checkSelection returns an error when selected is empty, so an over-narrow
 // -cases/-areas filter (a typo'd id, a misspelled area, or two filters that
-// don't overlap) is reported as a hard failure instead of silently printing
-// a vacuous "TOTAL 0/0" summary and exiting 0.
+// don't overlap) — or a -skip-cli/-skip-http flag that excludes every case
+// the id/area filters selected (e.g. `-cases 1705 -skip-cli` where 1705 is
+// cli-only) — is reported as a hard failure instead of silently printing a
+// vacuous "TOTAL 0/0" summary and exiting 0. Callers must pass the effective
+// selection (see effectiveSelection), not the raw id/area-filtered one.
 func checkSelection(selected []*cases.Case) error {
 	if len(selected) == 0 {
-		return fmt.Errorf("no cases selected (filters matched nothing)")
+		return errNoCasesSelected
 	}
 	return nil
+}
+
+// effectiveSelection narrows selected to the cases that will actually be
+// executed once -skip-cli/-skip-http are applied, mirroring the filtering
+// the run loops themselves perform (the CLI loop only ever runs
+// Request.Kind == "cli" cases and is skipped outright when skipCLI; the
+// HTTP loop, via groupsInOrder, only ever sees placements with
+// Kind == "http" and is skipped outright when skipHTTP). It exists so
+// checkSelection can validate the set that will actually run, closing the
+// gap where e.g. a CLI-only -cases selection combined with -skip-cli would
+// otherwise pass the id/area filter and then execute zero cases.
+func effectiveSelection(selected []*cases.Case, skipCLI, skipHTTP bool) []*cases.Case {
+	if !skipCLI && !skipHTTP {
+		return selected
+	}
+	out := make([]*cases.Case, 0, len(selected))
+	for _, c := range selected {
+		if c.Request.Kind == "cli" {
+			if !skipCLI {
+				out = append(out, c)
+			}
+			continue
+		}
+		if !skipHTTP {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// httpDeviationFindings are the two boot-time HARNESS deviations that only
+// apply once the run actually starts a PostgREST instance: see BaseConfigs'
+// doc comment (the "openapi" schema dropped from db-schemas) and
+// withConnUserAnon's doc comment (bulk/multi/unicode booted with
+// db-anon-role set to the connecting database user). They live only in code
+// comments otherwise, so this surfaces them in the run's own findings
+// output rather than requiring a reader to go find the source.
+func httpDeviationFindings() []string {
+	return []string{
+		"HARNESS deviation: §2.1 db-schemas entry 'openapi' dropped — schema does not exist in the fixture chain (PostgREST refuses to boot); no case uses that profile",
+		"HARNESS deviation: §2.1 bulk/multi/unicode run with db-anon-role=<connection user> — real PostgREST rejects JWT-less requests without an anon role; matches §2.1's 'requests run as the connecting database user'",
+	}
+}
+
+// findingsForRun appends httpDeviationFindings to base when ranHTTP is true
+// (the run started at least one HTTP case — i.e. -skip-http wasn't passed
+// and the selection contained at least one HTTP case), leaving base
+// untouched otherwise since neither deviation is exercised by a CLI-only
+// run.
+func findingsForRun(base []string, ranHTTP bool) []string {
+	if !ranHTTP {
+		return base
+	}
+	return append(base, httpDeviationFindings()...)
 }
 
 // httpGroup is one instance's worth of selected HTTP cases: everything

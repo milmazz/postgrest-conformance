@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -74,6 +75,61 @@ func TestValidateDBName(t *testing.T) {
 	}
 	if err := Teardown(p, bad); err == nil {
 		t.Errorf("Teardown(%q, ...) = nil error, want rejection before touching the DB", bad)
+	}
+}
+
+// TestChildEnvDoesNotInheritAmbientEnv covers Minor #4 from the PR #1
+// review: Psql's child environment must be built from scratch (PATH + the
+// PGEnv's own connection vars + PGDATABASE + extraEnv), not from
+// os.Environ(), so an ambient PGOPTIONS/PGSSLMODE/PGTZ/etc. set in the
+// caller's own shell can't silently change psql's behavior during fixture
+// loading.
+func TestChildEnvDoesNotInheritAmbientEnv(t *testing.T) {
+	t.Setenv("PGOPTIONS", "-c statement_timeout=1")
+	t.Setenv("PGSSLMODE", "require")
+	t.Setenv("PGTZ", "America/New_York")
+	t.Setenv("SOME_UNRELATED_VAR", "leak-me-not")
+
+	p := PGEnv{Host: "dbhost", Port: "6432", User: "u", Password: "pw"}
+	// PGTZ passed as extraEnv, the way Setup calls Psql for the fixture
+	// chain (PGTZ=UTC) — must be the value present in the result, not the
+	// ambient ("America/New_York") ever set above.
+	got := childEnv(p, "mydb", []string{"PGTZ=UTC"})
+
+	want := map[string]string{
+		"PATH":       os.Getenv("PATH"),
+		"PGHOST":     "dbhost",
+		"PGPORT":     "6432",
+		"PGUSER":     "u",
+		"PGPASSWORD": "pw",
+		"PGDATABASE": "mydb",
+		"PGTZ":       "UTC",
+	}
+
+	seen := map[string]string{}
+	for _, kv := range got {
+		key, val, ok := strings.Cut(kv, "=")
+		if !ok {
+			t.Fatalf("malformed env entry %q", kv)
+		}
+		if _, dup := seen[key]; dup {
+			t.Fatalf("env var %q appears more than once in %v", key, got)
+		}
+		seen[key] = val
+		switch key {
+		case "PGOPTIONS", "PGSSLMODE", "SOME_UNRELATED_VAR":
+			t.Errorf("ambient var %q leaked into child env: %q", key, kv)
+		}
+	}
+	if len(seen) != len(want) {
+		t.Errorf("child env has %d vars %v, want exactly %d: %v", len(seen), got, len(want), want)
+	}
+	for key, wantVal := range want {
+		if gotVal, ok := seen[key]; !ok {
+			t.Errorf("expected env var %q missing from child env %v", key, got)
+		} else if gotVal != wantVal {
+			t.Errorf("%s = %q, want %q", key, gotVal, wantVal)
+		}
 	}
 }
 

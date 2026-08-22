@@ -208,6 +208,9 @@ func Route(c *cases.Case) (*Placement, error) {
 
 	switch {
 	case c.ID == 1387 || c.ID == 1388 || c.ID == 1389:
+		if len(c.Config.Keys) > 0 {
+			return nil, fmt.Errorf("case %d: safeupdate-routed case carries a config block the router does not translate — extend Route", c.ID)
+		}
 		p.Base = "bulk"
 		p.SafeUpdate = true
 		p.InjectProfile = "mutations"

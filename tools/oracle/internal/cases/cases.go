@@ -175,6 +175,13 @@ func Load(path string) (*Case, error) {
 		area = feature[:i]
 	}
 
+	// normalizeYAML guards against a future non-string-keyed YAML mapping
+	// anywhere under expect: (e.g. an unquoted integer-looking key in a
+	// body_exact fixture) reaching jsonval.DeepEqual as a map[any]any,
+	// which it doesn't recognize. normalizeYAML on a map[string]any input
+	// always returns a map[string]any, so this type assertion cannot fail.
+	expect := normalizeYAML(expectRaw).(map[string]any)
+
 	return &Case{
 		ID:      id,
 		Feature: feature,
@@ -182,7 +189,7 @@ func Load(path string) (*Case, error) {
 		Schema:  schemaName,
 		Request: request,
 		Config:  cfg,
-		Expect:  expectRaw,
+		Expect:  expect,
 		Notes:   notes,
 		Source:  source,
 		Path:    path,

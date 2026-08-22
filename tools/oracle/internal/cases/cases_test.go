@@ -95,6 +95,35 @@ source: s
 	}
 }
 
+// TestLoadNormalizesNonStringKeyedExpectMappings covers Minor #3 from the PR
+// #1 review: an unquoted integer-looking key inside expect: decodes via
+// yaml.v3 as map[interface{}]interface{} (its fallback for non-string-keyed
+// mappings), which jsonval.DeepEqual doesn't recognize. Load must run
+// normalizeYAML over the decoded Expect map so this reaches assert.CheckHTTP
+// as an ordinary map[string]any.
+func TestLoadNormalizesNonStringKeyedExpectMappings(t *testing.T) {
+	p := writeCase(t, t.TempDir(), "4_x.yaml", `
+id: 4
+feature: a/b
+request: { method: GET, path: /x }
+schema: test
+expect: { status: 200, body_exact: { 1: x } }
+notes: n
+source: s
+`)
+	c, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	be, ok := c.Expect["body_exact"].(map[string]any)
+	if !ok {
+		t.Fatalf("body_exact = %T, want map[string]any (unquoted int key must normalize to a string key)", c.Expect["body_exact"])
+	}
+	if v, ok := be["1"]; !ok || v != "x" {
+		t.Fatalf(`body_exact["1"] = %v (present=%v), want "x"`, v, ok)
+	}
+}
+
 func TestLoadAllRealCorpus(t *testing.T) {
 	root := repoRoot(t) // helper: walk up from CWD until PIN exists
 	cs, err := LoadAll(filepath.Join(root, "cases"))
