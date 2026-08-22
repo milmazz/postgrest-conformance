@@ -7,6 +7,7 @@ package db
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"os/exec"
@@ -41,11 +42,20 @@ func envOrDefault(key, def string) string {
 	return def
 }
 
-// URI returns a postgresql:// connection string for dbname, with the
-// password url-escaped.
+// URI returns a postgresql:// connection string for dbname. Built with
+// net/url's URL type (rather than manual string formatting) so userinfo
+// escaping is correct by construction: url.QueryEscape is form-encoding
+// (a space becomes "+", which libpq's URI parser does not decode back to a
+// space, only percent-decoding), and "@"/":" need userinfo-specific
+// escaping that QueryEscape doesn't provide either.
 func (p PGEnv) URI(dbname string) string {
-	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
-		p.User, url.QueryEscape(p.Password), p.Host, p.Port, dbname)
+	u := url.URL{
+		Scheme: "postgresql",
+		User:   url.UserPassword(p.User, p.Password),
+		Host:   net.JoinHostPort(p.Host, p.Port),
+		Path:   "/" + dbname,
+	}
+	return u.String()
 }
 
 // Psql runs psql against dbname with -v ON_ERROR_STOP=1 -q, args appended,
