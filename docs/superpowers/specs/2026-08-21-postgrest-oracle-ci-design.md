@@ -127,9 +127,16 @@ checksum instead of silently testing the wrong version.
 
 All HTTP instances run **`db-tx-end=rollback`** (HARNESS §2.1; fact 3 makes
 the run order-independent) and get an admin server on a second port for
-`/ready` polling. Config is delivered as a generated config file per instance
-(env only for the CLI cases, which test env handling themselves). Ports are
-allocated dynamically from the ephemeral range.
+`/ready` polling. Instance config is delivered as a **`PGRST_*` environment
+map** — env values are raw bytes with no quoting layer (fact 4), so
+`SPECIAL "@/\#~_-` and `تست` need no escaping, and a `null` config value
+clears a key by *omitting* its env var rather than relying on empty-string
+semantics. CLI cases are the exception in both directions: their `config.env`
+maps are passed verbatim (env handling is what they test), and their
+`config.file` maps are rendered to config-file syntax by the runner (strings
+double-quoted with `"` and `\` backslash-escaped — case 1741 contains literal
+quotes; numbers and booleans bare). Ports are allocated dynamically from the
+ephemeral range.
 
 **Long-lived (booted once per run):**
 
@@ -234,10 +241,13 @@ case loudly**. Notables:
 - `body_exact`: decoded deep-equal; expected `null`/absent ⇒ the body must be
   **zero bytes**.
 - `body_raw`: byte-for-byte. `body_contains`: raw substring(s).
-- `body_jsonpath`: `equals` / `present`|`exists` / `absent` predicates via a
-  Go JSONPath library (chosen after enumerating the path syntax the 48 cases
-  actually use; `ohler55/ojg` or RFC-9535 `theory/jsonpath` are the
-  candidates).
+- `body_jsonpath`: `equals` / `present`|`exists` / `absent` predicates.
+  Enumerated during design: the 48 cases use 115 distinct paths built from
+  **only** dot-children (`$.info.title`), single-quoted bracket keys
+  (`['/child_entities']`, `['$ref']`, `['200']`), and integer indices
+  (`[0]`, `$[0].Plan`) — no filters, wildcards, recursion, or slices. A
+  small in-repo evaluator covers this grammar exactly; no JSONPath
+  dependency.
 - `status_text`: exact reason-phrase match (1508/1510/1511) — the assertion
   bier cannot make.
 - `headers_no_blank` (1573), `headers_present`, `headers_absent`,
@@ -265,13 +275,22 @@ In scope — they invoke the **same pinned binary** as subprocesses:
 
 ### Database
 
-**Local:** a scratch database `postgrest_conf_oracle` on the local PG
-(never `bier_test`), built by the fixture chain exactly per fixtures/README
-(`01_roles.sql` against the maintenance DB; `CREATE DATABASE … TEMPLATE
-template0 LC_COLLATE 'C'`; `02`–`07` with `PGTZ=UTC`, `ON_ERROR_STOP`),
-dropped after the run (plus the `db_config_authenticator` role). The
-`postgrest_test_*` roles from `01_roles.sql` are idempotent and shared with
-bier's own use — left in place.
+**Local:** the preferred local target is a **Dockerized PG 17 + PostGIS
+container identical to CI's** (`postgis/postgis:17-3.5` on a non-default
+port, started/stopped by a make target) — it carries pg-safeupdate, keeps
+cluster-wide role creation (`postgrest_test_*`, `db_config_authenticator`)
+off the shared MacPorts cluster entirely, and makes local runs reproduce CI
+exactly. The runner itself just takes standard `PG*` env vars, so pointing it
+at the shared local cluster with a scratch database `postgrest_conf_oracle`
+(never `bier_test`) remains possible — with the caveats that safeupdate cases
+need the extension present and the fixture roles land cluster-wide (they are
+idempotent and shared with bier's own use). Either way the database is built
+by the fixture chain exactly per fixtures/README (`01_roles.sql` against the
+maintenance DB; `CREATE DATABASE … TEMPLATE template0 LC_COLLATE 'C'`;
+`02`–`07` with `PGTZ=UTC`, `ON_ERROR_STOP`) and dropped after the run (plus
+the `db_config_authenticator` role, which the runner also drops/recreates
+around each db-config CLI case — their `preconditions_sql` all begin with a
+bare `CREATE ROLE`).
 
 **CI:** `postgis/postgis:17-3.5` container (same pin as the existing
 `freshness` job) with **pg-safeupdate installed into it** — expected via the
