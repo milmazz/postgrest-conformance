@@ -338,3 +338,20 @@ func TestFilterCases(t *testing.T) {
 		}
 	})
 }
+
+func TestCheckSelection(t *testing.T) {
+	t.Run("empty selection is an error", func(t *testing.T) {
+		if err := checkSelection(nil); err == nil {
+			t.Fatal("got nil error, want a \"no cases selected\" error")
+		}
+		if err := checkSelection([]*cases.Case{}); err == nil {
+			t.Fatal("got nil error, want a \"no cases selected\" error")
+		}
+	})
+
+	t.Run("non-empty selection is fine", func(t *testing.T) {
+		if err := checkSelection([]*cases.Case{{ID: 1}}); err != nil {
+			t.Fatalf("got error %v, want nil", err)
+		}
+	})
+}

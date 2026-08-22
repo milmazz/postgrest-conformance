@@ -17,7 +17,8 @@ import (
 
 // Spec is a fully resolved HTTP request ready to be sent over the wire:
 // headers include any injected Accept-Profile / minted Authorization, and
-// Body/HasBody reflect the case's body precedence (HARNESS §3.5).
+// Body/HasBody reflect the case's body precedence (HARNESS.md §3 (request
+// body precedence, item 5)).
 type Spec struct {
 	Method, Path string
 	Headers      map[string]string

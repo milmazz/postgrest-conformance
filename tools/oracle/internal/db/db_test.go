@@ -39,6 +39,44 @@ func TestURI(t *testing.T) {
 	}
 }
 
+// TestValidateDBName is unguarded (no database needed) and asserts
+// Setup/Teardown reject any dbname that isn't a bare
+// letters/digits/underscore identifier before it's interpolated into a
+// DROP/CREATE DATABASE statement.
+func TestValidateDBName(t *testing.T) {
+	valid := []string{"postgrest_conf_oracle", "db2", "ORACLE_TEST_DB", "_leading_underscore"}
+	for _, name := range valid {
+		if err := validateDBName(name); err != nil {
+			t.Errorf("validateDBName(%q) = %v, want nil", name, err)
+		}
+	}
+
+	invalid := []string{
+		"",
+		"db; DROP DATABASE postgres",
+		"db name",
+		"db-name",
+		"db.name",
+		"db'name",
+		"db\"name",
+		"db\nname",
+	}
+	for _, name := range invalid {
+		if err := validateDBName(name); err == nil {
+			t.Errorf("validateDBName(%q) = nil, want an error", name)
+		}
+	}
+
+	p := PGEnv{Host: "localhost", Port: "6432", User: "postgres", Password: "postgres"}
+	const bad = "db; DROP DATABASE postgres"
+	if err := Setup(p, bad, "/nonexistent"); err == nil {
+		t.Errorf("Setup(%q, ...) = nil error, want rejection before touching the DB", bad)
+	}
+	if err := Teardown(p, bad); err == nil {
+		t.Errorf("Teardown(%q, ...) = nil error, want rejection before touching the DB", bad)
+	}
+}
+
 func repoRoot(t *testing.T) string {
 	t.Helper()
 	dir, _ := os.Getwd()

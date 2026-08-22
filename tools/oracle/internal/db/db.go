@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 )
 
@@ -81,6 +82,20 @@ func (p PGEnv) Psql(dbname string, extraEnv []string, args ...string) error {
 	return nil
 }
 
+// validDBName matches the only database names Setup/Teardown accept: bare
+// identifiers of letters, digits, and underscores.
+var validDBName = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
+
+// validateDBName rejects any dbname that isn't a bare identifier, since
+// Setup/Teardown interpolate it directly into DROP/CREATE DATABASE
+// statements with no other quoting or escaping.
+func validateDBName(dbname string) error {
+	if !validDBName.MatchString(dbname) {
+		return fmt.Errorf("invalid database name %q: must match %s", dbname, validDBName.String())
+	}
+	return nil
+}
+
 // Setup loads the fixture chain from fixturesDir into dbname, following
 // fixtures/README.md exactly:
 //  1. 01_roles.sql against the postgres maintenance database.
@@ -88,6 +103,10 @@ func (p PGEnv) Psql(dbname string, extraEnv []string, args ...string) error {
 //     byte-ordering collation.
 //  3. Each 0[2-7]_*.sql file, sorted, against dbname with PGTZ=UTC.
 func Setup(p PGEnv, dbname, fixturesDir string) error {
+	if err := validateDBName(dbname); err != nil {
+		return err
+	}
+
 	if err := p.Psql("postgres", nil, "-f", filepath.Join(fixturesDir, "01_roles.sql")); err != nil {
 		return err
 	}
@@ -119,6 +138,10 @@ func Setup(p PGEnv, dbname, fixturesDir string) error {
 // Teardown drops dbname and the db_config_authenticator role created while
 // running the fixture chain.
 func Teardown(p PGEnv, dbname string) error {
+	if err := validateDBName(dbname); err != nil {
+		return err
+	}
+
 	if err := p.Psql("postgres", nil, "-c", "DROP DATABASE IF EXISTS "+dbname); err != nil {
 		return err
 	}

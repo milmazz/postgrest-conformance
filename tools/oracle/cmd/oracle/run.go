@@ -77,6 +77,9 @@ func cmdRun(args []string) error {
 	}
 	areaSet := parseStringSet(*areasFlag)
 	selected := filterCases(all, idSet, areaSet)
+	if err := checkSelection(selected); err != nil {
+		return err
+	}
 
 	placements := make(map[int]*route.Placement, len(all))
 	for _, c := range all {
@@ -332,6 +335,17 @@ func filterCases(all []*cases.Case, ids map[int]bool, areas map[string]bool) []*
 		out = append(out, c)
 	}
 	return out
+}
+
+// checkSelection returns an error when selected is empty, so an over-narrow
+// -cases/-areas filter (a typo'd id, a misspelled area, or two filters that
+// don't overlap) is reported as a hard failure instead of silently printing
+// a vacuous "TOTAL 0/0" summary and exiting 0.
+func checkSelection(selected []*cases.Case) error {
+	if len(selected) == 0 {
+		return fmt.Errorf("no cases selected (filters matched nothing)")
+	}
+	return nil
 }
 
 // httpGroup is one instance's worth of selected HTTP cases: everything

@@ -109,6 +109,14 @@ var harnessVariantIDs = []int{
 // with the connecting db-uri's own user for the bulk/multi/unicode bases
 // (never auth, which keeps its own explicit postgrest_test_anonymous per
 // §2.2), rather than baking a role name into this map.
+//
+// That boot-time injection is deliberately invisible to Route's overlay
+// satisfaction check below: `base` there (and pgDefaults's own
+// PGRST_DB_ANON_ROLE = "") reflects the map as returned by this function,
+// without run.go's later PGRST_DB_ANON_ROLE=<connection user> injection. If
+// a non-auth case ever declares db-anon-role in its own config: block, this
+// would need revisiting — today none do, every db-anon-role-bearing case is
+// auth-based (routed to the "auth" base, which never gets the injection).
 func BaseConfigs() map[string]map[string]string {
 	bulk := map[string]string{
 		"PGRST_DB_SCHEMAS":                  "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست",
