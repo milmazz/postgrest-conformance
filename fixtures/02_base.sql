@@ -261,11 +261,6 @@ CREATE SCHEMA IF NOT EXISTS v2;                       -- url_grammar / headers
 CREATE SCHEMA IF NOT EXISTS "تست";                    -- url_grammar (unicode)
 CREATE SCHEMA IF NOT EXISTS "SPECIAL ""@/\#~_-";      -- headers (special-named)
 CREATE SCHEMA IF NOT EXISTS openapi_no_comment;       -- openapi.sql (case 1654: default title, no schema COMMENT)
-CREATE SCHEMA IF NOT EXISTS openapi;                  -- listed in HARNESS.md's db-schemas (§2.1); left empty and
-                                                       -- ungranted since no case exercises Accept-Profile: openapi
-                                                       -- (openapi.sql's cases run against `test`, per-case schema:
-                                                       -- test/openapi_no_comment) — PostgREST still validates every
-                                                       -- listed schema exists at boot, so it must be present.
 
 -- Reachable: test first, then public for shared casts/extensions.
 SET search_path = test, public;

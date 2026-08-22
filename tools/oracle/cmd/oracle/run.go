@@ -130,6 +130,7 @@ func cmdRun(args []string) error {
 				}
 				continue
 			}
+			base = withConnUserAnon(base, g.base, pg.User)
 
 			inst, startErr := instance.Start(bin, base, g.overlay, uri, g.safeUpdate)
 			if startErr != nil {
@@ -229,6 +230,36 @@ func runHTTPCase(c *cases.Case, port int, injectProfile string) (failures []stri
 		return []string{err.Error()}
 	}
 	return assert.CheckHTTP(c, resp)
+}
+
+// withConnUserAnon returns base with PGRST_DB_ANON_ROLE set to connUser (the
+// runner's own db-uri connection user, from db.FromEnv), for every base
+// except "auth" — which keeps its own explicit postgrest_test_anonymous per
+// HARNESS.md §2.2. This implements §2.1's stated semantics for the other
+// three shared bases ("no anonymous role... requests run as the connecting
+// database user, no role switching") without baking a role name into
+// route.BaseConfigs: PostgREST requires *some* db-anon-role to serve
+// unauthenticated requests at all (its absence produced a 100% "401
+// Anonymous access is disabled" failure across every anonymous
+// bulk/multi/unicode request, observed during smoke-testing), and setting
+// it to the connecting user itself is the faithful equivalent of "no role
+// switching" rather than importing an unrelated role (e.g.
+// postgrest_test_anonymous) whose grants don't cover the bulk/multi/unicode
+// area-mirror schemas anyway.
+//
+// base is never mutated in place — it may be the same map object shared by
+// every group routed to the same base (including variants layered on top),
+// so a fresh copy is returned instead.
+func withConnUserAnon(base map[string]string, baseName, connUser string) map[string]string {
+	if baseName == "auth" {
+		return base
+	}
+	out := make(map[string]string, len(base)+1)
+	for k, v := range base {
+		out[k] = v
+	}
+	out["PGRST_DB_ANON_ROLE"] = connUser
+	return out
 }
 
 // toResult builds a report.CaseResult from a case's failure list (nil/empty

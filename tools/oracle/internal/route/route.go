@@ -89,10 +89,29 @@ var harnessVariantIDs = []int{
 // BaseConfigs returns the four base PGRST_* config maps ("bulk", "auth",
 // "multi", "unicode"), exclusive of db-uri/ports which are the caller's
 // responsibility to fill in.
+//
+// bulk deliberately omits "openapi" from PGRST_DB_SCHEMAS even though
+// HARNESS.md §2.1's db-schemas list names it: the fixture chain
+// (fixtures/02_base.sql) creates no schema by that name, and PostgREST
+// validates every listed schema exists at boot — with "openapi" included,
+// every instance built from bulk/auth/multi/unicode (which all inherit this
+// list) failed to become ready ("schema \"openapi\" does not exist"),
+// observed as a 100% instance-boot failure across the shared bases. No case
+// sends Accept-Profile: openapi (the openapi.sql-derived cases run against
+// schema test or openapi_no_comment instead), so dropping it here is
+// behavior-neutral for every case; it's recorded as a HARNESS finding
+// instead of a fixture edit (fixtures/ is owner-reviewed delta-channel
+// work — the runner never writes to it).
+//
+// bulk also omits PGRST_DB_ANON_ROLE outright, per HARNESS §2.1's stated
+// semantics ("no anonymous role... requests run as the connecting database
+// user, no role switching"): the runner (run.go) fills it in at boot time
+// with the connecting db-uri's own user for the bulk/multi/unicode bases
+// (never auth, which keeps its own explicit postgrest_test_anonymous per
+// §2.2), rather than baking a role name into this map.
 func BaseConfigs() map[string]map[string]string {
 	bulk := map[string]string{
-		"PGRST_DB_SCHEMAS":                  "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,openapi,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست",
-		"PGRST_DB_ANON_ROLE":                "postgrest_test_anonymous",
+		"PGRST_DB_SCHEMAS":                  "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست",
 		"PGRST_DB_EXTRA_SEARCH_PATH":        "public",
 		"PGRST_DB_POOL":                     "10",
 		"PGRST_DB_TX_END":                   "rollback",
