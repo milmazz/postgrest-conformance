@@ -74,12 +74,41 @@ func compactJSON(v any) string {
 // contentLength is known (>= 0), the lookup is synthesized from
 // contentLength — this covers responses where Go's transport computed the
 // length but it may not appear literally in the header map.
+//
+// This synthesis is only correct for a *value* lookup (checkHeaders,
+// checkHeadersMatch): it deliberately does not distinguish "the server sent
+// Content-Length: 0" from "the server sent no body and no Content-Length
+// header at all" (e.g. a 204, where Go's http.Response.ContentLength is
+// still 0, not -1, per net/http's own inference rules for bodyless
+// responses). literalHeader below is the presence-only counterpart used by
+// headers_present/headers_absent, which must tell those two cases apart.
 func foldedHeader(h http.Header, name string, contentLength int64) (string, bool) {
 	vs := h.Values(name)
 	if len(vs) == 0 {
 		if strings.EqualFold(name, "Content-Length") && contentLength >= 0 {
 			return strconv.FormatInt(contentLength, 10), true
 		}
+		return "", false
+	}
+	sep := ", "
+	if strings.EqualFold(name, "Set-Cookie") {
+		sep = "\n"
+	}
+	return strings.Join(vs, sep), true
+}
+
+// literalHeader looks up name in h (case-insensitive), folding repeated
+// values the same way foldedHeader does, but never synthesizes a value from
+// HTTPResponse.ContentLength: it reports "found" only when the header
+// literally appears on the wire. Used by headers_present/headers_absent,
+// which assert whether a header line exists at all rather than what value
+// it carries — foldedHeader's Content-Length synthesis would otherwise make
+// every zero-byte-body response (e.g. a 204, which never carries a literal
+// Content-Length header) look like it has one, since Go's
+// http.Response.ContentLength is 0, not -1 ("unknown"), for such responses.
+func literalHeader(h http.Header, name string) (string, bool) {
+	vs := h.Values(name)
+	if len(vs) == 0 {
 		return "", false
 	}
 	sep := ", "
@@ -268,7 +297,7 @@ func checkHeadersPresent(r *HTTPResponse, v any) []string {
 	var failures []string
 	for _, item := range names {
 		name := expectedScalar(item)
-		if _, found := foldedHeader(r.Header, name, r.ContentLength); !found {
+		if _, found := literalHeader(r.Header, name); !found {
 			failures = append(failures, fmt.Sprintf("headers_present[%s]: missing", name))
 		}
 	}
@@ -283,7 +312,7 @@ func checkHeadersAbsent(r *HTTPResponse, v any) []string {
 	var failures []string
 	for _, item := range names {
 		name := expectedScalar(item)
-		if got, found := foldedHeader(r.Header, name, r.ContentLength); found {
+		if got, found := literalHeader(r.Header, name); found {
 			failures = append(failures, fmt.Sprintf("headers_absent[%s]: present with value %q", name, got))
 		}
 	}
@@ -357,12 +386,19 @@ func checkHeadersNoBlank(r *HTTPResponse, v any) []string {
 	return failures
 }
 
-// checkBodyExact implements the body_exact/body_json synonyms: expected
-// nil requires a literally empty body; otherwise the body is JSON-decoded
-// and deep-compared to the expected value (key order/whitespace in the raw
-// bytes don't matter).
+// checkBodyExact implements the body_exact/body_json synonyms: an expected
+// value of nil OR the empty string requires a literally empty body;
+// otherwise the body is JSON-decoded and deep-compared to the expected
+// value (key order/whitespace in the raw bytes don't matter). The
+// empty-string sentinel mirrors the reference implementation (bier's
+// Bier.ConformanceAssertions: `expected in [nil, ""]`) — HARNESS.md §4 only
+// spells out "null or absent" in prose, but a number of case files write
+// `body_exact: ""` to mean "expect an empty body" (e.g.
+// representations/post/return-minimal), and the empty string "" is not
+// itself valid JSON, so treating it as "JSON-decode and deep-compare" would
+// make every such case fail against a genuinely empty (0-byte) response.
 func checkBodyExact(key string, body []byte, v any) []string {
-	if v == nil {
+	if v == nil || v == "" {
 		if len(body) != 0 {
 			return []string{fmt.Sprintf("%s: got %d-byte body, want empty body", key, len(body))}
 		}

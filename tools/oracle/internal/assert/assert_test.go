@@ -255,6 +255,36 @@ func TestCheckHTTPHeadersAbsentFail(t *testing.T) {
 	}
 }
 
+// TestCheckHTTPHeadersAbsentContentLengthNotSynthesizedPass guards against
+// headers_absent[Content-Length] false-positiving on a genuinely
+// header-less zero-byte response (e.g. a 204): real PostgREST omits the
+// Content-Length header entirely on these, but Go's http.Response still
+// reports ContentLength == 0 (not -1/"unknown") for a bodyless response, so
+// this must NOT reuse foldedHeader's value-synthesis fallback the way
+// checkHeaders/checkHeadersMatch do — headers_present/headers_absent test
+// wire presence, not an inferred value. Reproduced against real PostgREST
+// v16.0 (case 1311's PATCH .../items?id=eq.2, Accept-Profile:
+// representations): the wire response carries no Content-Length header at
+// all, so this must pass.
+func TestCheckHTTPHeadersAbsentContentLengthNotSynthesizedPass(t *testing.T) {
+	c := mkCase(t, `headers_absent: [Content-Length]`)
+	r := resp(204, "No Content", nil, "") // no literal Content-Length header
+	if got := CheckHTTP(c, r); len(got) != 0 {
+		t.Fatalf("want pass (no literal Content-Length header on the wire), got failures: %v", got)
+	}
+}
+
+// TestCheckHTTPHeadersPresentContentLengthLiteralPass is the mirror
+// positive case: a literal Content-Length header must still satisfy
+// headers_present.
+func TestCheckHTTPHeadersPresentContentLengthLiteralPass(t *testing.T) {
+	c := mkCase(t, `headers_present: [Content-Length]`)
+	r := resp(200, "OK", map[string][]string{"Content-Length": {"5"}}, "hello")
+	if got := CheckHTTP(c, r); len(got) != 0 {
+		t.Fatalf("want pass (literal Content-Length header present), got failures: %v", got)
+	}
+}
+
 // --- headers_match ---
 
 func TestCheckHTTPHeadersMatchPass(t *testing.T) {
@@ -376,6 +406,27 @@ func TestCheckHTTPBodyExactNullVsLiteralNullBodyFails(t *testing.T) {
 	got := CheckHTTP(c, r)
 	if len(got) != 1 {
 		t.Fatalf("want 1 failure (body must be zero bytes, not literal \"null\"), got %v", got)
+	}
+}
+
+// TestCheckHTTPBodyExactEmptyStringSentinelPass covers the reference
+// implementation's `expected in [nil, ""]` empty-body sentinel (bier's
+// Bier.ConformanceAssertions): a case writing `body_exact: ""` (as opposed
+// to `body_exact: null`) must also pass against a genuinely empty body.
+func TestCheckHTTPBodyExactEmptyStringSentinelPass(t *testing.T) {
+	c := mkCase(t, `body_exact: ""`)
+	r := resp(204, "No Content", nil, "")
+	if got := CheckHTTP(c, r); len(got) != 0 {
+		t.Fatalf("want pass (\"\" is an empty-body sentinel, same as null), got failures: %v", got)
+	}
+}
+
+func TestCheckHTTPBodyExactEmptyStringSentinelNonEmptyBodyFails(t *testing.T) {
+	c := mkCase(t, `body_exact: ""`)
+	r := resp(200, "OK", nil, `{"a":1}`)
+	got := CheckHTTP(c, r)
+	if len(got) != 1 {
+		t.Fatalf("want 1 failure (body must be zero bytes), got %v", got)
 	}
 }
 
