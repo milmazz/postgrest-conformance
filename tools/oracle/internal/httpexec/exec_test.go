@@ -57,6 +57,27 @@ func TestBuildSpecProfileInjectionWriteMethodsUseContentProfile(t *testing.T) {
 	}
 }
 
+// TestBuildSpecProfileInjectionWriteMethodExplicitAcceptProfileDoesNotSuppress
+// guards the header-name-specific nature of the put-new check on a write: an
+// explicit Accept-Profile in the case's own headers is a *different* header
+// from the one BuildSpec is about to inject (Content-Profile, for a write
+// method), so it must not suppress that injection — both headers end up in
+// the built request, the explicit Accept-Profile preserved verbatim and the
+// injected Content-Profile carrying the schema label. This mirrors
+// TestBuildSpecProfileInjection's read-side "Content-Profile does NOT
+// suppress injection" case, on the write side.
+func TestBuildSpecProfileInjectionWriteMethodExplicitAcceptProfileDoesNotSuppress(t *testing.T) {
+	c := &cases.Case{Request: cases.Request{Method: "POST", Path: "/x",
+		Headers: map[string]string{"Accept-Profile": "v2"}}}
+	s, _ := BuildSpec(c, "mutations")
+	if s.Headers["Accept-Profile"] != "v2" {
+		t.Fatalf("explicit Accept-Profile must be preserved, got headers %v", s.Headers)
+	}
+	if s.Headers["Content-Profile"] != "mutations" {
+		t.Fatalf("Content-Profile must still be injected, got headers %v", s.Headers)
+	}
+}
+
 // TestBuildSpecProfileInjectionReadMethodsUseAcceptProfile guards the read
 // side of the same method-aware choice: GET/HEAD/OPTIONS still get
 // Accept-Profile, matching the pre-existing behavior.
