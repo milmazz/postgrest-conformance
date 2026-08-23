@@ -29,9 +29,17 @@ func init() {
 	dispatch["run"] = cmdRun
 }
 
-// sharedGroupOrder is the fixed boot order for the four shared instances,
-// each one skipped when it has no selected cases.
-var sharedGroupOrder = []string{"bulk", "auth", "multi", "unicode"}
+// sharedGroupOrder is the fixed boot order for the fourteen shared
+// instances (see route.BaseConfigs), each one skipped when it has no
+// selected cases: "test" first (the default/no-profile area), then the
+// other ten area bases alphabetically, then "auth", "multi", "unicode".
+var sharedGroupOrder = []string{
+	"test",
+	"config", "domain_representations", "headers", "mutations",
+	"observability", "operators", "ordering", "pagination",
+	"representations", "rpc",
+	"auth", "multi", "unicode",
+}
 
 // cmdRun executes every selected case against a real PostgREST binary: CLI
 // cases first (id order), then HTTP cases grouped by their routing
@@ -102,7 +110,6 @@ func cmdRun(args []string) error {
 	}()
 
 	var results []report.CaseResult
-	ranHTTP := false
 
 	if !*skipCLI {
 		for _, c := range selected {
@@ -120,9 +127,7 @@ func cmdRun(args []string) error {
 	if !*skipHTTP {
 		uri := pg.URI(dbname)
 		bases := route.BaseConfigs()
-		shared := map[string]*instance.Instance{}
 		groups := groupsInOrder(placements, selected)
-		ranHTTP = len(groups) > 0
 
 		for _, g := range groups {
 			if ctx.Err() != nil {
@@ -158,17 +163,14 @@ func cmdRun(args []string) error {
 				results = append(results, toResult(c, g.key, failures))
 			}
 
-			if g.shared {
-				// Shared bases stay up until every group has run; stopped
-				// together below.
-				shared[g.key] = inst
-			} else {
-				inst.Stop()
-				reg.remove(inst)
-			}
-		}
-
-		for _, inst := range shared {
+			// Stop this group's instance now, whether it's one of the
+			// (up to fourteen) shared bases or a per-case variant: execution
+			// is strictly sequential and no later group reuses another
+			// group's instance, so nothing is lost by not keeping shared
+			// bases alive across groups — and stopping promptly caps how
+			// many Postgres connections are open concurrently, which
+			// matters more now that there can be many more shared
+			// instances than the old four.
 			inst.Stop()
 			reg.remove(inst)
 		}
@@ -189,8 +191,6 @@ func cmdRun(args []string) error {
 	if len(results) == 0 {
 		return noResultsError(ctx.Err())
 	}
-
-	findings = findingsForRun(findings, ranHTTP)
 
 	if err := report.WriteJSON(*reportFlag, results, findings); err != nil {
 		return err
@@ -254,17 +254,17 @@ func runHTTPCase(c *cases.Case, port int, injectProfile string) (failures []stri
 // withConnUserAnon returns base with PGRST_DB_ANON_ROLE set to connUser (the
 // runner's own db-uri connection user, from db.FromEnv), for every base
 // except "auth" — which keeps its own explicit postgrest_test_anonymous per
-// HARNESS.md §2.2. This implements §2.1's stated semantics for the other
-// three shared bases ("no anonymous role... requests run as the connecting
-// database user, no role switching") without baking a role name into
-// route.BaseConfigs: PostgREST requires *some* db-anon-role to serve
-// unauthenticated requests at all (its absence produced a 100% "401
-// Anonymous access is disabled" failure across every anonymous
-// bulk/multi/unicode request, observed during smoke-testing), and setting
-// it to the connecting user itself is the faithful equivalent of "no role
-// switching" rather than importing an unrelated role (e.g.
-// postgrest_test_anonymous) whose grants don't cover the bulk/multi/unicode
-// area-mirror schemas anyway.
+// HARNESS.md §2.2. This implements §2.1's stated semantics for every other
+// shared base (the per-area single-schema bases, plus multi/unicode):
+// "no anonymous role... requests run as the connecting database user, no
+// role switching" — without baking a role name into route.BaseConfigs:
+// PostgREST requires *some* db-anon-role to serve unauthenticated requests
+// at all (its absence produced a 100% "401 Anonymous access is disabled"
+// failure across every anonymous request on these bases, observed during
+// smoke-testing), and setting it to the connecting user itself is the
+// faithful equivalent of "no role switching" rather than importing an
+// unrelated role (e.g. postgrest_test_anonymous) whose grants don't cover
+// these area/multi/unicode schemas anyway.
 //
 // base is never mutated in place — it may be the same map object shared by
 // every group routed to the same base (including variants layered on top),
@@ -414,32 +414,6 @@ func effectiveSelection(selected []*cases.Case, skipCLI, skipHTTP bool) []*cases
 	return out
 }
 
-// httpDeviationFindings are the two boot-time HARNESS deviations that only
-// apply once the run actually starts a PostgREST instance: see BaseConfigs'
-// doc comment (the "openapi" schema dropped from db-schemas) and
-// withConnUserAnon's doc comment (bulk/multi/unicode booted with
-// db-anon-role set to the connecting database user). They live only in code
-// comments otherwise, so this surfaces them in the run's own findings
-// output rather than requiring a reader to go find the source.
-func httpDeviationFindings() []string {
-	return []string{
-		"HARNESS deviation: §2.1 db-schemas entry 'openapi' dropped — schema does not exist in the fixture chain (PostgREST refuses to boot); no case uses that profile",
-		"HARNESS deviation: §2.1 bulk/multi/unicode run with db-anon-role=<connection user> — real PostgREST rejects JWT-less requests without an anon role; matches §2.1's 'requests run as the connecting database user'",
-	}
-}
-
-// findingsForRun appends httpDeviationFindings to base when ranHTTP is true
-// (the run started at least one HTTP case — i.e. -skip-http wasn't passed
-// and the selection contained at least one HTTP case), leaving base
-// untouched otherwise since neither deviation is exercised by a CLI-only
-// run.
-func findingsForRun(base []string, ranHTTP bool) []string {
-	if !ranHTTP {
-		return base
-	}
-	return append(base, httpDeviationFindings()...)
-}
-
 // httpGroup is one instance's worth of selected HTTP cases: everything
 // sharing a route.Placement.GroupKey, which is exactly what one PostgREST
 // process configuration serves.
@@ -448,13 +422,14 @@ type httpGroup struct {
 	base       string
 	overlay    map[string]route.Val
 	safeUpdate bool
-	shared     bool // one of the four fixed bulk/auth/multi/unicode bases
+	shared     bool // one of the fourteen fixed bases in sharedGroupOrder
 	cases      []*cases.Case
 }
 
 // groupsInOrder buckets selected's HTTP cases (those routed to placements
 // with Kind == "http") by GroupKey and orders the groups: the shared bases
-// bulk, auth, multi, unicode first — each included only if it has at least
+// (sharedGroupOrder — "test", the other ten area bases alphabetically,
+// then auth/multi/unicode) first — each included only if it has at least
 // one selected case — then every other (variant) group sorted by its
 // smallest case id. Cases within a group are in id order because selected
 // itself is (cases.LoadAll sorts by id, and filterCases preserves order).
@@ -502,9 +477,10 @@ func groupsInOrder(placements map[int]*route.Placement, selected []*cases.Case) 
 	return append(shared, variant...)
 }
 
-// isSharedGroupKey reports whether key names one of the four fixed shared
-// instances outright (as opposed to a per-case variant built on top of one,
-// whose GroupKey is always base+overlay — never just the bare base name).
+// isSharedGroupKey reports whether key names one of the fourteen fixed
+// shared instances outright (as opposed to a per-case variant built on top
+// of one, whose GroupKey is always base+overlay — never just the bare base
+// name).
 func isSharedGroupKey(key string) bool {
 	for _, s := range sharedGroupOrder {
 		if key == s {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
-	"strings"
+	"sort"
 	"testing"
 
 	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/cases"
@@ -40,7 +40,7 @@ func caseIDs(cs []*cases.Case) []int {
 }
 
 func TestGroupsInOrder(t *testing.T) {
-	t.Run("shared bases first in bulk auth multi unicode order regardless of input order", func(t *testing.T) {
+	t.Run("shared bases first in sharedGroupOrder order regardless of input order", func(t *testing.T) {
 		// Global ascending id order with groups interleaved — mirrors the
 		// real invariant that `selected` is always id-sorted (cases.LoadAll
 		// sorts, filterCases preserves order), with different groups'
@@ -48,34 +48,34 @@ func TestGroupsInOrder(t *testing.T) {
 		selected := []*cases.Case{
 			httpTestCase(1, "unicode-area"),
 			httpTestCase(2, "auth-area"),
-			httpTestCase(3, "bulk-area"),
+			httpTestCase(3, "test-area"),
 			httpTestCase(4, "auth-area"),
-			httpTestCase(5, "bulk-area"),
+			httpTestCase(5, "test-area"),
 			httpTestCase(6, "multi-area"),
 			httpTestCase(7, "unicode-area"),
-			httpTestCase(8, "bulk-area"),
+			httpTestCase(8, "test-area"),
 		}
 		placements := map[int]*route.Placement{
 			1: httpPlacement("unicode", "unicode"),
 			2: httpPlacement("auth", "auth"),
-			3: httpPlacement("bulk", "bulk"),
+			3: httpPlacement("test", "test"),
 			4: httpPlacement("auth", "auth"),
-			5: httpPlacement("bulk", "bulk"),
+			5: httpPlacement("test", "test"),
 			6: httpPlacement("multi", "multi"),
 			7: httpPlacement("unicode", "unicode"),
-			8: httpPlacement("bulk", "bulk"),
+			8: httpPlacement("test", "test"),
 		}
 
 		got := groupsInOrder(placements, selected)
 
-		wantKeys := []string{"bulk", "auth", "multi", "unicode"}
+		wantKeys := []string{"test", "auth", "multi", "unicode"}
 		if gotKeys := groupKeys(got); !reflect.DeepEqual(gotKeys, wantKeys) {
 			t.Fatalf("group order = %v, want %v", gotKeys, wantKeys)
 		}
 
 		// cases within each group keep ascending id order
 		wantIDs := map[string][]int{
-			"bulk":    {3, 5, 8},
+			"test":    {3, 5, 8},
 			"auth":    {2, 4},
 			"multi":   {6},
 			"unicode": {1, 7},
@@ -87,26 +87,50 @@ func TestGroupsInOrder(t *testing.T) {
 		}
 	})
 
+	t.Run("shared area bases sort alphabetically between test and auth", func(t *testing.T) {
+		selected := []*cases.Case{
+			httpTestCase(1, "rpc-area"),
+			httpTestCase(2, "config-area"),
+			httpTestCase(3, "test-area"),
+			httpTestCase(4, "operators-area"),
+		}
+		placements := map[int]*route.Placement{
+			1: httpPlacement("rpc", "rpc"),
+			2: httpPlacement("config", "config"),
+			3: httpPlacement("test", "test"),
+			4: httpPlacement("operators", "operators"),
+		}
+
+		got := groupsInOrder(placements, selected)
+
+		// "test" always leads; the remaining area bases present come out
+		// alphabetically (config, operators, rpc), not input order.
+		wantKeys := []string{"test", "config", "operators", "rpc"}
+		if gotKeys := groupKeys(got); !reflect.DeepEqual(gotKeys, wantKeys) {
+			t.Fatalf("group order = %v, want %v", gotKeys, wantKeys)
+		}
+	})
+
 	t.Run("variant groups sorted by min case id, after shared groups", func(t *testing.T) {
 		selected := []*cases.Case{
 			httpTestCase(100, "v1"),
 			httpTestCase(10, "v2"),
 			httpTestCase(50, "v3"),
-			httpTestCase(1, "bulk-area"),
+			httpTestCase(1, "test-area"),
 		}
 		placements := map[int]*route.Placement{
-			100: httpPlacement("bulk", "bulk|A=1"),
+			100: httpPlacement("test", "test|A=1"),
 			10:  httpPlacement("auth", "auth|B=2"),
-			50:  httpPlacement("bulk", "bulk+safeupdate"),
-			1:   httpPlacement("bulk", "bulk"),
+			50:  httpPlacement("mutations", "mutations+safeupdate"),
+			1:   httpPlacement("test", "test"),
 		}
 
 		got := groupsInOrder(placements, selected)
 
-		// "bulk" is the only shared group present, so it comes first;
+		// "test" is the only shared group present, so it comes first;
 		// the three variant groups follow, ordered by their minimum id
 		// (10, 50, 100) rather than by input order or key.
-		wantKeys := []string{"bulk", "auth|B=2", "bulk+safeupdate", "bulk|A=1"}
+		wantKeys := []string{"test", "auth|B=2", "mutations+safeupdate", "test|A=1"}
 		if gotKeys := groupKeys(got); !reflect.DeepEqual(gotKeys, wantKeys) {
 			t.Fatalf("group order = %v, want %v", gotKeys, wantKeys)
 		}
@@ -124,9 +148,10 @@ func TestGroupsInOrder(t *testing.T) {
 
 		got := groupsInOrder(placements, selected)
 
-		// bulk/multi are absent from the selection entirely; auth/unicode
-		// must still come out in their relative bulk<auth<multi<unicode
-		// positions, not input order (unicode's case appears first here).
+		// Every other shared base is absent from the selection entirely;
+		// auth/unicode must still come out in their relative
+		// sharedGroupOrder positions, not input order (unicode's case
+		// appears first here).
 		wantKeys := []string{"auth", "unicode"}
 		if gotKeys := groupKeys(got); !reflect.DeepEqual(gotKeys, wantKeys) {
 			t.Fatalf("group order = %v, want %v", gotKeys, wantKeys)
@@ -137,13 +162,13 @@ func TestGroupsInOrder(t *testing.T) {
 		selected := []*cases.Case{httpTestCase(1, "x"), httpTestCase(2, "y")}
 		placements := map[int]*route.Placement{
 			1: {Kind: "cli"},
-			2: httpPlacement("bulk", "bulk"),
+			2: httpPlacement("test", "test"),
 		}
 
 		got := groupsInOrder(placements, selected)
 
-		if len(got) != 1 || got[0].key != "bulk" || !reflect.DeepEqual(caseIDs(got[0].cases), []int{2}) {
-			t.Fatalf("got %+v, want a single bulk group containing only case 2", got)
+		if len(got) != 1 || got[0].key != "test" || !reflect.DeepEqual(caseIDs(got[0].cases), []int{2}) {
+			t.Fatalf("got %+v, want a single test group containing only case 2", got)
 		}
 	})
 }
@@ -153,12 +178,22 @@ func TestIsSharedGroupKey(t *testing.T) {
 		key  string
 		want bool
 	}{
-		{"bulk", true},
+		{"test", true},
+		{"config", true},
+		{"domain_representations", true},
+		{"headers", true},
+		{"mutations", true},
+		{"observability", true},
+		{"operators", true},
+		{"ordering", true},
+		{"pagination", true},
+		{"representations", true},
+		{"rpc", true},
 		{"auth", true},
 		{"multi", true},
 		{"unicode", true},
-		{"bulk+safeupdate", false},
-		{"bulk|PGRST_DB_MAX_ROWS=2", false},
+		{"mutations+safeupdate", false},
+		{"config|PGRST_DB_MAX_ROWS=2", false},
 		{"", false},
 	}
 	for _, tc := range tests {
@@ -173,11 +208,21 @@ func TestSharedGroupRank(t *testing.T) {
 		key  string
 		want int
 	}{
-		{"bulk", 0},
-		{"auth", 1},
-		{"multi", 2},
-		{"unicode", 3},
-		{"bulk+safeupdate", len(sharedGroupOrder)},
+		{"test", 0},
+		{"config", 1},
+		{"domain_representations", 2},
+		{"headers", 3},
+		{"mutations", 4},
+		{"observability", 5},
+		{"operators", 6},
+		{"ordering", 7},
+		{"pagination", 8},
+		{"representations", 9},
+		{"rpc", 10},
+		{"auth", 11},
+		{"multi", 12},
+		{"unicode", 13},
+		{"mutations+safeupdate", len(sharedGroupOrder)},
 		{"anything-else", len(sharedGroupOrder)},
 	}
 	for _, tc := range tests {
@@ -185,6 +230,49 @@ func TestSharedGroupRank(t *testing.T) {
 			t.Errorf("sharedGroupRank(%q) = %d, want %d", tc.key, got, tc.want)
 		}
 	}
+}
+
+// TestSharedGroupOrderMatchesBaseConfigs cross-checks sharedGroupOrder
+// against route.BaseConfigs() directly: the two are independently
+// maintained (one here, one in the route package), and nothing else forces
+// them to stay in sync. If a future base is added to BaseConfigs without a
+// matching sharedGroupOrder entry, groupsInOrder would silently treat it as
+// a "variant" (ordered by min case id) instead of a shared base (ordered by
+// its fixed position) — this test catches that at build/test time instead.
+func TestSharedGroupOrderMatchesBaseConfigs(t *testing.T) {
+	seen := map[string]bool{}
+	for _, k := range sharedGroupOrder {
+		if seen[k] {
+			t.Fatalf("sharedGroupOrder has a duplicate entry: %q", k)
+		}
+		seen[k] = true
+	}
+
+	bases := route.BaseConfigs()
+	want := make(map[string]bool, len(bases))
+	for k := range bases {
+		want[k] = true
+	}
+
+	if reflect.DeepEqual(seen, want) {
+		return
+	}
+
+	var missing, extra []string
+	for k := range want {
+		if !seen[k] {
+			missing = append(missing, k)
+		}
+	}
+	for k := range seen {
+		if !want[k] {
+			extra = append(extra, k)
+		}
+	}
+	sort.Strings(missing)
+	sort.Strings(extra)
+	t.Fatalf("sharedGroupOrder %v does not match route.BaseConfigs() keys: missing from sharedGroupOrder %v, extra in sharedGroupOrder (not a real base) %v",
+		sharedGroupOrder, missing, extra)
 }
 
 func TestMinCaseID(t *testing.T) {
@@ -200,7 +288,7 @@ func TestMinCaseID(t *testing.T) {
 }
 
 func TestWithConnUserAnon(t *testing.T) {
-	for _, baseName := range []string{"bulk", "multi", "unicode"} {
+	for _, baseName := range []string{"test", "operators", "mutations", "multi", "unicode"} {
 		t.Run(baseName, func(t *testing.T) {
 			orig := map[string]string{"PGRST_DB_SCHEMAS": "test"}
 			origSnapshot := map[string]string{"PGRST_DB_SCHEMAS": "test"}
@@ -457,40 +545,9 @@ func TestEffectiveSelectionAndCheckSelection(t *testing.T) {
 	})
 }
 
-func TestHTTPDeviationFindings(t *testing.T) {
-	got := httpDeviationFindings()
-	if len(got) != 2 {
-		t.Fatalf("got %d findings, want 2: %v", len(got), got)
-	}
-	for _, f := range got {
-		if !strings.HasPrefix(f, "HARNESS deviation: §2.1 ") {
-			t.Errorf("finding %q does not start with the expected HARNESS deviation prefix", f)
-		}
-	}
-}
-
-func TestFindingsForRun(t *testing.T) {
-	t.Run("ranHTTP false leaves base untouched", func(t *testing.T) {
-		base := []string{"case 1: routed to a variant instance but not listed in HARNESS §2.3"}
-		got := findingsForRun(base, false)
-		if !reflect.DeepEqual(got, base) {
-			t.Fatalf("got %v, want unchanged %v", got, base)
-		}
-	})
-
-	t.Run("ranHTTP true appends the two deviation lines", func(t *testing.T) {
-		base := []string{"x"}
-		got := findingsForRun(base, true)
-		want := append(append([]string{}, base...), httpDeviationFindings()...)
-		if !reflect.DeepEqual(got, want) {
-			t.Fatalf("got %v, want %v", got, want)
-		}
-	})
-
-	t.Run("ranHTTP true with nil base still returns just the deviation lines", func(t *testing.T) {
-		got := findingsForRun(nil, true)
-		if !reflect.DeepEqual(got, httpDeviationFindings()) {
-			t.Fatalf("got %v, want %v", got, httpDeviationFindings())
-		}
-	})
-}
+// The former httpDeviationFindings/findingsForRun pair (and their tests) is
+// gone: the three §2.1 "HARNESS deviations" the runner used to print every
+// run — the dropped `openapi` schema, db-anon-role=<connection user> on
+// non-auth instances, and the per-area single-schema layout — became the
+// documented contract itself in HARNESS.md §2.1/§2.1.1 (issue #5), so a
+// clean run now reports zero findings.

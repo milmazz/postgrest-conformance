@@ -404,6 +404,16 @@ entries:
       inspects header VALUES only and never header names
       (test/support/conformance_assertions.ex), so no claim about empty header
       names is made.
+      CONFIG CONTEXT: upstream runs these it-blocks under `baseCfg`, which sets
+      `configServerTraceHeader = Nothing`
+      (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L171)
+      — no server-trace-header configured. The guarantee does NOT hold on an
+      instance with a trace header configured: when the request sends no
+      matching header, PostgREST echoes the configured trace header with a
+      blank value (e.g. `X-Request-Id: `), so case 1573 pins
+      `server-trace-header: ""` (dropped to Nothing by `optString`,
+      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L442)
+      to reproduce upstream's test-config context.
     source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1103
     case_ids: [1573]
 

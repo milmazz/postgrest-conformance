@@ -1803,7 +1803,9 @@ CREATE VIEW config.auto_incrementing_pk AS
 
 CREATE VIEW config.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -1856,7 +1858,7 @@ CREATE VIEW config.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -1959,8 +1961,8 @@ CREATE VIEW config.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -2030,7 +2032,7 @@ CREATE VIEW config.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -2041,7 +2043,7 @@ CREATE VIEW config.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -2164,7 +2166,10 @@ CREATE VIEW config.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -2590,7 +2595,9 @@ CREATE VIEW domain_representations.auto_incrementing_pk AS
 
 CREATE VIEW domain_representations.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -2643,7 +2650,7 @@ CREATE VIEW domain_representations.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -2746,8 +2753,8 @@ CREATE VIEW domain_representations.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -2817,7 +2824,7 @@ CREATE VIEW domain_representations.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -2828,7 +2835,7 @@ CREATE VIEW domain_representations.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -2951,7 +2958,10 @@ CREATE VIEW domain_representations.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -3496,7 +3506,9 @@ CREATE VIEW mutations.auto_incrementing_pk AS
 
 CREATE VIEW mutations.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -3549,7 +3561,7 @@ CREATE VIEW mutations.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -3652,8 +3664,8 @@ CREATE VIEW mutations.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -3723,7 +3735,7 @@ CREATE VIEW mutations.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -3734,7 +3746,7 @@ CREATE VIEW mutations.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -3857,7 +3869,10 @@ CREATE VIEW mutations.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -4283,7 +4298,9 @@ CREATE VIEW operators.auto_incrementing_pk AS
 
 CREATE VIEW operators.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -4336,7 +4353,7 @@ CREATE VIEW operators.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -4439,8 +4456,8 @@ CREATE VIEW operators.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -4510,7 +4527,7 @@ CREATE VIEW operators.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -4521,7 +4538,7 @@ CREATE VIEW operators.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -4644,7 +4661,10 @@ CREATE VIEW operators.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -5070,7 +5090,9 @@ CREATE VIEW ordering.auto_incrementing_pk AS
 
 CREATE VIEW ordering.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -5123,7 +5145,7 @@ CREATE VIEW ordering.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -5226,8 +5248,8 @@ CREATE VIEW ordering.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -5297,7 +5319,7 @@ CREATE VIEW ordering.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -5308,7 +5330,7 @@ CREATE VIEW ordering.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -5431,7 +5453,10 @@ CREATE VIEW ordering.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -5857,7 +5882,9 @@ CREATE VIEW pagination.auto_incrementing_pk AS
 
 CREATE VIEW pagination.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -5910,7 +5937,7 @@ CREATE VIEW pagination.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -6013,8 +6040,8 @@ CREATE VIEW pagination.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -6084,7 +6111,7 @@ CREATE VIEW pagination.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -6095,7 +6122,7 @@ CREATE VIEW pagination.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -6218,7 +6245,10 @@ CREATE VIEW pagination.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
@@ -6663,7 +6693,9 @@ ALTER SEQUENCE representations.auto_incrementing_pk_id_seq OWNED BY representati
 
 CREATE VIEW representations.bad_subquery AS
  SELECT id
-   FROM test.bad_subquery;
+   FROM test.cv_rows
+  WHERE (id = ( SELECT cv_rows_1.id
+           FROM test.cv_rows cv_rows_1));
 
 
 --
@@ -6716,7 +6748,7 @@ CREATE VIEW representations.child_entities_view AS
  SELECT id,
     name,
     parent_id
-   FROM test.child_entities_view;
+   FROM test.child_entities;
 
 
 --
@@ -6819,8 +6851,8 @@ CREATE VIEW representations.datarep_todos_computed AS
     name,
     label_color,
     due_at,
-    dark_color
-   FROM test.datarep_todos_computed;
+    (((label_color)::integer / 2))::public.color AS dark_color
+   FROM test.datarep_todos;
 
 
 --
@@ -6890,7 +6922,7 @@ CREATE VIEW representations.get_projects_above_view AS
  SELECT id,
     name,
     client_id
-   FROM test.get_projects_above_view;
+   FROM test.get_projects_above(1) get_projects_above(id, name, client_id);
 
 
 --
@@ -6901,7 +6933,7 @@ CREATE VIEW representations.getallprojects_view AS
  SELECT id,
     name,
     client_id
-   FROM test.getallprojects_view;
+   FROM test.getallprojects() getallprojects(id, name, client_id);
 
 
 --
@@ -7024,7 +7056,10 @@ CREATE VIEW representations.main_jobs AS
     name,
     site_id,
     big_project_id
-   FROM test.main_jobs;
+   FROM test.jobs
+  WHERE (site_id IN ( SELECT sites.site_id
+           FROM test.sites
+          WHERE (sites.main_project_id IS NOT NULL)));
 
 
 --
