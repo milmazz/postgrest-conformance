@@ -14,7 +14,11 @@ jobs:
       - run: pip install pyyaml jsonschema
       - run: python3 tools/validate.py
       - uses: actions/setup-go@v5
-        with: { go-version-file: tools/oracle/go.mod }
+        with:
+          go-version-file: tools/oracle/go.mod
+          # Explicit because the default cache lookup expects go.sum at the
+          # repo root and would warn (and never cache) on every run.
+          cache-dependency-path: tools/oracle/go.sum
       - run: go run ./cmd/oracle validate
         working-directory: tools/oracle
 

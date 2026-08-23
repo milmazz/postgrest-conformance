@@ -6,6 +6,16 @@
 // and cites a raw.githubusercontent.com source pinned to the tag in PIN;
 // for the tree as a whole it checks INDEX.md's "Area <-> id band <->
 // fixture fragment" table against what is on disk.
+//
+// Known, intentional divergence from validate.py: yaml.v3 parses YAML 1.2
+// scalars where pyyaml parses YAML 1.1, so unquoted `yes`/`no`/`on`/`off`
+// stay strings here (pyyaml resolves them to booleans) and unquoted dates
+// become time.Time (serialized to an RFC3339 string for schema purposes)
+// rather than a datetime that Python jsonschema rejects as a type error.
+// This validator therefore accepts a few scalar spellings validate.py
+// would flag — deliberately: it matches what the runner's own parser sees
+// when it executes the case. The corpus itself is guarded against parser
+// drift by internal/cases's pyyaml cross-check test.
 package validate
 
 import (
@@ -74,7 +84,7 @@ func Tree(root string) (Result, error) {
 
 		doc, err := cases.RawDocument(path)
 		if err != nil {
-			res.Findings = append(res.Findings, fmt.Sprintf("%s: %s", rel, oneLine(err.Error())))
+			res.Findings = append(res.Findings, fmt.Sprintf("%s: %s", rel, errorText(err, path)))
 			continue
 		}
 		if err := validateAgainstSchema(schema, doc); err != nil {
@@ -87,7 +97,7 @@ func Tree(root string) (Result, error) {
 		// cannot load is still broken.
 		c, err := cases.Load(path)
 		if err != nil {
-			res.Findings = append(res.Findings, fmt.Sprintf("%s: loader: %s", rel, oneLine(err.Error())))
+			res.Findings = append(res.Findings, fmt.Sprintf("%s: loader: %s", rel, errorText(err, path)))
 			continue
 		}
 
@@ -342,4 +352,11 @@ func relPath(root, path string) string {
 // finding prints as one line, like validate.py's output.
 func oneLine(s string) string {
 	return strings.Join(strings.Fields(s), " ")
+}
+
+// errorText renders an internal/cases error for a finding line: the finding
+// is already prefixed with the tree-relative path, so the absolute path the
+// loader embeds in its own message is stripped rather than printed twice.
+func errorText(err error, path string) string {
+	return oneLine(strings.TrimPrefix(err.Error(), path+": "))
 }

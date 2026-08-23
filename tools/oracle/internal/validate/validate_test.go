@@ -149,6 +149,11 @@ func TestUnparseableYAMLIsReported(t *testing.T) {
 	for _, f := range res.Findings {
 		if strings.Contains(f, "0101_demo_select.yaml") {
 			found = true
+			// The finding is prefixed with the tree-relative path; the
+			// parser error's own absolute path must not repeat after it.
+			if strings.Contains(f, root) {
+				t.Errorf("finding repeats the absolute path: %q", f)
+			}
 		}
 	}
 	if !found {
