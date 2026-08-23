@@ -9,14 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      # Transition (issue #7): the tree check is being folded into the Go
-      # oracle runner as `oracle validate`. Both validators run side by side
-      # for one release cycle; after that, tools/validate.py and the Python
-      # setup steps below go away and only `oracle validate` remains.
+      # Python is only here for internal/cases's pyyaml cross-check, which
+      # guards the corpus against YAML 1.1 vs 1.2 parser divergence (see the
+      # internal/validate package comment). Without pyyaml that test skips;
+      # this job is the one environment guaranteed to run it.
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with: { python-version: "3.12" }
-      - run: pip install pyyaml jsonschema
-      - run: python3 tools/validate.py
+      - run: pip install pyyaml
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: tools/oracle/go.mod
@@ -25,10 +24,6 @@ jobs:
           cache-dependency-path: tools/oracle/go.sum
       - run: go run ./cmd/oracle validate
         working-directory: tools/oracle
-      # The fidelity proof for the port: parity tests diff both validators'
-      # verdicts (internal/validate), and internal/cases cross-checks yaml.v3
-      # against pyyaml. This job is the one environment guaranteed to have
-      # both toolchains, so the python3-dependent tests never skip here.
       - run: go test ./internal/validate/ ./internal/cases/
         working-directory: tools/oracle
 

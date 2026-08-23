@@ -1,26 +1,30 @@
-// Package validate implements the suite tree check (`oracle validate`): the
-// Go port of tools/validate.py. Per case file under cases/*.yaml it checks
-// that the file parses as YAML, validates against case.schema.json
-// (draft 2020-12), loads through the runner's own strict loader
-// (internal/cases), has a globally-unique id matching its filename prefix,
-// and cites a raw.githubusercontent.com source pinned to the tag in PIN;
-// for the tree as a whole it checks INDEX.md's "Area <-> id band <->
-// fixture fragment" table against what is on disk.
+// Package validate implements the suite tree check (`oracle validate`),
+// the Go port of — and since the v16.0.0-suite.3 transition cycle the sole
+// successor to — the retired tools/validate.py. Per case file under
+// cases/*.yaml it checks that the file parses as YAML, validates against
+// case.schema.json (draft 2020-12), loads through the runner's own strict
+// loader (internal/cases), has a globally-unique id matching its filename
+// prefix, and cites a raw.githubusercontent.com source pinned to the tag
+// in PIN; for the tree as a whole it checks INDEX.md's "Area <-> id band
+// <-> fixture fragment" table against what is on disk.
 //
-// Known, intentional divergence from validate.py: yaml.v3 parses YAML 1.2
-// scalars where pyyaml parses YAML 1.1, so unquoted `yes`/`no`/`on`/`off`
-// stay strings here (pyyaml resolves them to booleans) and unquoted dates
-// become time.Time (serialized to an RFC3339 string for schema purposes)
-// rather than a datetime that Python jsonschema rejects as a type error.
-// This validator therefore accepts a few scalar spellings validate.py
-// would flag — deliberately: it matches what the runner's own parser sees
-// when it executes the case. The corpus itself is guarded against parser
-// drift by internal/cases's pyyaml cross-check test.
+// YAML dialect note (inherited from the validate.py transition, and still
+// load-bearing for suite consumers on other parsers): yaml.v3 parses
+// YAML 1.2 scalars where YAML 1.1 parsers such as pyyaml differ, so
+// unquoted `yes`/`no`/`on`/`off` stay strings here (a 1.1 parser resolves
+// them to booleans) and unquoted dates become time.Time (serialized to an
+// RFC3339 string for schema purposes) rather than a plain string. This
+// validator therefore accepts a few scalar spellings a 1.1-based
+// validator would flag — deliberately: it matches what the runner's own
+// parser sees when it executes the case. The corpus itself is guarded
+// against cross-dialect drift by internal/cases's pyyaml cross-check
+// test, which keeps every published case parsing identically under both
+// dialects (it skips where python3+pyyaml are absent; CI's tree job
+// always runs it).
 //
-// A second divergence, also intentional: on YAML that does not parse at
-// all, validate.py crashes with an uncaught traceback (losing every other
-// finding), while this validator emits a per-file finding and keeps
-// checking the rest of the tree. Both still exit non-zero.
+// On YAML that does not parse at all, the validator emits a per-file
+// finding and keeps checking the rest of the tree (validate.py crashed
+// with an uncaught traceback there, losing every other finding).
 package validate
 
 import (

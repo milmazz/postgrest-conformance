@@ -61,9 +61,8 @@ This validates every case against `case.schema.json`, checks id uniqueness,
 and runs the other machine checks described in `HARNESS.md`. A PR that
 doesn't pass it will fail review.
 
-(`tools/validate.py` is the same check's Python predecessor; CI still runs
-both during the transition, and either command is fine locally. The Python
-version needs `pip install pyyaml jsonschema`; the Go one only needs Go.)
+(`oracle validate` only needs Go. Its Python predecessor, `tools/validate.py`,
+was removed after the v16.0.0-suite.3 transition cycle — issue #16.)
 
 ## Divergences belong to consumers, not here
 
