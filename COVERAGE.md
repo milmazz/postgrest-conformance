@@ -3,9 +3,9 @@
 Maps every page of the PostgREST **v16** documentation
 ([postgrest.org/en/v16](https://postgrest.org/en/v16/)) to the conformance case
 ids that cover it. The docs-page list follows the v16 site's **References**
-section and its **API** sub-pages, **re-fetched from the live site this pass**
-(16 API sub-pages; 12 top-level References entries, of which `api` is the parent
-counted through its sub-pages).
+section and its **API** sub-pages, **re-fetched from the live site at the
+2026-08 v16.0 re-sync** (16 API sub-pages; 12 top-level References entries, of
+which `api` is the parent counted through its sub-pages).
 
 A docs page with no covering case (and not explicitly scoped out below) is
 flagged **GAP**.
@@ -16,13 +16,51 @@ the previous pass — `references.html` lists 12 entries (11 pages plus
 the `api` parent: Authentication, API, CLI, Transactions, Connection Pool, Schema
 Cache, Errors, Configuration, Observability, Admin Server, HTTP Server, Listener)
 and `references/api.html` lists 16 sub-pages, matching the tables below entry for
-entry. Both were **re-fetched live this pass** (not carried over) and
+entry. Both were **re-fetched live at that re-sync** (not carried over) and
 re-enumerated; the API sub-page order on the live site is Tables and Views,
 Functions as RPC, Schemas, Computed Fields, Domain Representations, Pagination and
 Count, Resource Embedding, Resource Representation, Media Type Handlers, Aggregate
 Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Grammar.
 
-State of the tree when this file was written: branch **`main`**, **HEAD
+> **Refresh, 2026-08-22 (standalone repo).** This file has been re-checked in
+> the standalone **postgrest-conformance** repository (scaffolded from
+> [milmazz/bier](https://github.com/milmazz/bier)@`6024c62`), branch `main`,
+> HEAD `4b161bf`, with exactly **three uncommitted case edits** in the working
+> tree — cases **1360, 1368, 1373**, the mutations citation audit's fix pass
+> (see the ledger in *Review status*); every count here includes them.
+> Re-derived from disk on that date:
+> **762** case files in [`cases/`](cases/), 762 distinct ids, 17 areas, and
+> **every per-area count, id band and `schema:`-label distribution in
+> [`INDEX.md`](INDEX.md) matches the files exactly** — no case was added,
+> dropped or re-numbered since the counts below were written, so every
+> docs-page → case-id mapping in the two tables below still names files that
+> exist. Three things in this refresh are new: **(1)** a fresh
+> machine-verification record dated 2026-08-22 at the top of *Validation
+> status* (all checks clean; read its relation-check classification before
+> quoting the old 20-row list); **(2)** a dated adversarial-citation-audit
+> ledger at the top of *Review status* — the **mutations** area passed a
+> standalone citation audit on 2026-08-22 after a fix pass; **(3)** a path
+> note, because everything below this box was written while the suite lived
+> inside bier and retains that repo's paths as provenance. Read them mapped:
+> `spec/conformance/cases/` → `cases/`, `spec/conformance/fixtures/<f>` (and
+> `conformance/fixtures/<f>`) → `fixtures/provenance/<f>` — except
+> `headers.sql`/`rpc.sql`, now live generator inputs at `fixtures/inputs/` —
+> `conformance/fixtures.sql` → the numbered chain `fixtures/01_roles.sql` …
+> `07_analyze.sql` (consolidated DDL in `02_base.sql` + generated
+> `06_area_schemas.sql`), `conformance/INDEX.md` → [`INDEX.md`](INDEX.md), and
+> harness internals (`test/support/*.ex`, `lib/bier/*`,
+> `mix bier.fixtures.load`) → the repo-independent implementer contract in
+> [`HARNESS.md`](HARNESS.md). One case-shape fact has moved since the text
+> below was written: the **`preconditions:` key was retired on 2026-08-19**
+> (commit `2859c90`) — all non-empty values were folded into each case's
+> `notes:` as "Assumes: …" and `case.schema.json` no longer defines the
+> property — so every `preconditions:` count below is a historical snapshot
+> (see `INDEX.md`'s Task 5 note; follow-up 25's *decision* is thereby
+> resolved in favour of retirement).
+
+State of the tree when this file was **originally written, inside
+milmazz/bier** (retained as the historical record the narrative below
+describes): branch **`main`**, **HEAD
 `9d05d84`** ("spec(openapi): re-sync to PostgREST v16.0 (area 16/17)") with an
 **uncommitted `domain_representations` re-sync in the working tree** — the
 **seventeenth and last** area. `git status --short spec/` shows **5** modified
@@ -1571,7 +1609,7 @@ for a *pass* verdict — but do not read the short list as "almost nothing left"
 because the area's own model now says where the remaining risk is and it is not
 in this band.
 
-### mutations (adversarial review verdict: **revise** — findings partly CLOSED in-pass; the residue is relation-blocked)
+### mutations (adversarial review verdict: **revise** — findings partly CLOSED in-pass; the residue is relation-blocked. **Citations re-audited 2026-08-22: pass**, fix pass ran — see *Review status*)
 
 **0 citation defects.** This is the tree's thirteenth recorded v16.0 verdict and
 the first whose findings were substantially addressed *before* this file was
@@ -2696,6 +2734,63 @@ open. Read them against the live docs page, whose three top-level sections are
 - `transactions`: no explicit transaction-characteristics / isolation-level case.
 
 ## Validation status
+
+### Machine verification, 2026-08-22 (standalone repo, current record)
+
+Machine-verified on **2026-08-22** at commit **`4b161bf`** on branch `main` of
+the standalone repository, with the working tree carrying exactly **three
+uncommitted case edits** — the mutations citation-audit fix pass on cases
+**1360, 1368, 1373** (see *Review status*); all checks below ran over the
+on-disk state **including** those edits. Six checks ran for real
+against the actual files and a real PostgreSQL server; **none failed**. Facts,
+recorded verbatim from the run:
+
+1. **Fixture chain load: OK.** The numbered chain loaded into a fresh scratch
+   database exactly as `fixtures/README.md` prescribes: `psql -d postgres -v
+   ON_ERROR_STOP=1 -q -f fixtures/01_roles.sql`, then `CREATE DATABASE
+   conf_scratch TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE
+   'C'`, then `02_base.sql` … `07_analyze.sql` in order under `PGTZ=UTC` with
+   `ON_ERROR_STOP=1`. Every file completed (tails: 02 `COMMIT`, 04 `GRANT`,
+   05 `UPDATE 3`, 06 `GRANT`, 07 `ANALYZE`); the scratch DB was dropped
+   afterwards.
+2. **Case schema: 762 / 762 valid.** PyYAML parse + `Draft202012Validator`
+   against `case.schema.json` over all of `cases/*.yaml`: 762 files, **0**
+   invalid, **0** parse errors.
+3. **Ids: 762 distinct, 0 duplicates.**
+4. **Pin sweep: 0 stale citations.** A line-scan of `source:` lines in
+   `spec/*.{yaml,md}` (18 files) plus `cases/*.yaml` found no ref other than
+   the pin; the cross-check `grep -rhoE
+   '…/PostgREST/postgrest/[^/]+/' spec cases | sort | uniq -c` returns exactly
+   one ref — `v16.0`, **2088** URLs — matching `PIN`.
+5. **Relation check: zero targets actually absent; 33 rows flagged, all
+   explained.** For each case, the first path segment (URL-decoded;
+   `/rpc/<fn>` → function) was checked against `pg_class` (relkind r,v,m,f,p)
+   ∪ `pg_proc` in the loaded scratch DB **under the case's literal `schema:`
+   label** (`null`/`public`/`test` → `test`): **673** cases carry a relation
+   target and **89** (CLI and root-path cases) carry none. **33** rows did not
+   resolve under that deliberately naive label rule — recorded honestly here,
+   with the classification that makes them non-failures:
+   - **20 are deliberate negatives** whose expectation (404/405/406) *is* the
+     missing relation: 1001, 1002, 1006, 1007, 1010, 1012, 1024, 1034, 1360,
+     1368, 1373, 1432, 1443, 1515–1517, 1520, 1521, 1525, 1765.
+   - **13 are label-vs-schema indirection**, where the request's
+     `Accept-Profile`/`Content-Profile` header (or the label's alias) resolves
+     to a schema that **does** exist in the loaded DB: the `multi` cases 1005,
+     1008, 1009, 1011, 1013, 1014, 1017, 1018, 1023 (→ `v1`/`v2`, all of
+     `parents`/`children`/`another_table`/`get_parents_below` present where
+     asserted), the `unicode` cases 1003, 1004, 1021 (→ `تست.موارد`,
+     present), and 1574 (explicit `Accept-Profile: SPECIAL "@/\#~_-`, whose
+     `names` relation is present).
+   So the honest headline is **0 unexpected missing relations**, and the
+   33-row raw list differs from the 2026-08-09 record's 20-row list only in
+   classifier label handling (the older script resolved `multi`/`unicode`
+   itself), **not** in anything on disk.
+6. **File count: `ls cases | wc -l` → 762.**
+
+The record below this line is the **2026-08-09 verification, run inside
+milmazz/bier** against that repo's loader and `bier_test` database — retained
+in full because its narrative (what the checks can and cannot see) is still
+the operative caveat list; its paths and DB names are bier-era.
 
 Machine-verified on **2026-08-09** at commit **`9d05d84`**
 ("spec(openapi): re-sync to PostgREST v16.0 (area 16/17)"), on
@@ -4194,6 +4289,35 @@ present, reachable, correctly-named object can still be the wrong object.
 
 ## Review status
 
+> **Adversarial citation audit ledger (updated 2026-08-22).** Areas that have
+> passed a *standalone* adversarial citation audit — every cited PostgREST
+> source re-fetched and verified to support its claim, defects fixed before
+> the verdict — in this repository, and when:
+>
+> - **mutations** — ✅ **pass**, **2026-08-22** (a fix pass ran before the
+>   verdict was recorded). The fix pass touched exactly **three cases** —
+>   **1360, 1368, 1373**, the band's table-not-found negatives: their
+>   `body_exact` PGRST205 messages now qualify the missing relation with the
+>   request's **active schema** (`mutations.garlic` / `mutations.fake` /
+>   `mutations.foozle`, not upstream's literal `test.…`, which appears in
+>   InsertSpec/UpdateSpec/DeleteSpec only because upstream's sole exposed
+>   schema is named `test`), their `notes:` record that reasoning, and their
+>   `source:` anchors moved onto the message's actual producer,
+>   `Error.hs#L255`. That takes the tree's mechanically-derived
+>   implementation-anchored count (a `source:` URL under
+>   `src/library/PostgREST/…`) to **60** on disk as of this refresh, with
+>   **2** docs-anchored (1279, 1682) — read follow-up 10 below against those
+>   figures, not its bier-era 53.
+>
+> All 17 areas additionally carry the v16.0 re-sync-era adversarial verdicts
+> recorded in the table below (13 ⚠️ revise / 4 ✅ pass, every one with 0
+> citation defects); those verdicts date from the 2026-08 re-sync inside
+> milmazz/bier and are about *coverage*, not citations. The 2026-08-22
+> mutations result does not erase its re-sync-era ⚠️ *revise* row — that row's
+> residue is missing-coverage (relation-blocked gaps), which a citation audit
+> does not adjudicate — it certifies that the area's citations, as now on
+> disk, survived a fresh adversarial re-fetch.
+
 The v16.0 re-sync re-pinned **every** case `source:` from `v14.12` to `v16.0`, so
 the per-area audit verdicts recorded by the v14.12 pass no longer describe the
 citations on disk and are not carried forward. All 17 area behavior models are
@@ -4357,7 +4481,10 @@ Adversarial review summaries recorded so far cover **auth**, **headers**,
 areas, the full tree. **Thirteen** are ⚠️ *revise* and **four** are ✅ *pass*;
 **every one of the seventeen reports 0 citation defects**, so no verdict in this
 table has ever turned
-on a mis-cited line. What separates them is entirely coverage:
+on a mis-cited line. (Since then, **mutations** has additionally passed the
+standalone adversarial *citation* audit of **2026-08-22**, after a fix pass —
+see the ledger at the top of this section; its ⚠️ row below remains the record
+of its *coverage* residue.) What separates them is entirely coverage:
 
 > **THE TREE IS NOW FULLY AUDITED AT THIS PIN.** The last revision predicted
 > that `domain_representations` — "the one area whose entire subject is TYPE
@@ -4387,7 +4514,7 @@ on a mis-cited line. What separates them is entirely coverage:
 | **observability** | ⚠️ **revise** | 4 missing-coverage findings, **0 citation defects** — and unusually, **three of the four are blocked on the harness rather than on authoring effort**: the entire docs **Metrics** section (admin `/metrics`, `pgrst_db_pool_*`, `pgrst_schema_cache_*`, `pgrst_jwt_cache_*`, `ghc_*`; modelled in 5 entries, needs `request.kind: admin`, verified against `test_io/test_admin.py#L132`), **access-log line emission** (docs L15–L48: Apache-combined format, `-` placeholders, per-level line counts; needs `expect.stdout_matches`, and cases 1764–1767 assert only the status the filter keys on), and the **`server-trace-header` empty echo** (`App.hs#L289`, blocked by a direct conflict with case 1573's `headers_no_blank` on the shared instance). The fourth — **`Server-Timing` absent on error responses** (`App.hs#L154` vs `#L253`) — is black-box observable and cheap, left uncased *deliberately* because upstream never asserts it; promotable on request. Separately confirmed source-accurate: the **SQL query log** entry (`log-query`, gate at `App.hs#L223`, rendering at `Logger.hs#L192-195`), stderr-only, gap justified. The pass also **retracted a modelled rule** — the OPTIONS Server-Timing "subset" never existed at either pin — and **closed one gap**, the Server version header (case 1771). See **Known gaps → observability**. |
 | **operators** | **✅ pass** | **The tree's second pass verdict**, and the pass with the largest coverage delta of any so far: **50 → 87** cases (37 new, ids 10200–10236, **0 rewritten**). 2 findings, **both explicitly MINOR / non-blocking**, **0 citation defects** — no case for `not.plfts` / `not.phfts` / `not.wfts` (the `not` prefix is a single wrapper already pinned on `fts` at both flavors, cases 1090/10227, and on nine other operators), and no case putting an fts filter inside an `or=()` tree with three dictionaries (case 1099 already pins `not.fts` inside `and()`, and `or=()` composition is covered by filters). Both *citable but uncovered*, both case-only. The pass's substance was elsewhere: it **closed the filters area's `IN`/`NOT IN` empty-set gap** (cases 10200–10205 + the folded `test.items_with_different_col_types`) and it found that an entire upstream `context` block — the automatic `to_tsvector()` coercion for fts against **non**-tsvector columns, plus the tsvector-domain, recursive-domain and computed-field variants and the tsquery/websearch operand grammar — existed at **both** pins with **zero** coverage (cases 10220–10236, new model entry `grammar.fts_auto_tsvector`). It is the first re-sync in three to add fixture objects and the first ever to close another area's recorded gap. Residual: only **three of eight** `in.()` column types are swept. See **Known gaps → operators**. |
 | **rpc** | ⚠️ **revise** | **5 missing-coverage findings — the most any single area audit has produced — and 0 citation defects.** Against an area that had *just* been re-synced (41 → 44 cases, 3 new / 6 rewritten, **no fixture object**): the *Untyped functions* docs H2 (routines returning `record` / `SETOF record`, `RpcSpec.hs#L486`/`#L496`; `grep -rniE "returns_record\|setof record\|untyped function" spec/` → **zero** matches tree-wide), the *Functions with array parameters* docs H2 (a **non**-variadic array param bound three ways — JSON body `#L515`, GET literal `?arr=%7Ba,b,c%7D` `#L545`, form body `#L564` — distinct from the VARIADIC rule the area already models; the only other mention of array params in `spec/` is openapi's *schema output* cases 1667/1671/1673, never an invocation), the **text** and **xml** flavors of the single unnamed parameter (`#L1170`/`#L1177`, leaving the `MTTextPlain`/`MTTextXML` PGRST202 branches at `#L1207` unexercised while only the bytea flavor is covered, and from the *content_negotiation* area at that), *Resource Embedding on table-valued functions* (`#L324`; covered only incidentally by case **1023**, whose real subject is `/rpc` profile routing), and `?columns=` on a POST to `/rpc/` (`#L855`, note-only). All five *citable but uncovered*; **two are case-only** (the embed, `?columns=`) and **three are fixture-blocked by ownership**, not absence — the routines belong in the human-owned `fixtures/rpc.sql`. All nine cited lines were re-fetched during synthesis and read as claimed. See **Known gaps → rpc**. |
-| **mutations** | ⚠️ **revise** | **0 citation defects**, and the first verdict whose findings were substantially **closed inside the pass** (48 → 65 cases: 17 new, 1 rewritten, **1 authored then deleted**, **no fixture object**). Closed in-pass: resource embedding on mutations, for every flavor the fixture DB can reach — **11412** (DELETE + to-one parent, `DeleteSpec.hs#L71`), **11413** (PATCH + one-to-one, `UpdateSpec.hs#L579`), **11415** (PATCH + m2m with a nested parent, `UpdateSpec.hs#L539`), joining representations case 1300 for POST. Also closed: the form-urlencoded insert body (11402), insignificant whitespace (11403), the empty-body PGRST102 (1398), the unique-violation 409/`23505` (11401), multi-row PATCH `Content-Range` (11400), the only-pk-table upsert pair (11410/11411), composite-pk upsert POST/PUT (11414/11408) and its PGRST105 rejection (11409), PUT ignoring `Range` (11407), UPDATE-flavored `max-affected` (11405), ignore-duplicates-with-nothing-created (11404) and the PUT-`offset` PGRST114 (1399). **One modelled rule WITHDRAWN**: `?columns=` on PUT, which nothing at v16.0 asserts and the PUT docs contradict (`tables_views.rst#L689`) — the first correction in this tree of a rule that was never a version claim, merely uncited. **One case DELETED** (11406, PUT `return=minimal`) as strictly weaker than representations case 1332, leaving a deliberate hole in the new band. Open residue: almost entirely **relation-blocked** — 15+ upstream relations the fixture DB lacks, several needing **real tables** the loader's hard-coded `isolate_mutations/1` list cannot be extended to by a delta — plus one editorial item, the four-way cross-area duplication of the PGRST114 PUT rule (1016/1383, 1030/1399). See **Known gaps → mutations**. |
+| **mutations** | ⚠️ **revise** | **Re-audited 2026-08-22: standalone citation audit ✅ pass (fix pass ran) — this row's residue is coverage, not citations.** **0 citation defects**, and the first verdict whose findings were substantially **closed inside the pass** (48 → 65 cases: 17 new, 1 rewritten, **1 authored then deleted**, **no fixture object**). Closed in-pass: resource embedding on mutations, for every flavor the fixture DB can reach — **11412** (DELETE + to-one parent, `DeleteSpec.hs#L71`), **11413** (PATCH + one-to-one, `UpdateSpec.hs#L579`), **11415** (PATCH + m2m with a nested parent, `UpdateSpec.hs#L539`), joining representations case 1300 for POST. Also closed: the form-urlencoded insert body (11402), insignificant whitespace (11403), the empty-body PGRST102 (1398), the unique-violation 409/`23505` (11401), multi-row PATCH `Content-Range` (11400), the only-pk-table upsert pair (11410/11411), composite-pk upsert POST/PUT (11414/11408) and its PGRST105 rejection (11409), PUT ignoring `Range` (11407), UPDATE-flavored `max-affected` (11405), ignore-duplicates-with-nothing-created (11404) and the PUT-`offset` PGRST114 (1399). **One modelled rule WITHDRAWN**: `?columns=` on PUT, which nothing at v16.0 asserts and the PUT docs contradict (`tables_views.rst#L689`) — the first correction in this tree of a rule that was never a version claim, merely uncited. **One case DELETED** (11406, PUT `return=minimal`) as strictly weaker than representations case 1332, leaving a deliberate hole in the new band. Open residue: almost entirely **relation-blocked** — 15+ upstream relations the fixture DB lacks, several needing **real tables** the loader's hard-coded `isolate_mutations/1` list cannot be extended to by a delta — plus one editorial item, the four-way cross-area duplication of the PGRST114 PUT rule (1016/1383, 1030/1399). See **Known gaps → mutations**. |
 | **representations** | **✅ pass** | **The tree's third pass verdict**, **0 citation defects**, and the **first pass verdict on a model that carried no gap list at all** — it now carries five. 24 → **32** cases (8 new, 1 rewritten, 0 deleted, **no fixture object**). Findings closed in-pass: the two remaining `Location` suppressions under `return=headers-only` (bulk insert **1315**, no-PK relation **1317** — each sufficient alone, `Query/Statements.hs#L48`/`#L49`), `return=representation` never carrying a `Location` (**1316**), and the four `Prefer`-grammar rules the model stated but never exercised — duplicate `return=` resolving to the first token in **request** order (**1318**), an unknown value being *ignored* rather than rejected (**1319**), `Preference-Applied` rendering in the fixed `prefsVals` order (**1327**), and `return=` echoed **only** for mutations, on a read (**1325**) and an RPC (**1326**). **One citation NARROWED, a fourth species of anchor motion**: `InsertSpec.hs#L745` proved the no-`Location` rule only for a **view** (it sits under `describe "Inserting into VIEWs"`), replaced by `#L157` + `#L99`; case **1309** rewritten with it. **One gap entry CORRECTED**: the claim that `compound_pk_view` adds a view-specific angle 1309 misses is **false** — `car_models` is not in `isolate_representations`' real-table list, so 1309 *already* runs against a view mirror. **It also broke the implementation-anchored plateau**: 7 of its 8 new cases anchor at `src/library/PostgREST/…`, taking the tree 46 → **53** (6.3 % → 7.2 %), every one pinning a rule upstream never asserts black-box. Open residue: **one** entry, and it is unreachable by construction rather than unwritten — the `is.null` key-column `Location`, which needs a multi-base-table view because `PRIMARY KEY` implies `NOT NULL`. See **Known gaps → representations**. |
 | **content_negotiation** | ⚠️ **revise** | **SEVEN missing-coverage findings — the most any single area audit has produced, surpassing rpc's five — and 0 citation defects.** 47 → **52** cases (6 new, 1 deleted, **1 id reused**, 3 rewritten, and — uniquely — **1 fixture object corrected**). Uncovered: the **`db-plan-enabled = false` 406** gate (modelled twice, declared in five cases' inert `preconditions:`, pinned by none; `PlanSpec.hs#L544`); the `*/*` handler's **`Content-Type` override** from inside the function *and* its rejection of non-matching types (case 1638 covers only the default half; `CustomMediaSpec.hs#L346`); the `*/*` handler on **TABLES/VIEWS**, i.e. the `(RelId, MTAny)` probe the model documents as step (1) and that "overrides all other handlers" (`#L369`); overriding the builtin **`application/geo+json`** handler for a single relation (asserted in the model, no case; `#L188`); **q-factor ordering** of the `Accept` list (modelled with a cited test, but case 1601 resolves identically with or without q-sorting — the same non-discriminating shape the pagination audit found; `#L208`); and the **`text/plain`/`text/xml`** unnamed-parameter bodies (shared with rpc; `RpcSpec.hs#L1168`). The seventh is the **id-reuse hazard** left by deleting old case 1623. **Three corrections beyond coverage**: a **FIXTURE** was wrong (`test.unnamed_bytea_param` returned plain `bytea`, not the mime DOMAIN, making case 1622 unreachable while it passed); the modelled handler-discovery mechanism keyed on an aggregate's **stype** when upstream keys on `proc.prorettype` and has a second branch for plain functions (`SchemaCache.hs#L1062-L1071`/`#L1080-L1086`); and two claims were weakened to what their citations support ("byte-identical" → *modulo whitespace*; "NEW in v16.0: Query Identifier" → *upstream added a test*, the field being PostgreSQL's). **Audited and still silent** — no `gaps:` key — but it invented **`fixture_notes:`**, the tree's first record of fixture dependencies. All seven *citable but uncovered*; six case-only, one fixture-blocked by ownership. See **Known gaps → content_negotiation**. |
 | **openapi** | ⚠️ **revise** | **The SMALLEST finding count any *revise* verdict has produced — two — against an area whose gap list is joint fourth-longest in the tree (14 entries), and 0 citation defects.** 33 → **39** cases (6 new, **33 rewritten**, 1 authored then **withdrawn**, **no fixture object**, no delta channel). Uncovered *and undisclosed*: the `/rpc/*` path item's per-operation `produces` (a 3-element list) and `responses.200 = "OK"` (`OpenAPI.hs#L357-358`), emitted on **every** routine item in **every** document; and the shared **`$.parameters.on_conflict`** definition (`#L239-245`), emitted in every document regardless of schema, role or config. Both *citable but uncovered*, both **case-only**, and both absent from `openapi.yaml`'s 14 gap entries under any wording — verified during synthesis (`on_conflict` matches four case files, none in the 1650–1688 band, and zero lines of `openapi.yaml`). **Four corrections beyond coverage, and the first of them is the pass's real subject**: (1) all **33** committed cases were relabelled — **31** carried `schema: openapi`, a schema that **does not exist**, so they shipped `Accept-Profile: openapi` and would have described an **empty document** against a faithful implementation, passing only because Bier dispatches the root path before resolving the profile; (2) **1689** was authored, found red on a harness gate (`@variant_case_ids`, verified to be exactly 18 ids) and **withdrawn** rather than shipped broken — the tree's third and cheapest deletion convention; (3) the area's **two** non-empty `preconditions:` were removed, both of them *wrong* as well as inert (1654's would have broken 1656; 1672's contradicted its own assertion), taking the tree-wide count 44 → 42; (4) **six** anchors moved, four *onto* implementation code, one *off* it onto the documentation (1682 → `openapi.rst#L71`) and one onto `SpecHelper.hs#L104` — the tree's first shared-helper anchor — after the audit found `RootSpec`'s it-blocks run under a `db-root-spec` config and so witness a different path than case 1650 models. It wrote the tree's **second** `fixture_notes:` key (5 entries) and took its gap list 6 → 14, **and the audit still found two holes** — the same lesson `rpc.yaml`'s seven rigorous entries taught, now against an author who disclosed more, not less. See **Known gaps → openapi**. |
