@@ -1,6 +1,6 @@
 # postgrest-conformance
 
-A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16.0. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
+A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16.0. Every case is machine-verified against real PostgREST v16.0 in CI: the internal runner under `tools/oracle/` executes all 762 cases against the pinned release binary on every push to `main` and on every pull request. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
 
 **Derived from:** [milmazz/bier@6024c62](https://github.com/milmazz/bier/commit/6024c62)
 
