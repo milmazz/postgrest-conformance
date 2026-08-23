@@ -1,0 +1,30 @@
+name: oracle
+on: [push, pull_request]
+jobs:
+  oracle:
+    runs-on: ubuntu-latest
+    env:
+      PGHOST: localhost
+      PGPORT: "6432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.23", cache-dependency-path: tools/oracle/go.sum }
+      # Unlike validate.yml, this job can't use a `services:` container:
+      # the fixture Postgres needs pg-safeupdate compiled and installed
+      # inside it (no PGDG apt package exists — see tools/oracle/Makefile),
+      # which `make db-up` does by exec-ing into a container it manages.
+      - name: Start PG 17 + PostGIS + pg-safeupdate
+        run: make -C tools/oracle db-up
+      - name: Load fixture chain
+        run: cd tools/oracle && go run ./cmd/oracle db-setup
+      - name: Fetch pinned PostgREST binary
+        run: cd tools/oracle && go run ./cmd/oracle fetch
+      - name: Run all 762 cases against PostgREST
+        run: cd tools/oracle && go run ./cmd/oracle run -report report.json
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: oracle-report, path: tools/oracle/report.json }
