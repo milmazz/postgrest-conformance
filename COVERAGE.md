@@ -28,7 +28,11 @@ Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Gramma
 > PR #11) — with exactly **two uncommitted working-tree edits**: case
 > **1573** (`cases/1573_no_blank_headers_post.yaml`) and
 > **`spec/headers.yaml`**, the **headers** citation audit's seeded fix pass
-> for **issue #4**; every count here includes them. Re-derived from disk on
+> for **issue #4**; every count here includes them (scope note: that is the
+> tree as it stood when the machine checks ran — the commit shipping this
+> record also carries the pass's later-landed edits, `HARNESS.md`'s §2.3
+> row, route.go's `harnessVariantIDs` mirror and this refresh itself, none
+> of which the checks inspect). Re-derived from disk on
 > this date: **762** case files, 762 distinct ids, 17 areas, and every
 > per-area count, id band and `schema:`-label distribution in
 > [`INDEX.md`](INDEX.md) still matches the files exactly — **no case was
@@ -2894,7 +2898,10 @@ recorded verbatim from the run:
    `spec/*.{yaml,md}` (18 files) plus `cases/*.yaml` found no ref other than
    the pin; the cross-check `grep -rhoE
    '…/PostgREST/postgrest/[^/]+/' spec cases | sort | uniq -c` returns exactly
-   one ref — `v16.0`, **2088** URLs — matching `PIN`.
+   one ref — `v16.0`, **2088** URLs — matching `PIN` *[editorial note,
+   2026-08-23: a mechanical re-scan of this same state returns **2090**, so
+   2088 was a miscount, not drift — zero stale refs either way; see the
+   2026-08-23 refresh box]*.
 5. **Relation check: zero targets actually absent; 33 rows flagged, all
    explained.** For each case, the first path segment (URL-decoded;
    `/rpc/<fn>` → function) was checked against `pg_class` (relkind r,v,m,f,p)
