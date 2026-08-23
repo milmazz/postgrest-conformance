@@ -8,6 +8,6 @@ request:
 schema: mutations
 expect:
   status: 404
-  body_exact: { "code": "PGRST205", "details": null, "hint": null, "message": "Could not find the table 'test.garlic' in the schema cache" }
-notes: "Missing-table error (PGRST205) takes precedence over invalid ?columns."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L477
+  body_exact: { "code": "PGRST205", "details": null, "hint": null, "message": "Could not find the table 'mutations.garlic' in the schema cache" }
+notes: "Missing-table error (PGRST205) takes precedence over invalid ?columns. Message is qualified by the request's active schema (here 'mutations'); upstream's InsertSpec.hs#L477 shows 'test.' only because its sole exposed schema is named test."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L255
