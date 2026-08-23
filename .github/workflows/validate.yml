@@ -5,10 +5,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Transition (issue #7): the tree check is being folded into the Go
+      # oracle runner as `oracle validate`. Both validators run side by side
+      # for one release cycle; after that, tools/validate.py and the Python
+      # setup steps below go away and only `oracle validate` remains.
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pyyaml jsonschema
       - run: python3 tools/validate.py
+      - uses: actions/setup-go@v5
+        with: { go-version-file: tools/oracle/go.mod }
+      - run: go run ./cmd/oracle validate
+        working-directory: tools/oracle
 
   fixtures:
     runs-on: ubuntu-latest

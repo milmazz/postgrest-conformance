@@ -54,12 +54,16 @@ This regenerates `fixtures/06_area_schemas.sql` from `fixtures/inputs/` +
 ## Before every PR
 
 ```sh
-python3 tools/validate.py
+make -C tools/oracle validate
 ```
 
 This validates every case against `case.schema.json`, checks id uniqueness,
 and runs the other machine checks described in `HARNESS.md`. A PR that
 doesn't pass it will fail review.
+
+(`tools/validate.py` is the same check's Python predecessor; CI still runs
+both during the transition, and either command is fine locally. The Python
+version needs `pip install pyyaml jsonschema`; the Go one only needs Go.)
 
 ## Divergences belong to consumers, not here
 

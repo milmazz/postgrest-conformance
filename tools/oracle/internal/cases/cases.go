@@ -419,6 +419,18 @@ func toInt(v any) (int, error) {
 	return 0, fmt.Errorf("expected integer, got %T (%v)", v, v)
 }
 
+// RawDocument parses path as YAML into an untyped Go value without any of
+// Load's validation, normalizing mappings to map[string]any. It is what the
+// validate tree check feeds to the JSON-Schema validator, so that schema
+// validation sees exactly the document shape the loader would.
+func RawDocument(path string) (any, error) {
+	v, err := rawYAML(path)
+	if err != nil {
+		return nil, err
+	}
+	return normalizeYAML(v), nil
+}
+
 // rawYAML parses path with yaml.v3 into an untyped Go value, without any of
 // Load's schema validation. It is used by Load itself and, separately, by
 // the pyyaml cross-check test to compare yaml.v3's parse against pyyaml's.

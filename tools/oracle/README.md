@@ -61,6 +61,24 @@ downloads and verifies the pinned binary (checksummed against
 [`bin.sha256`](bin.sha256)) without running anything, printing its cached
 path.
 
+## `oracle validate` — the tree check
+
+`oracle validate` (or `make validate`) is the suite tree check — the Go
+port of `tools/validate.py`, run from anywhere inside the repository, no
+database or PostgREST binary needed. Per case file it checks YAML
+parseability, `case.schema.json` (draft 2020-12) validity, loadability
+through the runner's own strict loader (`internal/cases`), id uniqueness,
+the filename-prefix == id rule, and that `source:` cites
+`raw.githubusercontent.com` at the exact tag pinned in `PIN`; for the tree
+as a whole it checks `INDEX.md`'s "Area ↔ id band" table (per-area counts,
+band membership, and the `Total: N cases` line) against what is on disk.
+It prints one line per finding and exits non-zero on any violation.
+
+Parity with `tools/validate.py` is enforced by test
+(`internal/validate`'s cross-check runs both validators over the real
+corpus and over deliberately-broken trees and diffs their verdicts); CI
+runs both during the transition period.
+
 ## Environment variables
 
 The Postgres connection is read once, by `internal/db.FromEnv`, and used by
