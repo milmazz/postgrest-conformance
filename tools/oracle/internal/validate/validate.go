@@ -16,6 +16,11 @@
 // would flag — deliberately: it matches what the runner's own parser sees
 // when it executes the case. The corpus itself is guarded against parser
 // drift by internal/cases's pyyaml cross-check test.
+//
+// A second divergence, also intentional: on YAML that does not parse at
+// all, validate.py crashes with an uncaught traceback (losing every other
+// finding), while this validator emits a per-file finding and keeps
+// checking the rest of the tree. Both still exit non-zero.
 package validate
 
 import (
@@ -143,6 +148,18 @@ var (
 )
 
 type idRange struct{ lo, hi int }
+
+// String renders the range the way INDEX.md spells it ("100-149", or a bare
+// "100" for a single-id band), so the out-of-band finding reads like the
+// table row it contradicts. (validate.py prints Python tuples here —
+// "[(100, 149)]" — which the parity tests tolerate: they compare verdicts,
+// not finding text.)
+func (r idRange) String() string {
+	if r.lo == r.hi {
+		return strconv.Itoa(r.lo)
+	}
+	return fmt.Sprintf("%d-%d", r.lo, r.hi)
+}
 
 type areaClaim struct {
 	count  int

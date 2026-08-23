@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -22,7 +23,10 @@ func TestFullCorpusIsHealthy(t *testing.T) {
 }
 
 // requireValidatePy skips unless python3 with pyyaml+jsonschema is
-// available (same skip pattern as internal/cases's pyyaml cross-check).
+// available (same skip pattern as internal/cases's pyyaml cross-check) and
+// tools/validate.py still exists — once the transition period ends and the
+// script is deleted, these parity tests skip rather than fail, and can be
+// deleted along with it.
 func requireValidatePy(t *testing.T) string {
 	t.Helper()
 	if _, err := exec.LookPath("python3"); err != nil {
@@ -31,7 +35,11 @@ func requireValidatePy(t *testing.T) string {
 	if err := exec.Command("python3", "-c", "import yaml, jsonschema").Run(); err != nil {
 		t.Skip("pyyaml/jsonschema not available")
 	}
-	return filepath.Join(repoRoot(t), "tools", "validate.py")
+	script := filepath.Join(repoRoot(t), "tools", "validate.py")
+	if _, err := os.Stat(script); err != nil {
+		t.Skip("tools/validate.py removed (transition over)")
+	}
+	return script
 }
 
 // runValidatePy runs tools/validate.py with the given tree as CWD and
@@ -145,15 +153,19 @@ func TestParityWithValidatePyOnBrokenTree(t *testing.T) {
 	write(t, root, "cases/0115_boundary_status.yaml",
 		strings.Replace(strings.Replace(validCase2, "id: 101", "id: 115", 1), "status: 200", "status: 599", 1))
 
-	// Keep INDEX.md coherent for the *valid* population so INDEX findings
-	// stay a pure function of the broken files on both sides.
+	// INDEX.md matches the *valid* population exactly: both validators
+	// count the 6 unique ids of files that pass the schema (100, 101, 110,
+	// 112, 114, 115 — the schema-invalid files are skipped before area
+	// bookkeeping), all inside the 100-149 band. So neither side may emit
+	// any INDEX finding — index parity here means "clean on both", not
+	// "same complaint on both".
 	write(t, root, "INDEX.md", `# Index
 
 | Area | Cases | Id band |
 |------|-------|---------|
-| demo | 16    | 100-149 |
+| demo | 6     | 100-149 |
 
-Total: 16 cases
+Total: 6 cases
 `)
 
 	pyFlagged, pyIndex, pyOK := runValidatePy(t, script, root)
@@ -162,8 +174,8 @@ Total: 16 cases
 	if pyOK || goOK {
 		t.Fatalf("broken tree must fail both validators: pyOK=%v goOK=%v", pyOK, goOK)
 	}
-	if pyIndex != goIndex {
-		t.Errorf("INDEX.md verdicts differ: python=%v go=%v", pyIndex, goIndex)
+	if pyIndex || goIndex {
+		t.Errorf("INDEX.md must be clean on both sides (it matches the valid population): python=%v go=%v", pyIndex, goIndex)
 	}
 	pySet, goSet := sortedSet(pyFlagged), sortedSet(goFlagged)
 	if strings.Join(pySet, ",") != strings.Join(goSet, ",") {

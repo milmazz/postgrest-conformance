@@ -25,6 +25,12 @@ jobs:
           cache-dependency-path: tools/oracle/go.sum
       - run: go run ./cmd/oracle validate
         working-directory: tools/oracle
+      # The fidelity proof for the port: parity tests diff both validators'
+      # verdicts (internal/validate), and internal/cases cross-checks yaml.v3
+      # against pyyaml. This job is the one environment guaranteed to have
+      # both toolchains, so the python3-dependent tests never skip here.
+      - run: go test ./internal/validate/ ./internal/cases/
+        working-directory: tools/oracle
 
   fixtures:
     runs-on: ubuntu-latest
