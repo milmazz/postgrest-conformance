@@ -110,7 +110,6 @@ func cmdRun(args []string) error {
 	}()
 
 	var results []report.CaseResult
-	ranHTTP := false
 
 	if !*skipCLI {
 		for _, c := range selected {
@@ -129,7 +128,6 @@ func cmdRun(args []string) error {
 		uri := pg.URI(dbname)
 		bases := route.BaseConfigs()
 		groups := groupsInOrder(placements, selected)
-		ranHTTP = len(groups) > 0
 
 		for _, g := range groups {
 			if ctx.Err() != nil {
@@ -193,8 +191,6 @@ func cmdRun(args []string) error {
 	if len(results) == 0 {
 		return noResultsError(ctx.Err())
 	}
-
-	findings = findingsForRun(findings, ranHTTP)
 
 	if err := report.WriteJSON(*reportFlag, results, findings); err != nil {
 		return err
@@ -416,35 +412,6 @@ func effectiveSelection(selected []*cases.Case, skipCLI, skipHTTP bool) []*cases
 		}
 	}
 	return out
-}
-
-// httpDeviationFindings are the boot-time HARNESS deviations that only
-// apply once the run actually starts a PostgREST instance: see BaseConfigs'
-// doc comment (the "openapi" schema dropped from db-schemas, and the
-// per-area single-schema instance layout replacing §2.1's single shared
-// "bulk" instance) and withConnUserAnon's doc comment (every non-auth
-// instance booted with db-anon-role set to the connecting database user).
-// They live only in code comments otherwise, so this surfaces them in the
-// run's own findings output rather than requiring a reader to go find the
-// source.
-func httpDeviationFindings() []string {
-	return []string{
-		"HARNESS deviation: §2.1 db-schemas entry 'openapi' dropped — schema does not exist in the fixture chain (PostgREST refuses to boot); no case uses that profile",
-		"HARNESS deviation: §2.1 all non-auth instances run with db-anon-role=<connection user> — real PostgREST rejects JWT-less requests without an anon role; matches §2.1's 'requests run as the connecting database user'",
-		"HARNESS deviation: §2.1's single shared instance replaced by per-area single-schema instances — PostgREST resolves embed targets across every exposed schema, making the shared layout produce false PGRST201 ambiguity (issue #2)",
-	}
-}
-
-// findingsForRun appends httpDeviationFindings to base when ranHTTP is true
-// (the run started at least one HTTP case — i.e. -skip-http wasn't passed
-// and the selection contained at least one HTTP case), leaving base
-// untouched otherwise since neither deviation is exercised by a CLI-only
-// run.
-func findingsForRun(base []string, ranHTTP bool) []string {
-	if !ranHTTP {
-		return base
-	}
-	return append(base, httpDeviationFindings()...)
 }
 
 // httpGroup is one instance's worth of selected HTTP cases: everything

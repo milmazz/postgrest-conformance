@@ -5,7 +5,6 @@ import (
 	"errors"
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/cases"
@@ -546,40 +545,9 @@ func TestEffectiveSelectionAndCheckSelection(t *testing.T) {
 	})
 }
 
-func TestHTTPDeviationFindings(t *testing.T) {
-	got := httpDeviationFindings()
-	if len(got) != 3 {
-		t.Fatalf("got %d findings, want 3: %v", len(got), got)
-	}
-	for _, f := range got {
-		if !strings.HasPrefix(f, "HARNESS deviation: §2.1") {
-			t.Errorf("finding %q does not start with the expected HARNESS deviation prefix", f)
-		}
-	}
-}
-
-func TestFindingsForRun(t *testing.T) {
-	t.Run("ranHTTP false leaves base untouched", func(t *testing.T) {
-		base := []string{"case 1: routed to a variant instance but not listed in HARNESS §2.3"}
-		got := findingsForRun(base, false)
-		if !reflect.DeepEqual(got, base) {
-			t.Fatalf("got %v, want unchanged %v", got, base)
-		}
-	})
-
-	t.Run("ranHTTP true appends the three deviation lines", func(t *testing.T) {
-		base := []string{"x"}
-		got := findingsForRun(base, true)
-		want := append(append([]string{}, base...), httpDeviationFindings()...)
-		if !reflect.DeepEqual(got, want) {
-			t.Fatalf("got %v, want %v", got, want)
-		}
-	})
-
-	t.Run("ranHTTP true with nil base still returns just the deviation lines", func(t *testing.T) {
-		got := findingsForRun(nil, true)
-		if !reflect.DeepEqual(got, httpDeviationFindings()) {
-			t.Fatalf("got %v, want %v", got, httpDeviationFindings())
-		}
-	})
-}
+// The former httpDeviationFindings/findingsForRun pair (and their tests) is
+// gone: the three §2.1 "HARNESS deviations" the runner used to print every
+// run — the dropped `openapi` schema, db-anon-role=<connection user> on
+// non-auth instances, and the per-area single-schema layout — became the
+// documented contract itself in HARNESS.md §2.1/§2.1.1 (issue #5), so a
+// clean run now reports zero findings.

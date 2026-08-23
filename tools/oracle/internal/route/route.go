@@ -5,18 +5,17 @@
 // "observability", plus "auth", "multi", "unicode" — or a per-case
 // config-overlay variant layered on top of one of them.
 //
-// This mirrors HARNESS.md §2 ("Server configuration"), with one deliberate
-// deviation: §2.1 describes a single wide "bulk" instance exposing every
-// area schema at once, sharing it across nearly all cases. This package
-// instead boots one single-schema instance per area (see BaseConfigs' doc
-// comment for why — issue #2, PGRST201 false-positive ambiguous embeds).
-// Aside from that split, the model is the same: most cases share one of the
-// fixed base instances; a small number declare a `config:` block that no
-// base can honor, so they get a dedicated variant instance built by merging
-// their translated config onto the base they would otherwise use.
-// CrossCheckHarness compares the routing this package derives against the
-// harness's own hand-curated §2.3 table, as a consistency check between the
-// two independently-maintained sources.
+// This mirrors HARNESS.md §2 ("Server configuration"): the per-area
+// single-schema layout of §2.1.1 (adopted for issue #2 — PGRST201
+// false-positive ambiguous embeds on a single wide instance; see
+// BaseConfigs' doc comment — and documented as the contract by issue #5).
+// Most cases share one of the fixed base instances; a small number declare
+// a `config:` block that no base can honor, so they get a dedicated
+// variant instance built by merging their translated config onto the base
+// they would otherwise use. CrossCheckHarness compares the routing this
+// package derives against the harness's own hand-curated variant list
+// (§2.3's table plus §2.5's safe-update trio), as a consistency check
+// between the two independently-maintained sources.
 package route
 
 import (
@@ -93,18 +92,23 @@ var noInjectSchemas = map[string]bool{
 	"unicode": true,
 }
 
-// harnessVariantIDs are the 34 case ids HARNESS.md §2.3 lists as needing a
-// per-case variant instance.
+// harnessVariantIDs are the 64 case ids HARNESS.md documents as needing a
+// per-case variant instance: §2.3's config-driven table (61 ids), plus the
+// three §2.5-only safe-update cases 1387–1389, which carry no config: block
+// and are selected purely by id.
 var harnessVariantIDs = []int{
-	1139, 1467, 1468, 1469, 1470, 1471, 1472, 1473, 1491, 1493, 1495, 1498,
-	1499, 1517, 1518, 1522, 1573, 1654, 1677, 1678, 1680, 1682, 1703, 1742,
-	1758, 1763, 1764, 11800, 11802, 11803, 11804, 11805, 11807, 11818,
+	1129, 1130, 1131, 1132, 1133, 1139, 1140, 1147, 1148, 1149, 1387, 1388,
+	1389, 1466, 1467, 1468, 1469, 1470, 1471, 1472, 1473, 1475, 1476, 1477,
+	1491, 1492, 1493, 1494, 1495, 1497, 1498, 1499, 1517, 1518, 1522, 1573,
+	1654, 1677, 1678, 1680, 1682, 1700, 1701, 1703, 1742, 1758, 1763, 1764,
+	1765, 1766, 1767, 11800, 11801, 11802, 11803, 11804, 11805, 11806, 11807,
+	11808, 11815, 11816, 11817, 11818,
 }
 
-// areaSchemaLabels are the eleven area schema labels HARNESS.md §2.1 lists
-// in its wide db-schemas set (minus "auth"/"openapi", handled separately —
-// see below), each of which gets its own single-schema base config from
-// BaseConfigs.
+// areaSchemaLabels are the eleven area schema labels HARNESS.md §2.1.1
+// gives their own single-schema instance ("auth", "multi" and "unicode"
+// are handled separately — see below), each of which gets its own base
+// config from BaseConfigs.
 var areaSchemaLabels = []string{
 	"test", "operators", "ordering", "pagination", "representations",
 	"mutations", "rpc", "headers", "config", "domain_representations",
@@ -128,9 +132,10 @@ var areaSchemaSet = func() map[string]bool {
 //
 // # Per-area single-schema layout (issue #2)
 //
-// HARNESS.md §2.1 describes a single "bulk" instance whose PGRST_DB_SCHEMAS
-// lists every area schema at once (plus auth/v1/v2/SPECIAL/تست), shared by
-// nearly every case. This package deliberately does not build that
+// Earlier revisions of HARNESS.md §2.1 described a single "bulk" instance
+// whose PGRST_DB_SCHEMAS lists every area schema at once (plus
+// auth/v1/v2/SPECIAL/تست), shared by nearly every case. This package
+// deliberately does not build that
 // instance. Real PostgREST resolves an *unqualified* embed target (e.g.
 // `select=id,users(id)`) by scanning relationship candidates across every
 // schema named in db-schemas, not just the request's active
@@ -155,7 +160,8 @@ var areaSchemaSet = func() map[string]bool {
 // else for embed resolution to scan. This supersedes §2.1's single-shared-
 // instance recipe; it's a portability finding against the reference
 // harness recipe (a real semantic difference an implementer following §2.1
-// literally would hit), tracked as issue #5, not a bug in this package.
+// literally would hit); HARNESS.md §2.1.1 now documents this layout as the
+// contract (issue #5).
 //
 // auth, multi, and unicode are unaffected by the above — they're built the
 // same way as before this change (auth/multi's/unicode's db-schemas lists
@@ -235,8 +241,7 @@ func BaseConfigs() map[string]map[string]string {
 	// risk: auth still exposes all 8 area mirrors alongside test, so a
 	// future auth-routed case that adds an unqualified embed could hit the
 	// same false PGRST201 ambiguity this fix removes everywhere else (no
-	// case does today); the HARNESS.md documentation side of that residual
-	// gap is tracked in issue #5.
+	// case does today); HARNESS.md §2.2 documents this residual (issue #5).
 	auth["PGRST_DB_SCHEMAS"] = "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست"
 	auth["PGRST_DB_ANON_ROLE"] = "postgrest_test_anonymous"
 	auth["PGRST_JWT_SECRET"] = "reallyreallyreallyreallyverysafe"
@@ -454,10 +459,11 @@ func groupKey(base string, overlay map[string]Val) string {
 }
 
 // CrossCheckHarness compares the routing decisions in all against
-// HARNESS.md §2.3's hand-curated 34-id table, returning one finding line
-// per disagreement in either direction: a case this package routes to a
-// variant instance that §2.3 doesn't list, or a case §2.3 lists that this
-// package routes to a shared instance.
+// HARNESS.md's hand-curated variant list (§2.3's table plus §2.5's
+// safe-update trio), returning one finding line per disagreement in either
+// direction: a case this package routes to a variant instance that
+// HARNESS.md doesn't list, or a case HARNESS.md lists that this package
+// routes to a shared instance.
 func CrossCheckHarness(all map[int]*Placement) []string {
 	harnessSet := make(map[int]bool, len(harnessVariantIDs))
 	for _, id := range harnessVariantIDs {
