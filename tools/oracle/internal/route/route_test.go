@@ -114,9 +114,18 @@ func TestBaseConfigsCensus(t *testing.T) {
 		}
 	}
 
-	// Every base must declare exactly one PGRST_DB_SCHEMAS entry containing
-	// only its own single schema, except auth/multi/unicode which keep
-	// their (wider or differently-scoped) pre-issue-#2 values.
+	// Every base — including auth/multi/unicode — must declare its own
+	// explicit, non-empty PGRST_DB_SCHEMAS (it's no longer inherited from a
+	// shared template default; see BaseConfigs).
+	for name, cfg := range bases {
+		if v, ok := cfg["PGRST_DB_SCHEMAS"]; !ok || v == "" {
+			t.Errorf("base %q: PGRST_DB_SCHEMAS missing or empty (got %q, present=%v)", name, v, ok)
+		}
+	}
+
+	// Every area base must declare exactly one PGRST_DB_SCHEMAS entry
+	// containing only its own single schema, except auth/multi/unicode
+	// which keep their (wider or differently-scoped) pre-issue-#2 values.
 	for _, label := range areaSchemaLabels {
 		if got := bases[label]["PGRST_DB_SCHEMAS"]; got != label {
 			t.Errorf("base %q: PGRST_DB_SCHEMAS = %q, want %q", label, got, label)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -230,6 +231,49 @@ func TestSharedGroupRank(t *testing.T) {
 			t.Errorf("sharedGroupRank(%q) = %d, want %d", tc.key, got, tc.want)
 		}
 	}
+}
+
+// TestSharedGroupOrderMatchesBaseConfigs cross-checks sharedGroupOrder
+// against route.BaseConfigs() directly: the two are independently
+// maintained (one here, one in the route package), and nothing else forces
+// them to stay in sync. If a future base is added to BaseConfigs without a
+// matching sharedGroupOrder entry, groupsInOrder would silently treat it as
+// a "variant" (ordered by min case id) instead of a shared base (ordered by
+// its fixed position) — this test catches that at build/test time instead.
+func TestSharedGroupOrderMatchesBaseConfigs(t *testing.T) {
+	seen := map[string]bool{}
+	for _, k := range sharedGroupOrder {
+		if seen[k] {
+			t.Fatalf("sharedGroupOrder has a duplicate entry: %q", k)
+		}
+		seen[k] = true
+	}
+
+	bases := route.BaseConfigs()
+	want := make(map[string]bool, len(bases))
+	for k := range bases {
+		want[k] = true
+	}
+
+	if reflect.DeepEqual(seen, want) {
+		return
+	}
+
+	var missing, extra []string
+	for k := range want {
+		if !seen[k] {
+			missing = append(missing, k)
+		}
+	}
+	for k := range seen {
+		if !want[k] {
+			extra = append(extra, k)
+		}
+	}
+	sort.Strings(missing)
+	sort.Strings(extra)
+	t.Fatalf("sharedGroupOrder %v does not match route.BaseConfigs() keys: missing from sharedGroupOrder %v, extra in sharedGroupOrder (not a real base) %v",
+		sharedGroupOrder, missing, extra)
 }
 
 func TestMinCaseID(t *testing.T) {

@@ -111,6 +111,16 @@ var areaSchemaLabels = []string{
 	"observability",
 }
 
+// areaSchemaSet is areaSchemaLabels as a set, for O(1) "is this an area
+// label" membership checks (areaBase) instead of a linear scan.
+var areaSchemaSet = func() map[string]bool {
+	m := make(map[string]bool, len(areaSchemaLabels))
+	for _, label := range areaSchemaLabels {
+		m[label] = true
+	}
+	return m
+}()
+
 // BaseConfigs returns the fourteen base PGRST_* config maps — one
 // single-schema base per areaSchemaLabels entry, plus "auth", "multi", and
 // "unicode" — exclusive of db-uri/ports which are the caller's
@@ -201,12 +211,12 @@ var areaSchemaLabels = []string{
 // auth-based (routed to the "auth" base, which never gets the injection).
 func BaseConfigs() map[string]map[string]string {
 	// template holds every field shared across all fourteen bases except
-	// PGRST_DB_SCHEMAS (each base sets its own) and auth's extra keys
-	// (added below). This is exactly the field set the pre-issue-#2 "bulk"
-	// base used, verbatim — auth/multi/unicode still derive from it exactly
-	// as before, unaffected by the area-base split.
+	// PGRST_DB_SCHEMAS — every base sets that explicitly itself below, since
+	// it's the one field that differs by design (that's the entire point of
+	// the per-area split) — and auth's extra keys (added below). Aside from
+	// PGRST_DB_SCHEMAS, this is exactly the field set the pre-issue-#2
+	// "bulk" base used, verbatim.
 	template := map[string]string{
-		"PGRST_DB_SCHEMAS":                  "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست",
 		"PGRST_DB_EXTRA_SEARCH_PATH":        "public",
 		"PGRST_DB_POOL":                     "10",
 		"PGRST_DB_TX_END":                   "rollback",
@@ -220,6 +230,14 @@ func BaseConfigs() map[string]map[string]string {
 	}
 
 	auth := cloneMap(template)
+	// auth's PGRST_DB_SCHEMAS is the same wide list "bulk" used, verbatim —
+	// kept byte-for-byte unchanged per BaseConfigs' doc comment. Residual
+	// risk: auth still exposes all 8 area mirrors alongside test, so a
+	// future auth-routed case that adds an unqualified embed could hit the
+	// same false PGRST201 ambiguity this fix removes everywhere else (no
+	// case does today); the HARNESS.md documentation side of that residual
+	// gap is tracked in issue #5.
+	auth["PGRST_DB_SCHEMAS"] = "test,operators,ordering,pagination,representations,mutations,rpc,headers,config,domain_representations,observability,auth,v1,v2,SPECIAL \"@/\\#~_-,تست"
 	auth["PGRST_DB_ANON_ROLE"] = "postgrest_test_anonymous"
 	auth["PGRST_JWT_SECRET"] = "reallyreallyreallyreallyverysafe"
 	auth["PGRST_DB_PRE_REQUEST"] = "auth.switch_role"
@@ -256,20 +274,18 @@ func cloneMap(m map[string]string) map[string]string {
 // areaBase maps a case's schema label to the BaseConfigs key of its
 // single-schema instance: "" and "public" (the default/unlabeled schema)
 // and "test" itself all map to the "test" base; every other area label maps
-// to the identically-named base. A label that isn't one of
-// areaSchemaLabels is an error — every non-auth/multi/unicode schema label
-// actually used by cases/*.yaml must have a base here, so a new, unrecognized
-// label likely means BaseConfigs needs a new entry (or Route needs a new
-// special case) rather than silently misrouting.
+// to the identically-named base. A label that isn't in areaSchemaSet is an
+// error — every non-auth/multi/unicode schema label actually used by
+// cases/*.yaml must have a base here, so a new, unrecognized label likely
+// means BaseConfigs needs a new entry (or Route needs a new special case)
+// rather than silently misrouting.
 func areaBase(schema string) (string, error) {
 	switch schema {
 	case "", "public":
 		return "test", nil
 	}
-	for _, label := range areaSchemaLabels {
-		if schema == label {
-			return schema, nil
-		}
+	if areaSchemaSet[schema] {
+		return schema, nil
 	}
 	return "", fmt.Errorf("schema %q has no base config in BaseConfigs — add one or route it explicitly", schema)
 }
