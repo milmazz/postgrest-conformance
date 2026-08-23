@@ -3,6 +3,7 @@ package route
 import (
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -25,8 +26,8 @@ func TestRouteBases(t *testing.T) {
 		profile string
 		variant bool
 	}{
-		{httpCase(1, "test", "/items", nil), "bulk", "", false},
-		{httpCase(2, "operators", "/items", nil), "bulk", "operators", false},
+		{httpCase(1, "test", "/items", nil), "test", "", false},
+		{httpCase(2, "operators", "/items", nil), "operators", "", false},
 		{httpCase(3, "auth", "/items", nil), "auth", "auth", false},
 		{httpCase(4, "test", "/", nil), "auth", "", false}, // root path -> auth
 		{httpCase(1005, "multi", "/parents", nil), "multi", "", false},
@@ -44,15 +45,104 @@ func TestRouteBases(t *testing.T) {
 	}
 }
 
+// TestRouteAreaBases covers the issue #2 per-area single-schema routing
+// directly: every area schema label routes to its own identically-named
+// base (never to a shared wide instance), and an unrecognized schema label
+// is a loud error rather than a silent misroute.
+func TestRouteAreaBases(t *testing.T) {
+	for _, label := range []string{
+		"test", "operators", "ordering", "pagination", "representations",
+		"mutations", "rpc", "headers", "config", "domain_representations",
+		"observability",
+	} {
+		p, err := Route(httpCase(1, label, "/items", nil))
+		if err != nil {
+			t.Fatalf("schema %q: %v", label, err)
+		}
+		if p.Base != label {
+			t.Fatalf("schema %q: Base = %q, want %q", label, p.Base, label)
+		}
+		if p.InjectProfile != "" {
+			t.Fatalf("schema %q: InjectProfile = %q, want \"\" (own single-schema instance)", label, p.InjectProfile)
+		}
+		if p.GroupKey != label {
+			t.Fatalf("schema %q: GroupKey = %q, want %q (shared, no overlay)", label, p.GroupKey, label)
+		}
+	}
+
+	// "" and "public" both fall back to the "test" base.
+	for _, schema := range []string{"", "public"} {
+		p, err := Route(httpCase(1, schema, "/items", nil))
+		if err != nil {
+			t.Fatalf("schema %q: %v", schema, err)
+		}
+		if p.Base != "test" {
+			t.Fatalf("schema %q: Base = %q, want \"test\"", schema, p.Base)
+		}
+	}
+
+	if _, err := Route(httpCase(1, "nonexistent_area", "/items", nil)); err == nil {
+		t.Fatal("Route with an unrecognized schema label = nil error, want an error naming the schema")
+	} else if !strings.Contains(err.Error(), "nonexistent_area") {
+		t.Fatalf("error %q does not name the offending schema", err.Error())
+	}
+}
+
+// TestBaseConfigsCensus locks in the fourteen expected base names: the
+// eleven per-area single-schema bases plus auth/multi/unicode. A base
+// appearing or disappearing here is exactly the kind of change that must be
+// deliberate (it changes how many PostgREST instances a full run boots).
+func TestBaseConfigsCensus(t *testing.T) {
+	want := map[string]bool{
+		"test": true, "operators": true, "ordering": true, "pagination": true,
+		"representations": true, "mutations": true, "rpc": true, "headers": true,
+		"config": true, "domain_representations": true, "observability": true,
+		"auth": true, "multi": true, "unicode": true,
+	}
+	bases := BaseConfigs()
+	if len(bases) != len(want) {
+		t.Fatalf("BaseConfigs() has %d entries, want %d: got keys %v", len(bases), len(want), baseKeys(bases))
+	}
+	for k := range bases {
+		if !want[k] {
+			t.Errorf("BaseConfigs() has unexpected base %q", k)
+		}
+	}
+	for k := range want {
+		if _, ok := bases[k]; !ok {
+			t.Errorf("BaseConfigs() is missing expected base %q", k)
+		}
+	}
+
+	// Every base must declare exactly one PGRST_DB_SCHEMAS entry containing
+	// only its own single schema, except auth/multi/unicode which keep
+	// their (wider or differently-scoped) pre-issue-#2 values.
+	for _, label := range areaSchemaLabels {
+		if got := bases[label]["PGRST_DB_SCHEMAS"]; got != label {
+			t.Errorf("base %q: PGRST_DB_SCHEMAS = %q, want %q", label, got, label)
+		}
+	}
+}
+
+func baseKeys(bases map[string]map[string]string) []string {
+	keys := make([]string, 0, len(bases))
+	for k := range bases {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 func TestRouteSatisfaction(t *testing.T) {
-	// server-timing-enabled true == bulk's effective value -> shared
+	// server-timing-enabled true == the observability base's effective
+	// value -> shared
 	p, _ := Route(httpCase(1750, "observability", "/x", map[string]any{"server-timing-enabled": true}))
 	if len(p.Overlay) != 0 {
-		t.Fatal("1750 must be satisfied by bulk")
+		t.Fatal("1750 must be satisfied by the observability base")
 	}
 	// db-max-rows 2 != unset default -> variant
 	p, _ = Route(httpCase(1700, "config", "/items", map[string]any{"db-max-rows": 2}))
-	if v := p.Overlay["PGRST_DB_MAX_ROWS"]; v.V != "2" || p.GroupKey == "bulk" {
+	if v := p.Overlay["PGRST_DB_MAX_ROWS"]; v.V != "2" || p.GroupKey == "config" {
 		t.Fatalf("1700: %+v", p)
 	}
 	// jwt-aud null on auth base: effective is unset -> satisfied (case 1474)
@@ -80,7 +170,7 @@ func TestRouteSatisfaction(t *testing.T) {
 
 func TestRouteSpecials(t *testing.T) {
 	p, _ := Route(httpCase(1387, "mutations", "/safe_update_items", nil))
-	if !p.SafeUpdate || p.Base != "bulk" || p.InjectProfile != "mutations" {
+	if !p.SafeUpdate || p.Base != "mutations" || p.InjectProfile != "" || p.GroupKey != "mutations+safeupdate" {
 		t.Fatalf("1387: %+v", p)
 	}
 	p, _ = Route(httpCase(1654, "openapi_no_comment", "/", nil))
