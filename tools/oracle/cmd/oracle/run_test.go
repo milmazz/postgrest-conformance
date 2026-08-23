@@ -523,7 +523,7 @@ func TestFindingsForRun(t *testing.T) {
 		}
 	})
 
-	t.Run("ranHTTP true appends the two deviation lines", func(t *testing.T) {
+	t.Run("ranHTTP true appends the three deviation lines", func(t *testing.T) {
 		base := []string{"x"}
 		got := findingsForRun(base, true)
 		want := append(append([]string{}, base...), httpDeviationFindings()...)

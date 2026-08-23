@@ -81,7 +81,10 @@ var multiIDs = map[int]bool{
 // consulted for cases routed to the "auth" base (see Route): every other
 // base is now a single-schema instance for the case's own area (or "test"),
 // so InjectProfile is unconditionally "" there — the sole exposed schema is
-// already the default, nothing to select.
+// already the default, nothing to select. The "multi"/"unicode" entries are
+// consequently unreachable here too — Route's earlier switch cases always
+// intercept those schemas before this map is ever consulted — but are kept
+// for documentation/defensiveness.
 var noInjectSchemas = map[string]bool{
 	"":        true,
 	"public":  true,
