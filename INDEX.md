@@ -1,18 +1,25 @@
 # Conformance case index
 
 Cross-reference of the **762** conformance cases under [`cases/`](cases/).
-Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-22**
+Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-23**
 at the current 762-case state: 762 files, 762 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2088** of them — carries the
-single ref `v16.0`, matching `PIN`. The state verified includes the
+URL across `spec/` (18 files) and `cases/` — **2093** of them — carries the
+single ref `v16.0`, matching `PIN` (an earlier revision said 2088; the same
+scan at the prior state returns 2090, so that figure was a miscount — the
++3 to 2093 is the headers fix pass's new anchors, and zero refs are stale
+either way). The state verified includes the
 **2026-08-22 mutations citation-audit fix pass** (cases **1360, 1368, 1373**:
 PGRST205 messages re-qualified to the request's active schema
-`mutations.…`, anchors moved onto `Error.hs#L255` — see
-[`COVERAGE.md`](COVERAGE.md) → *Review status*), which takes the tree's
-implementation-anchored `source:` count to **60** (with 2 docs-anchored:
-1279, 1682); the "53" figures quoted in the pass narratives below are
-historical snapshots of earlier states.
+`mutations.…`, anchors moved onto `Error.hs#L255` — now committed at
+`80015a1`) **and the 2026-08-23 headers citation-audit fix pass** (issue #4:
+case **1573** gains `config: {server-trace-header: ""}` pinning upstream's
+`configServerTraceHeader = Nothing` context, `spec/headers.yaml` gains the
+matching CONFIG CONTEXT note; no `source:` anchor moved — see
+[`COVERAGE.md`](COVERAGE.md) → *Review status*). The tree's
+implementation-anchored `source:` count stands at **60** (with 2
+docs-anchored: 1279, 1682); the "53" figures quoted in the pass narratives
+below are historical snapshots of earlier states.
 
 Each case is one YAML file `NNNN_<slug>.yaml` validated against
 [`case.schema.json`](case.schema.json). Cases are grouped into 17 feature
@@ -153,8 +160,10 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 
 ## Area <-> id band <-> fixture fragment
 
-Re-derived from `cases/*.yaml` on **2026-08-22**: every count, id band and
-`schema:`-label distribution below matches the files on disk at that date.
+Re-derived from `cases/*.yaml` on **2026-08-23**: every count, id band and
+`schema:`-label distribution below matches the files on disk at that date
+(unchanged from the 2026-08-22 derivation — the only case edit since, the
+headers fix pass on 1573, touched no count, band or label).
 The *Fixture fragment* column names each area's historical fragment (now under
 `fixtures/provenance/`, frozen, or `fixtures/inputs/` for the two live
 generator inputs); at runtime all areas load from the single numbered chain
@@ -956,11 +965,15 @@ The **auth** area uses `request.jwt` to have the runner mint a signed token —
 header because it needs a token signed with a secret the harness deliberately
 does not know.
 
-Any case may carry a `config:` block — **116** do (112 non-empty; 1705, 1719,
-1727 and 1743 carry an empty `config: {}`), spread over six areas: config 45,
-auth 33, observability 21, select 10, openapi 4, errors 3 (that breakdown counts
-the key's *presence*, so it sums to 116). **The count did not
-move for a SIXTH consecutive pass**: none of the operators re-sync's 37 new
+Any case may carry a `config:` block — **117** do (113 non-empty; 1705, 1719,
+1727 and 1743 carry an empty `config: {}`), spread over **seven** areas:
+config 45, auth 33, observability 21, select 10, openapi 4, errors 3,
+**headers 1** (that breakdown counts the key's *presence*, so it sums to
+117). **The count moved on 2026-08-23 for the first time in six passes** —
+not by a re-sync but by the **headers citation-audit fix pass** (issue #4):
+case **1573** gained `config: {server-trace-header: ""}`, making headers the
+seventh config-carrying area and 116 → 117. Before that, the count had held
+still through six consecutive passes: none of the operators re-sync's 37 new
 cases, the rpc re-sync's 3, the mutations re-sync's 17, the representations
 re-sync's 8, the content_negotiation re-sync's 6, the openapi re-sync's 6 or the
 domain_representations re-sync's 16
@@ -986,10 +999,20 @@ ids listed in `@variant_case_ids`
 1654, 1677, 1678, 1680, 1682, 1703, 1758, 1763, 1764) plus every `kind: cli`
 case. On any other HTTP case the `config:` block is **inert** — it documents the
 upstream configuration the assertion depends on, but the case still runs against
-a shared instance. Mechanically, **60** HTTP cases carry a non-empty `config:`
+a shared instance. Mechanically, **61** HTTP cases carry a non-empty `config:`
 outside `@variant_case_ids` (re-derived on disk this pass against the harness's
 live 18-id list), now out of **724** HTTP cases (762 − 38 CLI); most simply
-restate what the shared instance already provides.
+restate what the shared instance already provides. The 61st is **1573**
+(added 2026-08-23 by the headers citation-audit fix pass), and it is **not**
+one of the restaters: its `server-trace-header: ""` must *clear* the shared
+headers instance's `X-Request-Id` for `headers_no_blank` to hold, so it
+belongs on the diverging list below. This repo's oracle runner honours it via
+dynamic config overlay (`tools/oracle/internal/route/route.go` → `Route`,
+which spins a variant instance for any unsatisfied `config:` entry regardless
+of the id list), and `HARNESS.md` §2.3's variant table plus route.go's
+`harnessVariantIDs` mirror both carry the 1573 row (33 → 34 ids); only
+bier's `@variant_case_ids` (18 ids) predates it and still needs a 1573
+row — recorded in [`COVERAGE.md`](COVERAGE.md) → *Review status*.
 
 > **The openapi pass turned that inertness into a WITHDRAWN case, which is the
 > clearest demonstration of the gate this document has.** A case pinning
@@ -1022,11 +1045,15 @@ than an ignored one because nothing mechanical can surface it.
 The instances where the declared config *diverges* from the shared instance, and
 the assertion therefore depends on it, are case **1742**, the ten select cases
 **1129–1133, 1139, 1140, 1147–1149**, the three errors cases **1517, 1518, 1522**
-(which `spec/errors.yaml`'s own `harness_gate:` key names explicitly), and the
+(which `spec/errors.yaml`'s own `harness_gate:` key names explicitly), the
 three observability cases **1765, 1766, 1767** (which declare `log-level:
 warn|info|crit` against a shared instance pinned to `log_level: :error`; their
 assertions are log-level-independent statuses, so they still hold — see
-`spec/observability.yaml` → gaps). See
+`spec/observability.yaml` → gaps), and — since 2026-08-23 — the headers case
+**1573** (`server-trace-header: ""` against a shared instance that sets
+`X-Request-Id`; unlike the observability trio, its `headers_no_blank`
+assertion **fails** without the variant, because PostgREST echoes a blank
+`X-Request-Id: ` when the request omits the header). See
 [`COVERAGE.md`](COVERAGE.md) → *Known gaps → config*.
 
 `preconditions:` is parsed but **never executed** by the harness — treat it as

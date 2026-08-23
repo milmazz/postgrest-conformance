@@ -106,7 +106,7 @@ else is a fixed value the cases assert against:
 | `jwt_aud` | `nil` | |
 | `server_cors_allowed_origins` | `"http://example.com, http://example2.com"` | |
 | `server_timing_enabled` | `true` | Most cases assert `Server-Timing` is present; the few needing it absent (1758/1763) run on their own variant instance instead. |
-| `server_trace_header` | `"X-Request-Id"` | |
+| `server_trace_header` | `"X-Request-Id"` | Case 1573 (`headers_no_blank`) needs it **unset** and runs on its own variant instance instead (§2.3) — with it set, PostgREST echoes a blank `X-Request-Id: ` on every response whose request carried no matching header. |
 | `log_level` | `:error` | |
 
 ### 2.2 Shared "auth" instance
@@ -166,6 +166,7 @@ config it would otherwise use:
 | 1517 | bulk | `client-error-verbosity: minimal` | `client_error_verbosity: "minimal"` |
 | 1518 | bulk | `client-error-verbosity: minimal` | `client_error_verbosity: "minimal"` |
 | 1522 | bulk | `client-error-verbosity: minimal` | `client_error_verbosity: "minimal"` |
+| 1573 | bulk | `server-trace-header: ""` | `server_trace_header: ""` (unset — upstream runs its `noBlankHeader` test with no trace header configured; on a trace-header-configured instance PostgREST echoes a blank `X-Request-Id: ` when the request sends none, tripping `headers_no_blank`) |
 | 1758 | bulk | `server-timing-enabled: false` | `server_timing_enabled: false` |
 | 1763 | bulk | `server-trace-header: ""` | `server_trace_header: ""` (unset — the trace header must NOT be echoed) |
 | **1764** | auth (root path) | `log-level: error` | `log_level: :error` **plus** the hard-coded `jwt_secret: nil` from §2.5 (both apply — auth base's `db_anon_role` stays set, so the request still routes through JWT resolution and hits the no-secret 500) |

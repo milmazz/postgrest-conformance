@@ -22,6 +22,53 @@ Functions as RPC, Schemas, Computed Fields, Domain Representations, Pagination a
 Count, Resource Embedding, Resource Representation, Media Type Handlers, Aggregate
 Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Grammar.
 
+> **Refresh, 2026-08-23 (headers citation audit).** Re-checked at branch
+> `main`, HEAD **`80015a1`** — the mutations citation-audit fix pass described
+> in the 2026-08-22 box below is now **committed** (cases 1360/1368/1373,
+> PR #11) — with exactly **two uncommitted working-tree edits**: case
+> **1573** (`cases/1573_no_blank_headers_post.yaml`) and
+> **`spec/headers.yaml`**, the **headers** citation audit's seeded fix pass
+> for **issue #4**; every count here includes them (scope note: that is the
+> tree as it stood when the machine checks ran — the commit shipping this
+> record also carries the pass's later-landed edits, `HARNESS.md`'s §2.3
+> row, route.go's `harnessVariantIDs` mirror and this refresh itself, none
+> of which the checks inspect). Re-derived from disk on
+> this date: **762** case files, 762 distinct ids, 17 areas, and every
+> per-area count, id band and `schema:`-label distribution in
+> [`INDEX.md`](INDEX.md) still matches the files exactly — **no case was
+> added, dropped or re-numbered**, so every docs-page → case-id mapping below
+> still names files that exist. What the fix pass changed *inside* 1573: it
+> gained a **`config:` block** (`server-trace-header: ""`) plus a CONFIG
+> PRECONDITION note — upstream runs its it-block under `baseCfg`, whose
+> `configServerTraceHeader = Nothing` (`SpecHelper.hs#L171`), and on an
+> instance that *does* configure a trace header PostgREST echoes a literal
+> blank `X-Request-Id: ` when the request omits it, tripping
+> `headers_no_blank` — and `spec/headers.yaml`'s matching entry gained the
+> same CONFIG CONTEXT paragraph. Three knock-on facts, each updated in place
+> below: **(1)** the tree's `config:`-block count moved for the first time in
+> six passes, **116 → 117** (113 non-empty; **headers** becomes the seventh
+> config-carrying area — see `INDEX.md`); **(2)** the shared-instance
+> conflict that blocked the observability *trace-header empty echo* gap "on
+> case 1573's `headers_no_blank`" is **dissolved** — 1573 no longer runs
+> against a trace-header-configured instance (see *Known gaps →
+> observability*); **(3)** the pinned-URL population grew by the fix pass's
+> three new anchors — the sweep now counts **2093**
+> `raw.githubusercontent.com/PostgREST/postgrest/v16.0/` URLs across `spec/`
+> + `cases/`, all at the pin (the prior prose said 2088; a mechanical re-scan
+> of the prior state returns 2090, so 2088 was a miscount, not drift — zero
+> stale refs either way). A fresh machine-verification record dated
+> **2026-08-23** heads *Validation status* (all checks clean), and the
+> adversarial-citation-audit ledger in *Review status* gains its second
+> entry: **headers — pass, 2026-08-23**, the seeded fix pass having run
+> first. The harness contract was updated in the same pass: 1573's
+> `config:` block is honored by this repo's oracle runner (dynamic overlay,
+> `tools/oracle/internal/route/route.go` → `Route`), and
+> [`HARNESS.md`](HARNESS.md) §2.3's variant-instance table plus route.go's
+> `harnessVariantIDs` mirror both carry the 1573 row (33 → **34** ids).
+> **One residual this refresh opens rather than closes**: bier's
+> `@variant_case_ids` (18 ids) predates 1573 and lists no row for it — an
+> upstream-harness edit this repo does not own.
+
 > **Refresh, 2026-08-22 (standalone repo).** This file has been re-checked in
 > the standalone **postgrest-conformance** repository (scaffolded from
 > [milmazz/bier](https://github.com/milmazz/bier)@`6024c62`), branch `main`,
@@ -555,7 +602,10 @@ cases (**21** when this note was last re-verified — the one fact in it that mo
 **1705–1741 + 1744 = 38**, re-enumerated id by id and confirmed to equal exactly
 that set (the domain_representations re-sync added no CLI case, and **none of its
 sixteen new cases declares a `config:` block** — the sixth consecutive pass for
-which that is true; the `config:` totals are unchanged at **116**/**112**);
+which that is true; the `config:` totals stood unchanged at **116**/**112**
+when this note was written, and moved to **117**/**113** on 2026-08-23 when
+the headers citation-audit fix pass gave case **1573** a
+`server-trace-header: ""` block);
 `expect.status_text` on exactly **1508/1510/1511**. The openapi
 re-sync added **six** cases (**1683–1688**) and
 rewrote **33** (the whole committed band, 1650–1682), all on the `openapi` page,
@@ -1058,7 +1108,9 @@ prioritizing:
 > than authoring effort** — an assertion style the schema does not have
 > (`expect.stdout_matches`), a request shape the harness cannot issue
 > (`request.kind: admin`), or a direct conflict with an existing frozen case
-> (1573's `headers_no_blank` on the shared instance). Upstream *does* assert all
+> (1573's `headers_no_blank` on the shared instance — a conflict the
+> 2026-08-23 headers fix pass has since dissolved by moving 1573 onto its own
+> variant config; see *Known gaps → observability*). Upstream *does* assert all
 > three, so they are not uncitable in the auth sense — the citation exists and is
 > verified; the **harness** is what is missing. The fourth
 > (`server_timing.success_path_only`) is the mirror image: black-box observable
@@ -2428,26 +2480,30 @@ Two missing-coverage findings, **0 citation defects**.
 
   Closing any of these is a harness decision (per-`config` instance booting, or
   `@variant_case_ids` entries) behind the human harness gate, not a spec edit.
-  **116** of the **762** cases carry a `config:` key (112 non-empty), spread over
-  six areas: config 45, auth 33, observability 21, select 10, openapi 4, errors 3
-  (that breakdown counts the key's *presence* and sums to 116; the four empty
+  **117** of the **762** cases carry a `config:` key (113 non-empty), spread over
+  seven areas: config 45, auth 33, observability 21, select 10, openapi 4,
+  errors 3, headers 1
+  (that breakdown counts the key's *presence* and sums to 117; the four empty
   `config: {}` blocks are all in the config area, so its non-empty count is 41).
-  **The count did not move for a FIFTH consecutive pass**: none of the operators
-  re-sync's 37 new cases, none of the rpc re-sync's 3, none of the mutations
-  re-sync's 17, none of the representations re-sync's 8 and none of the
-  domain_representations re-sync's 16 declares a `config:`
-  block, because none of those areas is config-gated. So the diverging set below is
-  unchanged, and the ratio of unhonoured blocks improved only by dilution —
-  **60** HTTP cases still carry a non-empty `config:` outside
+  **The count held still for five consecutive passes and then moved on
+  2026-08-23** — not by a re-sync but by the headers citation-audit fix pass,
+  which gave case **1573** a `server-trace-header: ""` block: none of the
+  operators re-sync's 37 new cases, none of the rpc re-sync's 3, none of the
+  mutations re-sync's 17, none of the representations re-sync's 8 and none of
+  the domain_representations re-sync's 16 declares a `config:` block, because
+  none of those areas is config-gated. The diverging set below therefore grew
+  by exactly one (1573) —
+  **61** HTTP cases now carry a non-empty `config:` outside
   `@variant_case_ids` (re-derived on disk this pass against the harness's live
   18-id list), now out of **724** HTTP cases (762 − 38 CLI). **Corrected rather
   than carried:** the previous revision printed that denominator as **702**,
   which was the 740-case tree's figure (740 − 38) reprinted at 746; it should
   have read 708 then. **Five consecutive
   config-silent passes is itself worth reading**: the `config:` key is used
-  almost exclusively by the six areas that already had it, and every re-sync since
-  has been in an area that needs none. The 60 unhonoured blocks are therefore a
-  fixed, aging set, not a growing one.
+  almost exclusively by the six areas that already had it, and every re-sync
+  has been in an area that needs none — the one movement (1573, 2026-08-23)
+  came from a *citation audit fix*, not a re-sync. The unhonoured blocks are
+  therefore a fixed, aging set that grew by one, not a growing one.
 
   > **The mutations band introduces a harness dependency of a different kind, and
   > it should be read alongside these.** Its cases declare no `config:` at all, so
@@ -2500,7 +2556,7 @@ Two missing-coverage findings, **0 citation defects**.
   modeled but unconstrained, because `request.jwt.payload` is a static object —
   upstream never asserts the inside-the-window side either).
 
-### headers (adversarial review verdict: **revise** — findings are *citable but uncovered*)
+### headers (adversarial review verdict: **revise** — findings are *citable but uncovered*. **Citations re-audited 2026-08-23: pass**, seeded fix pass for issue #4 ran first — see *Review status*)
 
 Three missing-coverage findings, **0 citation defects**. Unlike the auth
 entries above, none of these is blocked on upstream ground truth or on case
@@ -2639,16 +2695,26 @@ open. Read them against the live docs page, whose three top-level sections are
   needs **both** `needed_assertion: log_capture` and harness-owned changes to
   `@variant_case_ids`.
 
-- **`server-trace-header` empty echo has no case, and is *blocked*, not merely
-  unwritten.** PostgREST echoes the configured trace header with an **empty
-  value** when the request omits it
+- **`server-trace-header` empty echo has no case — but it is no longer
+  conflict-blocked.** PostgREST echoes the configured trace header with an
+  **empty value** when the request omits it
   ([`App.hs#L289`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L289)).
-  A case cannot be added under the frozen harness: the shared conformance
-  instances set `server_trace_header`, and case **1573** (headers area) asserts
-  `headers_no_blank: true` against that same instance, so the two assertions would
-  contradict each other on the wire. It needs its own variant instance, i.e. an
-  `@variant_case_ids` entry — frozen harness code. Listed under *issues* rather
-  than *authoring*.
+  As originally recorded, a case could not be added under the frozen harness:
+  the shared conformance instances set `server_trace_header`, and case
+  **1573** (headers area) asserted `headers_no_blank: true` against that same
+  instance, so the two assertions would have contradicted each other on the
+  wire. **UPDATED (2026-08-23):** the headers citation audit's seeded fix
+  pass (issue #4) gave 1573 `config: {server-trace-header: ""}`, pinning
+  upstream's actual test-config context (`configServerTraceHeader = Nothing`,
+  `SpecHelper.hs#L171`) on a variant instance of its own — so 1573 no longer
+  runs against a trace-header-configured instance and the wire conflict is
+  gone. `HARNESS.md` §2.3's variant table and route.go's
+  `harnessVariantIDs` mirror gained the 1573 row in the same pass (33 →
+  34 ids), so this repo's harness contract is consistent; what remains is
+  ordinary authoring — an empty-echo case against the shared instance's
+  `X-Request-Id` is now writable without contradiction — plus one external
+  bookkeeping item: bier's `@variant_case_ids` still lacks a 1573 row.
+  Demoted from *issues* to *authoring + upstream bookkeeping*.
 
 - **`Server-Timing` absent on error responses — uncovered *deliberately*, and the
   only promotable item here.** The model entry
@@ -2735,7 +2801,78 @@ open. Read them against the live docs page, whose three top-level sections are
 
 ## Validation status
 
-### Machine verification, 2026-08-22 (standalone repo, current record)
+### Machine verification, 2026-08-23 (current record)
+
+Machine-verified on **2026-08-23** at commit **`80015a1`** on branch `main`,
+with the working tree carrying exactly **two uncommitted edits** — case
+**1573** and `spec/headers.yaml`, the headers citation audit's seeded fix
+pass for issue #4 (see *Review status*); all checks ran over the on-disk
+state **including** those edits. Six checks ran for real against the actual
+files and a real PostgreSQL server; **none failed**. Facts, recorded verbatim
+from the run:
+
+1. **Fixture chain load: OK.** Built a scratch database `conf_scratch` on the
+   Docker Postgres at `localhost:6432` (PostgreSQL **17.5**, PostGIS present):
+   `psql -d postgres -v ON_ERROR_STOP=1 -q -f fixtures/01_roles.sql`; then
+   `CREATE DATABASE conf_scratch TEMPLATE template0 ENCODING 'UTF8'
+   LC_COLLATE 'C' LC_CTYPE 'C'`; then `PGTZ=UTC psql -d conf_scratch -v
+   ON_ERROR_STOP=1 -q -f <02..07>` in order. Output tail:
+   `== fixtures/07_analyze.sql / ANALYZE / EXIT=0`; `grep -c ERROR` over the
+   full 36 KB load log = **0**. All six chain files (`02_base`,
+   `03_supplement`, `04_postgis`, `05_corrections`, `06_area_schemas`,
+   `07_analyze`) loaded; the scratch DB was dropped afterwards.
+2. **Case schema: 762 / 762 valid.** python3 + PyYAML + jsonschema
+   `Draft202012Validator` over all `cases/*.yaml` against `case.schema.json`:
+   `CASE_FILE_COUNT 762 / INVALID_COUNT 0`.
+3. **Ids: 762 distinct, 0 duplicates** (`DUPE_COUNT 0`).
+4. **Pin sweep: 0 stale citations.** A scan of `source:` URLs across
+   `spec/**/*.yaml`, `spec/**/*.md` and `cases/*.yaml`:
+   `TOTAL_SOURCE_URLS 1759 / STALE 0` — every
+   github/raw.githubusercontent PostgREST URL pins tag `v16.0` and every
+   postgrest.org docs URL uses `/en/v16.0/`; `PIN` confirms
+   `postgrest: v16.0`. (One earlier false positive was the comment line
+   `# Primary source: src/library/PostgREST/Response/OpenAPI.hs` at
+   `spec/openapi.yaml:7` — a relative file path, not a URL; the URL on the
+   next line pins v16.0.) A broader occurrence count — *every*
+   `raw.githubusercontent.com/PostgREST/postgrest/<ref>/` URL in `spec/` +
+   `cases/`, not just `source:` lines — returns **2093**, all `v16.0`; the
+   two totals count different populations, and both report zero drift.
+5. **Relation check: zero targets unexpectedly absent; 19 rows flagged, all
+   intentional.** For each HTTP case, the first path segment (or
+   `/rpc/<fn>` → function) was resolved per HARNESS.md/INDEX.md — label
+   `test`/`public`/`null` → `test`; alias `unicode` → `تست`; `multi` → the
+   `v1`/`v2` pair; an explicit `Accept-Profile` header in the case
+   **overrides** the label (`Map.put_new` semantics) — and checked by catalog
+   query on `conf_scratch` (`pg_class` relkind r,v,m,f,p ∪ `pg_proc`).
+   Result: `CHECKED 673 / MISSING 19`, with **89** cases skipped as CLI or
+   root-path cases carrying no relation target. All 19 are intentional
+   negatives whose `expect.status` (404/406) *is* the missing relation:
+   `test.first` (1001), `test.invalid` (1002, 1516), `unknown.parents`
+   (1010, 1560, 1583 — unknown-schema 406s), `v1.another_table` (1024 —
+   deliberately targets the v2-only table via the v1 profile),
+   `test.unknown` (1034), `mutations.garlic`/`.fake`/`.foozle`
+   (1360/1368/1373), `rpc.fake` (1432), `test.sayhell` (1443),
+   `test.non_existent_table` (1515), `test.itemsx` (1517), `test.projectx`
+   (1520), `test.projxxxx` (1521, 1525) and `observability.unknown` (1765).
+   **Zero positive-path cases target a relation absent from the loaded
+   database**, so `missing_relations` reduces to `[]`. (The 19-row raw list
+   differs from the 2026-08-22 record's 33-row list only in classifier
+   sophistication — this run resolves aliases, profile pairs and explicit
+   `Accept-Profile` overrides itself, so the 13 label-indirection rows and
+   the header-resolved negatives 1006/1007/1012 no longer surface — **not**
+   in anything on disk.)
+6. **File count: `ls cases | wc -l` → 762.**
+
+Machine-verification facts, verbatim: `fixtures_load_ok: true` ·
+`cases_schema_valid: true` · `invalid_cases: []` · `duplicate_ids: []` ·
+`stale_pin_citations: []` · `case_count: 762` · 19 flagged relations, all
+classified intentional as itemized above. **No failures to record.**
+
+The record below this line is the **2026-08-22 verification** — retained
+because its 33-row relation-check classification and its narrative caveats
+are still the operative reading guide for older revisions' numbers.
+
+### Machine verification, 2026-08-22 (standalone repo, previous record)
 
 Machine-verified on **2026-08-22** at commit **`4b161bf`** on branch `main` of
 the standalone repository, with the working tree carrying exactly **three
@@ -2761,7 +2898,10 @@ recorded verbatim from the run:
    `spec/*.{yaml,md}` (18 files) plus `cases/*.yaml` found no ref other than
    the pin; the cross-check `grep -rhoE
    '…/PostgREST/postgrest/[^/]+/' spec cases | sort | uniq -c` returns exactly
-   one ref — `v16.0`, **2088** URLs — matching `PIN`.
+   one ref — `v16.0`, **2088** URLs — matching `PIN` *[editorial note,
+   2026-08-23: a mechanical re-scan of this same state returns **2090**, so
+   2088 was a miscount, not drift — zero stale refs either way; see the
+   2026-08-23 refresh box]*.
 5. **Relation check: zero targets actually absent; 33 rows flagged, all
    explained.** For each case, the first path segment (URL-decoded;
    `/rpc/<fn>` → function) was checked against `pg_class` (relkind r,v,m,f,p)
@@ -3032,8 +3172,9 @@ verification handoff: 762 files / 762 distinct ids / `{'v16.0': 762}` source tag
   (which names only six: `notes` is not required by the schema but is universal in
   practice). The full key vocabulary on disk is exactly those seven plus
   `preconditions` (on **761** — case **1330** still the only omission) and
-  `config` (on **116**, four of them the empty `config: {}` — 1705, 1719, 1727,
-  1743) — no case carries anything else. **42** of the 761 carry a *non-empty*
+  `config` (on **117** as of 2026-08-23 — case 1573 joined via the headers
+  citation audit's fix pass — four of them the empty `config: {}` — 1705,
+  1719, 1727, 1743) — no case carries anything else. **42** of the 761 carry a *non-empty*
   `preconditions:` list, and **25 of those 42 are mutations cases** — the area is
   the heaviest user of a key the harness never executes (see
   **Known gaps → mutations**). Full non-empty distribution, re-derived at the
@@ -4289,10 +4430,33 @@ present, reachable, correctly-named object can still be the wrong object.
 
 ## Review status
 
-> **Adversarial citation audit ledger (updated 2026-08-22).** Areas that have
+> **Adversarial citation audit ledger (updated 2026-08-23).** Areas that have
 > passed a *standalone* adversarial citation audit — every cited PostgREST
 > source re-fetched and verified to support its claim, defects fixed before
 > the verdict — in this repository, and when:
+>
+> - **headers** — ✅ **pass**, **2026-08-23** (a seeded fix pass for
+>   **issue #4** ran first). The fix pass touched exactly **one case and one
+>   model file** — case **1573** (`headers/guc/no-blank-headers`) and
+>   `spec/headers.yaml`'s matching entry. The defect was a missing **config
+>   precondition**, not a wrong citation: upstream's it-block
+>   (`RpcSpec.hs#L1103`) runs under `baseCfg`, whose
+>   `configServerTraceHeader = Nothing` (`SpecHelper.hs#L171`), so no trace
+>   header is configured — while an instance that *does* configure one (the
+>   shared instance's `server-trace-header: X-Request-Id`) makes PostgREST
+>   echo a literal blank `X-Request-Id: ` whenever the request carries no
+>   matching header, tripping the case's `headers_no_blank`. 1573 now pins
+>   `config: {server-trace-header: ""}` (an empty string is dropped to
+>   `Nothing` by `optString`, `Config.hs#L442` — the same pattern case 1763
+>   uses), reproducing upstream's actual test-config context on a variant
+>   instance, and both files record the mechanism. The case's `source:`
+>   anchor did **not** move, so the tree's implementation-anchored count
+>   stays **60**. Two consequences are recorded elsewhere: the observability
+>   *trace-header empty echo* gap is no longer conflict-blocked (see *Known
+>   gaps → observability*), and `HARNESS.md` §2.3 plus route.go's
+>   `harnessVariantIDs` gained the 1573 row in the same pass (33 → 34 ids);
+>   only bier's `@variant_case_ids` still lacks one (an open
+>   upstream-harness edit).
 >
 > - **mutations** — ✅ **pass**, **2026-08-22** (a fix pass ran before the
 >   verdict was recorded). The fix pass touched exactly **three cases** —
@@ -4312,11 +4476,13 @@ present, reachable, correctly-named object can still be the wrong object.
 > All 17 areas additionally carry the v16.0 re-sync-era adversarial verdicts
 > recorded in the table below (13 ⚠️ revise / 4 ✅ pass, every one with 0
 > citation defects); those verdicts date from the 2026-08 re-sync inside
-> milmazz/bier and are about *coverage*, not citations. The 2026-08-22
-> mutations result does not erase its re-sync-era ⚠️ *revise* row — that row's
-> residue is missing-coverage (relation-blocked gaps), which a citation audit
-> does not adjudicate — it certifies that the area's citations, as now on
-> disk, survived a fresh adversarial re-fetch.
+> milmazz/bier and are about *coverage*, not citations. Neither the
+> 2026-08-22 mutations result nor the 2026-08-23 headers result erases its
+> re-sync-era ⚠️ *revise* row — those rows' residue is missing-coverage
+> (relation-blocked gaps for mutations; the RPC preference flavors and the
+> CORS-preflight `Vary` leg for headers), which a citation audit does not
+> adjudicate — each certifies that the area's citations, as now on disk,
+> survived a fresh adversarial re-fetch.
 
 The v16.0 re-sync re-pinned **every** case `source:` from `v14.12` to `v16.0`, so
 the per-area audit verdicts recorded by the v14.12 pass no longer describe the
@@ -4503,7 +4669,7 @@ of its *coverage* residue.) What separates them is entirely coverage:
 | Area | v16.0 audit result | Nature of findings |
 |------|--------------------|--------------------|
 | auth | ⚠️ revise | 4 informational gaps, **0 citation defects** — the reviewer independently re-verified each gap's justification against v16.0 sources and confirmed all four are correct. See **Known gaps → auth**. |
-| headers | ⚠️ revise | 3 missing-coverage findings, **0 citation defects** — RPC-flavored `max-affected`, RPC-flavored `handling`, and the CORS-preflight leg of the `Vary` rule. **The PGRST128 leg of the first is now closed** by rpc case **1441** (the rpc area took ownership, the rule having no table flavor to delegate); its PGRST124 leg and the other two findings remain *citable but uncovered*. See **Known gaps → headers**. |
+| headers | ⚠️ revise | **Re-audited 2026-08-23: standalone citation audit ✅ pass (seeded fix pass for issue #4 — case 1573 — ran first); this row's residue is coverage, not citations.** 3 missing-coverage findings, **0 citation defects** — RPC-flavored `max-affected`, RPC-flavored `handling`, and the CORS-preflight leg of the `Vary` rule. **The PGRST128 leg of the first is now closed** by rpc case **1441** (the rpc area took ownership, the rule having no table flavor to delegate); its PGRST124 leg and the other two findings remain *citable but uncovered*. See **Known gaps → headers**. |
 | config | ⚠️ revise | 2 missing-coverage findings, **0 citation defects** — `db-pre-config` (the v16-*recommended* in-database config mechanism, dump-observable, while cases 1724/1725/1744 cover only the deprecated `ALTER ROLE` path) and `app.settings.*` reaching SQL as a GUC (1729 pins only the dump surface). Both *citable but uncovered*. See **Known gaps → config**. |
 | select | ⚠️ revise | 5 missing-coverage findings, **0 citation defects** — FK joins on views / chains of views (20 upstream it-blocks, no case *and* no gap entry), spread to-many (gap recorded but its "needs a fixture" justification does not hold), aggregates in to-one spreads + the PGRST127 rejection (entire upstream context, absent from the whole tree), FK joins on partitioned tables, and the terminal `->` on a json/jsonb column. All five *citable but uncovered*. See **Known gaps → select**. |
 | filters | ⚠️ revise | 3 missing-coverage findings, **0 citation defects** — the `IN`/`NOT IN` empty set (an 11-it-block upstream `describe`, `in.()` issued by no case in the tree, while `operators.yaml` already models the `= ANY('{}')` rendering it produces), the empty filter *value* (`?string=eq.` → `""`), and the implicit AND of two plain filters. All three *citable but uncovered*. See **Known gaps → filters**. |
@@ -4511,7 +4677,7 @@ of its *coverage* residue.) What separates them is entirely coverage:
 | url_grammar | ⚠️ revise | 1 missing-coverage finding, **0 citation defects** — backslash / escaped-double-quote values inside `in.( … )`, a named part of the area's own docs page with three upstream `it`-blocks (plus one in the adjacent describe) and **no case anywhere in `spec/`**. *Citable but uncovered*, and **partly case-only**. The pass also produced two case repairs that are *not* review findings but belong on the record — **1016** re-anchored off implementation code onto `UpsertSpec.hs#L295` (retiring a false "no Feature spec line exists" claim) and **1029**'s overstated "byte-identical parser" note corrected. See **Known gaps → url_grammar**. |
 | errors | **✅ pass** | **The tree's only pass verdict.** 3 findings, **all explicitly MINOR / non-blocking**, **0 citation defects** — no `Proxy-Status` assertion on a HEAD request (the docs' stated motivation, but the behavior is method-independent in `errorResponseFor`), the modelled `inline_416_content_length_suppressed_on_head` flag that no case exercises (the one genuinely method-dependent behavior, and case-only to close), and the 42883 `xmlagg` → 406 special case (effectively unreachable black-box, accepted as-is). The pass additionally confirmed by reproduction in a scratch DB that cases **1523/1524**'s fixtures behave as asserted, and flagged a **harness gate** (1517/1518/1522 need `@variant_case_ids` entries) that is Bier-side wiring, not a spec defect. See **Known gaps → errors**. |
 | **pagination** | ⚠️ **revise** | 1 missing-coverage finding, **0 citation defects** — embedded **`<embed_path>.offset` has zero cases anywhere in the tree**, while `<embed>.limit` has one (1276); the model names both parameters and cites the docs example for the offset half, and its `constraints:` only justify omitting a *deeper-nested* offset case, never the single-level one both `resource_embedding.rst#L919` and `QueryLimitedSpec.hs#L42` exercise. *Citable but uncovered*, **case-only**, and now the cheapest open item in this file. The pass is also the tree's most substantial **model correction** to date: the Range header was documented as *overriding* limit/offset when `getRanges` **intersects** them (new discriminating case 1287), four traceable-but-unmodeled behaviors were added (PAG-025..PAG-028), four cases were retargeted off a fixture name collision (`/menagerie` → `/menagerie_empty`), and two `source:` anchors were moved onto their actual assertion lines (1268, 1269). See **Known gaps → pagination**. |
-| **observability** | ⚠️ **revise** | 4 missing-coverage findings, **0 citation defects** — and unusually, **three of the four are blocked on the harness rather than on authoring effort**: the entire docs **Metrics** section (admin `/metrics`, `pgrst_db_pool_*`, `pgrst_schema_cache_*`, `pgrst_jwt_cache_*`, `ghc_*`; modelled in 5 entries, needs `request.kind: admin`, verified against `test_io/test_admin.py#L132`), **access-log line emission** (docs L15–L48: Apache-combined format, `-` placeholders, per-level line counts; needs `expect.stdout_matches`, and cases 1764–1767 assert only the status the filter keys on), and the **`server-trace-header` empty echo** (`App.hs#L289`, blocked by a direct conflict with case 1573's `headers_no_blank` on the shared instance). The fourth — **`Server-Timing` absent on error responses** (`App.hs#L154` vs `#L253`) — is black-box observable and cheap, left uncased *deliberately* because upstream never asserts it; promotable on request. Separately confirmed source-accurate: the **SQL query log** entry (`log-query`, gate at `App.hs#L223`, rendering at `Logger.hs#L192-195`), stderr-only, gap justified. The pass also **retracted a modelled rule** — the OPTIONS Server-Timing "subset" never existed at either pin — and **closed one gap**, the Server version header (case 1771). See **Known gaps → observability**. |
+| **observability** | ⚠️ **revise** | 4 missing-coverage findings, **0 citation defects** — and unusually, **three of the four are blocked on the harness rather than on authoring effort**: the entire docs **Metrics** section (admin `/metrics`, `pgrst_db_pool_*`, `pgrst_schema_cache_*`, `pgrst_jwt_cache_*`, `ghc_*`; modelled in 5 entries, needs `request.kind: admin`, verified against `test_io/test_admin.py#L132`), **access-log line emission** (docs L15–L48: Apache-combined format, `-` placeholders, per-level line counts; needs `expect.stdout_matches`, and cases 1764–1767 assert only the status the filter keys on), and the **`server-trace-header` empty echo** (`App.hs#L289` — recorded here as blocked by a direct conflict with case 1573's `headers_no_blank` on the shared instance; **that conflict dissolved on 2026-08-23**, when the headers citation audit's fix pass gave 1573 `config: {server-trace-header: ""}` and moved it onto its own variant instance — see *Known gaps → observability*). The fourth — **`Server-Timing` absent on error responses** (`App.hs#L154` vs `#L253`) — is black-box observable and cheap, left uncased *deliberately* because upstream never asserts it; promotable on request. Separately confirmed source-accurate: the **SQL query log** entry (`log-query`, gate at `App.hs#L223`, rendering at `Logger.hs#L192-195`), stderr-only, gap justified. The pass also **retracted a modelled rule** — the OPTIONS Server-Timing "subset" never existed at either pin — and **closed one gap**, the Server version header (case 1771). See **Known gaps → observability**. |
 | **operators** | **✅ pass** | **The tree's second pass verdict**, and the pass with the largest coverage delta of any so far: **50 → 87** cases (37 new, ids 10200–10236, **0 rewritten**). 2 findings, **both explicitly MINOR / non-blocking**, **0 citation defects** — no case for `not.plfts` / `not.phfts` / `not.wfts` (the `not` prefix is a single wrapper already pinned on `fts` at both flavors, cases 1090/10227, and on nine other operators), and no case putting an fts filter inside an `or=()` tree with three dictionaries (case 1099 already pins `not.fts` inside `and()`, and `or=()` composition is covered by filters). Both *citable but uncovered*, both case-only. The pass's substance was elsewhere: it **closed the filters area's `IN`/`NOT IN` empty-set gap** (cases 10200–10205 + the folded `test.items_with_different_col_types`) and it found that an entire upstream `context` block — the automatic `to_tsvector()` coercion for fts against **non**-tsvector columns, plus the tsvector-domain, recursive-domain and computed-field variants and the tsquery/websearch operand grammar — existed at **both** pins with **zero** coverage (cases 10220–10236, new model entry `grammar.fts_auto_tsvector`). It is the first re-sync in three to add fixture objects and the first ever to close another area's recorded gap. Residual: only **three of eight** `in.()` column types are swept. See **Known gaps → operators**. |
 | **rpc** | ⚠️ **revise** | **5 missing-coverage findings — the most any single area audit has produced — and 0 citation defects.** Against an area that had *just* been re-synced (41 → 44 cases, 3 new / 6 rewritten, **no fixture object**): the *Untyped functions* docs H2 (routines returning `record` / `SETOF record`, `RpcSpec.hs#L486`/`#L496`; `grep -rniE "returns_record\|setof record\|untyped function" spec/` → **zero** matches tree-wide), the *Functions with array parameters* docs H2 (a **non**-variadic array param bound three ways — JSON body `#L515`, GET literal `?arr=%7Ba,b,c%7D` `#L545`, form body `#L564` — distinct from the VARIADIC rule the area already models; the only other mention of array params in `spec/` is openapi's *schema output* cases 1667/1671/1673, never an invocation), the **text** and **xml** flavors of the single unnamed parameter (`#L1170`/`#L1177`, leaving the `MTTextPlain`/`MTTextXML` PGRST202 branches at `#L1207` unexercised while only the bytea flavor is covered, and from the *content_negotiation* area at that), *Resource Embedding on table-valued functions* (`#L324`; covered only incidentally by case **1023**, whose real subject is `/rpc` profile routing), and `?columns=` on a POST to `/rpc/` (`#L855`, note-only). All five *citable but uncovered*; **two are case-only** (the embed, `?columns=`) and **three are fixture-blocked by ownership**, not absence — the routines belong in the human-owned `fixtures/rpc.sql`. All nine cited lines were re-fetched during synthesis and read as claimed. See **Known gaps → rpc**. |
 | **mutations** | ⚠️ **revise** | **Re-audited 2026-08-22: standalone citation audit ✅ pass (fix pass ran) — this row's residue is coverage, not citations.** **0 citation defects**, and the first verdict whose findings were substantially **closed inside the pass** (48 → 65 cases: 17 new, 1 rewritten, **1 authored then deleted**, **no fixture object**). Closed in-pass: resource embedding on mutations, for every flavor the fixture DB can reach — **11412** (DELETE + to-one parent, `DeleteSpec.hs#L71`), **11413** (PATCH + one-to-one, `UpdateSpec.hs#L579`), **11415** (PATCH + m2m with a nested parent, `UpdateSpec.hs#L539`), joining representations case 1300 for POST. Also closed: the form-urlencoded insert body (11402), insignificant whitespace (11403), the empty-body PGRST102 (1398), the unique-violation 409/`23505` (11401), multi-row PATCH `Content-Range` (11400), the only-pk-table upsert pair (11410/11411), composite-pk upsert POST/PUT (11414/11408) and its PGRST105 rejection (11409), PUT ignoring `Range` (11407), UPDATE-flavored `max-affected` (11405), ignore-duplicates-with-nothing-created (11404) and the PUT-`offset` PGRST114 (1399). **One modelled rule WITHDRAWN**: `?columns=` on PUT, which nothing at v16.0 asserts and the PUT docs contradict (`tables_views.rst#L689`) — the first correction in this tree of a rule that was never a version claim, merely uncited. **One case DELETED** (11406, PUT `return=minimal`) as strictly weaker than representations case 1332, leaving a deliberate hole in the new band. Open residue: almost entirely **relation-blocked** — 15+ upstream relations the fixture DB lacks, several needing **real tables** the loader's hard-coded `isolate_mutations/1` list cannot be extended to by a delta — plus one editorial item, the four-way cross-area duplication of the PGRST114 PUT rule (1016/1383, 1030/1399). See **Known gaps → mutations**. |
@@ -4614,14 +4780,19 @@ Open follow-ups:
    exists).
 9. Decide the harness question behind **all** the unhonoured `config:` blocks —
    case **1742** (config band), the ten select cases
-   1129–1133/1139/1140/1147–1149, the three errors cases 1517/1518/1522, and
-   the three observability cases **1765/1766/1767**. Until then 1742 fails for
+   1129–1133/1139/1140/1147–1149, the three errors cases 1517/1518/1522, the
+   three observability cases **1765/1766/1767**, and — since 2026-08-23 — the
+   headers case **1573** (`server-trace-header: ""`, from the citation
+   audit's issue-#4 fix pass; honoured today by this repo's oracle runner's
+   dynamic overlay, but absent from both `HARNESS.md` §2.3's variant table
+   and bier's `@variant_case_ids`). Until then 1742 fails for
    the wrong reason, the eight aggregate cases run with `db-aggregates-enabled`
    at its `False` default, the three verbosity cases run verbose, and the three
-   log-level cases run at the shared instance's `:error`. **116** cases carry
-   `config:` (112 non-empty), unchanged for a fourth consecutive pass; **60** HTTP
+   log-level cases run at the shared instance's `:error`. **117** cases carry
+   `config:` (113 non-empty — the count moved on 2026-08-23 after four flat
+   passes); **61** HTTP
    cases carry a non-empty block outside
-   `@variant_case_ids`, of which those seventeen are the ones whose assertion
+   `@variant_case_ids`, of which those eighteen are the ones whose assertion
    actually diverges from the shared instance.
    **The content_negotiation audit adds an eighteenth case to this question and it
    is of a new kind: the case that OUGHT to carry a `config:` block and does not.**

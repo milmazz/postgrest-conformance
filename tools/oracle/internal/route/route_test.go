@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -259,7 +260,37 @@ func TestRouteWholeCorpus(t *testing.T) {
 		}
 	}
 	t.Logf("distinct http groups: %d", len(groups))
-	for _, f := range CrossCheckHarness(all) {
+
+	// goldenUnlistedVariantIDs pins the KNOWN, accepted disagreements between
+	// this package's routing and HARNESS.md §2.3's table: the 30
+	// config-carrying ids §2.3 does not yet list (issue #5, third checkbox —
+	// enumerated with their config keys in the 2026-08-22 triage doc). Any
+	// OTHER finding is drift — a §2.3 row without a harnessVariantIDs entry
+	// or vice versa (the defect class PR #12 fixed for case 1573) — and must
+	// either fix HARNESS.md §2.3 / harnessVariantIDs or be explicitly
+	// accepted here. When issue #5 lands its §2.3 amendments, shrink this
+	// list in the same change.
+	goldenUnlistedVariantIDs := []int{
+		1129, 1130, 1131, 1132, 1133, 1140, 1147, 1148, 1149, 1387, 1388,
+		1389, 1466, 1475, 1476, 1477, 1492, 1494, 1497, 1700, 1701, 1765,
+		1766, 1767, 11801, 11806, 11808, 11815, 11816, 11817,
+	}
+	want := make(map[string]bool, len(goldenUnlistedVariantIDs))
+	for _, id := range goldenUnlistedVariantIDs {
+		want[fmt.Sprintf("case %d: routed to a variant instance but not listed in HARNESS §2.3", id)] = true
+	}
+	got := CrossCheckHarness(all)
+	seen := make(map[string]bool, len(got))
+	for _, f := range got {
 		t.Logf("HARNESS finding: %s", f)
+		seen[f] = true
+		if !want[f] {
+			t.Errorf("unexpected HARNESS finding (drift — fix §2.3/harnessVariantIDs or accept it in the golden list): %s", f)
+		}
+	}
+	for f := range want {
+		if !seen[f] {
+			t.Errorf("golden HARNESS finding no longer reported (was it fixed? then remove it from the golden list): %s", f)
+		}
 	}
 }
