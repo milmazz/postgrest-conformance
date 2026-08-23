@@ -83,8 +83,10 @@ instance/config (§2.3) before sending its request.
 
 No JWT secret, no anonymous role, no pre-request hook configured, so
 requests run as the connecting database user (no role switching). Serves
-every case whose `schema:` is not `"auth"`/`"openapi"` and whose request path
-is not `/`.
+every case whose `schema:` is not `"auth"` and whose request path is not
+`/`. (Earlier revisions also excluded a `schema: "openapi"` label here; no
+case carries it — it fell out of the contract with the `openapi` schema,
+per the `db_schemas` note below.)
 
 > **Portability note — anonymous role.** "No anonymous role configured" is a
 > bier behavior that real PostgREST cannot reproduce: without `db-anon-role`,
@@ -153,15 +155,33 @@ and differing *only* in `db_schemas`:
   first, so the default profile resolves to `v1` (this is what §2.1's
   bier-specific `db_profile_default`/`db_profile_schemas` options encode;
   on real PostgREST the schema-list order provides it). Serves the
-  multi-schema profile-routing cases (`schema: multi`, the `v1`/`v2` pair).
+  multi-schema profile-routing cases: `schema: multi` (the `v1`/`v2` pair)
+  **plus the six id-selected `schema: headers` exceptions below**.
 - **`unicode`**: `db_schemas: ["تست"]` — serves `schema: unicode`.
 
 Route each non-auth case to the instance matching its `schema:` label
 (absent/`"public"`/`"test"` → the `test` instance; `unicode` → the `تست`
-instance; `multi` → the `multi` instance). On a single-schema instance the
-case's label is already the default schema, so §3 step 4's profile-header
-injection becomes a harmless no-op there — it still matters on the
-instances exposing more than one schema (auth, `multi`).
+instance; `multi` → the `multi` instance) — **with one id-selected
+exception**: the six headers-area profile-routing cases **1557, 1558, 1559,
+1560, 1574, 1583** carry `schema: headers` but exercise `v1`/`v2`/`SPECIAL`
+multi-schema behavior, and must route to the **`multi`** instance. On the
+single-schema `headers` instance they demonstrably fail: 1557 asserts the
+default-profile `Content-Profile: v1` echo, which PostgREST emits only when
+more than one schema is exposed; 1560 asserts the 406/`PGRST106` hint
+listing `v1, v2, SPECIAL "@/\#~_-` (and 1583 reuses that 406 scenario to
+assert `Vary` is absent on errors); 1558/1559/1574 read or write
+`v2`/`SPECIAL` via their own explicit profile headers. Like §2.5's
+1387–1389, the selection is by case id — the label alone does not encode it.
+
+**Skip §3 step 4's profile-header injection for every case routed to
+`multi`** — both `schema: multi` and the six exceptions. Those labels are
+fixture labels, not schema names exposed on that instance: injecting
+`Accept-Profile: headers` there turns e.g. 1557's 200 into a 406, and the
+cases that need a specific profile already carry it in their own
+`request.headers`. On a single-schema instance the case's label is already
+the default schema, so the injection is a harmless no-op there — it still
+matters on the auth instance (§2.2), the layout's one remaining
+multi-schema instance with injection.
 
 **Why view mirrors are inlined (case 1824, issue #9 — resolved).**
 PostgREST traces a view's column ancestry through `pg_depend` to find the
@@ -188,10 +208,14 @@ Everything in §2.1, **plus**:
 | `db_pre_request` | `"auth.switch_role"` | Runs inside the request's transaction. |
 | `jwt_secret` | `"reallyreallyreallyreallyverysafe"` | HS256 secret, matching PostgREST's own `testCfg` default (≥ 32 chars). |
 
-Serves cases whose `schema:` is `"auth"` or `"openapi"`, **or** whose request
-path is exactly `/` (the root/OpenAPI document resolves the anonymous role to
+Serves cases whose `schema:` is `"auth"`, **or** whose request path is
+exactly `/` (the root/OpenAPI document resolves the anonymous role to
 filter which routes it lists, even though it never switches the database
-role for the request itself).
+role for the request itself). No case carries a `schema: "openapi"` label
+(earlier revisions named it here alongside the since-dropped `openapi`
+schema); the openapi-area cases route by their `/` path — including 1654,
+whose `openapi_no_comment` label rides the root-path rule onto its §2.5
+variant.
 
 Unlike the no-auth side (§2.1.1), the auth instance keeps the **wide**
 `db_schemas` list — every label from §2.1's set (minus the dropped
@@ -212,7 +236,7 @@ anonymous role, a non-default `openapi-mode`). Each such case gets its **own**
 dedicated server instance, built by layering on top of whichever shared
 config it would otherwise use:
 
-1. Start from `base_opts` (§2.1) if the case is not an auth/openapi/root-path
+1. Start from `base_opts` (§2.1) if the case is not an auth/root-path
    case per the §2.2 rule, else `auth_opts` (§2.1 + §2.2). Under the
    per-area layout (§2.1.1) "the §2.1 base" means the instance config the
    case's `schema:` label would otherwise route to — the table below writes
@@ -224,7 +248,10 @@ config it would otherwise use:
    they are documented in §2.5, not in this table.
 
 **Every** case that declares a `config:` block needing a variant instance,
-its base, its declared `config:`, and the resulting server option(s):
+its base, its declared `config:`, and the resulting server option(s) — plus
+**1654**, which declares no `config:` of its own but keeps a row here
+because its variant is built entirely from §2.5's hard-coded
+`db_schemas` override (unlike 1387–1389, which need no table row at all):
 
 | Case id | Base | Case's `config:` | Resulting option(s) |
 |---|---|---|---|
@@ -457,8 +484,9 @@ For each case's `request:` block:
    already sets the header that would be injected, the case's value wins —
    don't overwrite it. Under the per-area layout (§2.1.1) the injection is
    a harmless no-op on single-schema instances (the label is already the
-   default schema); it still matters on the multi-schema instances (auth,
-   `multi`).
+   default schema) and is **skipped entirely for cases routed to the
+   `multi` instance** (see §2.1.1's routing rules — their labels are not
+   schema names exposed there); it still matters on the auth instance.
 5. **Request body** — a case carries at most one of these three request-body
    forms, in this precedence:
    - `body_raw` — a string sent **verbatim** on the wire (CSV, deliberately
