@@ -1,16 +1,36 @@
 name: oracle
-on: [push, pull_request]
+# `push` is restricted to main: every branch lands through a PR, whose run
+# already tests the merge ref (strictly more than the branch tip), so an
+# unrestricted push trigger only duplicated each ~1.5-minute suite run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+# Only the newest commit's verdict matters — cancel superseded runs of the
+# same ref instead of queueing them.
+concurrency:
+  group: oracle-${{ github.ref }}
+  cancel-in-progress: true
+# The job only reads the repo and uploads an artifact; it also compiles and
+# executes third-party code (Go deps, apt packages, pg-safeupdate), so keep
+# the token read-only rather than inheriting the repo default.
+permissions:
+  contents: read
 jobs:
   oracle:
     runs-on: ubuntu-latest
+    # Healthy runs finish in ~1.5 min; the Makefile's pg_isready wait loop is
+    # uncapped, so bound the job well under GitHub's 360-minute default in
+    # case the container boot or the in-container apt fetch wedges.
+    timeout-minutes: 15
     env:
       PGHOST: localhost
       PGPORT: "6432"
       PGUSER: postgres
       PGPASSWORD: postgres
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with: { go-version: "1.23", cache-dependency-path: tools/oracle/go.sum }
       # Unlike validate.yml, this job can't use a `services:` container:
       # the fixture Postgres needs pg-safeupdate compiled and installed
@@ -26,5 +46,11 @@ jobs:
         run: cd tools/oracle && go run ./cmd/oracle run -report report.json
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@v4
-        with: { name: oracle-report, path: tools/oracle/report.json }
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: oracle-report
+          path: tools/oracle/report.json
+          # A job that dies before `oracle run` produces no report; skip the
+          # upload quietly instead of stacking a missing-file warning on top
+          # of the real failure.
+          if-no-files-found: ignore
