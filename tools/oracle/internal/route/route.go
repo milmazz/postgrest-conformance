@@ -93,12 +93,12 @@ var noInjectSchemas = map[string]bool{
 	"unicode": true,
 }
 
-// harnessVariantIDs are the 33 case ids HARNESS.md §2.3 lists as needing a
+// harnessVariantIDs are the 34 case ids HARNESS.md §2.3 lists as needing a
 // per-case variant instance.
 var harnessVariantIDs = []int{
 	1139, 1467, 1468, 1469, 1470, 1471, 1472, 1473, 1491, 1493, 1495, 1498,
-	1499, 1517, 1518, 1522, 1654, 1677, 1678, 1680, 1682, 1703, 1742, 1758,
-	1763, 1764, 11800, 11802, 11803, 11804, 11805, 11807, 11818,
+	1499, 1517, 1518, 1522, 1573, 1654, 1677, 1678, 1680, 1682, 1703, 1742,
+	1758, 1763, 1764, 11800, 11802, 11803, 11804, 11805, 11807, 11818,
 }
 
 // areaSchemaLabels are the eleven area schema labels HARNESS.md §2.1 lists
@@ -454,7 +454,7 @@ func groupKey(base string, overlay map[string]Val) string {
 }
 
 // CrossCheckHarness compares the routing decisions in all against
-// HARNESS.md §2.3's hand-curated 33-id table, returning one finding line
+// HARNESS.md §2.3's hand-curated 34-id table, returning one finding line
 // per disagreement in either direction: a case this package routes to a
 // variant instance that §2.3 doesn't list, or a case §2.3 lists that this
 // package routes to a shared instance.

@@ -7,6 +7,8 @@ request:
     Content-Type: application/json
   body: { "id": "1", "c": "c1" }
 schema: headers
+config:
+  server-trace-header: ""
 expect:
   status: 201
   headers_no_blank: true
@@ -28,4 +30,15 @@ notes: >
   JSON, which the conformance harness expresses explicitly. Upstream asserts
   only `noBlankHeader`; the 201 and the empty body are the default no-Prefer
   POST outcome (see cases 1561/1563) and are asserted here as well.
+  CONFIG PRECONDITION: upstream runs this it-block under `baseCfg`, whose
+  `configServerTraceHeader = Nothing` (SpecHelper.hs#L171,
+  https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L171)
+  means NO trace header is configured. On an instance that DOES configure one
+  (e.g. the shared instance's `server-trace-header: X-Request-Id`), PostgREST
+  echoes a literal blank `X-Request-Id: ` response header whenever the request
+  carries no matching header — which trips `headers_no_blank`. The `config:`
+  block therefore pins `server-trace-header: ""` (an empty string is dropped
+  to Nothing by `optString`, Config.hs#L442 — the same pattern case 1763 uses)
+  so the case runs on a variant instance reproducing upstream's actual
+  test-config context.
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1103
