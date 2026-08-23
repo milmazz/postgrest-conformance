@@ -1009,9 +1009,10 @@ headers instance's `X-Request-Id` for `headers_no_blank` to hold, so it
 belongs on the diverging list below. This repo's oracle runner honours it via
 dynamic config overlay (`tools/oracle/internal/route/route.go` → `Route`,
 which spins a variant instance for any unsatisfied `config:` entry regardless
-of the id list), but `HARNESS.md` §2.3's variant table (33 ids) and bier's
-`@variant_case_ids` (18 ids) both predate it and need a 1573 row — recorded
-in [`COVERAGE.md`](COVERAGE.md) → *Review status*.
+of the id list), and `HARNESS.md` §2.3's variant table plus route.go's
+`harnessVariantIDs` mirror both carry the 1573 row (33 → 34 ids); only
+bier's `@variant_case_ids` (18 ids) predates it and still needs a 1573
+row — recorded in [`COVERAGE.md`](COVERAGE.md) → *Review status*.
 
 > **The openapi pass turned that inertness into a WITHDRAWN case, which is the
 > clearest demonstration of the gate this document has.** A case pinning

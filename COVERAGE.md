@@ -56,12 +56,14 @@ Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Gramma
 > **2026-08-23** heads *Validation status* (all checks clean), and the
 > adversarial-citation-audit ledger in *Review status* gains its second
 > entry: **headers — pass, 2026-08-23**, the seeded fix pass having run
-> first. **One residual this refresh opens rather than closes**: 1573's
+> first. The harness contract was updated in the same pass: 1573's
 > `config:` block is honored by this repo's oracle runner (dynamic overlay,
-> `tools/oracle/internal/route/route.go` → `Route`), but
-> [`HARNESS.md`](HARNESS.md) §2.3's variant-instance table (33 ids) and
-> bier's `@variant_case_ids` (18 ids) both predate it and list no 1573 row —
-> a harness-contract edit this file does not own.
+> `tools/oracle/internal/route/route.go` → `Route`), and
+> [`HARNESS.md`](HARNESS.md) §2.3's variant-instance table plus route.go's
+> `harnessVariantIDs` mirror both carry the 1573 row (33 → **34** ids).
+> **One residual this refresh opens rather than closes**: bier's
+> `@variant_case_ids` (18 ids) predates 1573 and lists no row for it — an
+> upstream-harness edit this repo does not own.
 
 > **Refresh, 2026-08-22 (standalone repo).** This file has been re-checked in
 > the standalone **postgrest-conformance** repository (scaffolded from
@@ -2702,12 +2704,13 @@ open. Read them against the live docs page, whose three top-level sections are
   upstream's actual test-config context (`configServerTraceHeader = Nothing`,
   `SpecHelper.hs#L171`) on a variant instance of its own — so 1573 no longer
   runs against a trace-header-configured instance and the wire conflict is
-  gone. What remains is ordinary authoring **plus a harness-contract edit**:
-  an empty-echo case against the shared instance's `X-Request-Id` is now
-  writable without contradiction, but 1573's own `config:` block is honored
-  today only by the oracle runner's dynamic overlay — `HARNESS.md` §2.3's
-  variant table and bier's `@variant_case_ids` still lack a 1573 row.
-  Demoted from *issues* to *authoring + harness bookkeeping*.
+  gone. `HARNESS.md` §2.3's variant table and route.go's
+  `harnessVariantIDs` mirror gained the 1573 row in the same pass (33 →
+  34 ids), so this repo's harness contract is consistent; what remains is
+  ordinary authoring — an empty-echo case against the shared instance's
+  `X-Request-Id` is now writable without contradiction — plus one external
+  bookkeeping item: bier's `@variant_case_ids` still lacks a 1573 row.
+  Demoted from *issues* to *authoring + upstream bookkeeping*.
 
 - **`Server-Timing` absent on error responses — uncovered *deliberately*, and the
   only promotable item here.** The model entry
@@ -4443,9 +4446,10 @@ present, reachable, correctly-named object can still be the wrong object.
 >   anchor did **not** move, so the tree's implementation-anchored count
 >   stays **60**. Two consequences are recorded elsewhere: the observability
 >   *trace-header empty echo* gap is no longer conflict-blocked (see *Known
->   gaps → observability*), and `HARNESS.md` §2.3 / bier's
->   `@variant_case_ids` still lack a 1573 row (an open harness-contract
->   edit).
+>   gaps → observability*), and `HARNESS.md` §2.3 plus route.go's
+>   `harnessVariantIDs` gained the 1573 row in the same pass (33 → 34 ids);
+>   only bier's `@variant_case_ids` still lacks one (an open
+>   upstream-harness edit).
 >
 > - **mutations** — ✅ **pass**, **2026-08-22** (a fix pass ran before the
 >   verdict was recorded). The fix pass touched exactly **three cases** —
