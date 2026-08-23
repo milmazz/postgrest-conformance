@@ -40,7 +40,7 @@ contract is:
    | `03_supplement.sql` | Small human-owned supplement loaded right after `02_base.sql`. |
    | `04_postgis.sql` | PostGIS-dependent objects (`test.shops`, the `geotest` schema). **Requires the PostGIS extension.** |
    | `05_corrections.sql` | Post-load seed corrections aligning consolidated seed data with what specific cases assert. |
-   | `06_area_schemas.sql` | Generated: mirrors `test` into each pure table/data area schema as auto-updatable views, so `Accept-Profile: <area>` resolves to a real exposed schema. |
+   | `06_area_schemas.sql` | Generated: mirrors `test` into each pure table/data area schema as auto-updatable views (pass-through for tables; relations that are themselves *views* in `test` are mirrored by inlining their definitions — see `fixtures/README.md`), so `Accept-Profile: <area>` resolves to a real exposed schema. |
    | `07_analyze.sql` | `ANALYZE;` — refreshes planner statistics (the `count=planned`/`count=estimated` pagination cases assume analyzed tables). |
 
 **PostgreSQL / PostGIS requirement.** The reference implementation develops
