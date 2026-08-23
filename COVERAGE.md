@@ -196,7 +196,9 @@ from every earlier one:
   to route around them with a `schema:` label rather than a loader change.**
   Case **1822** carries `schema: test`, the only case in the area that does, and
   the label is load-bearing: the mirrored area schemas are auto-updatable views
-  (`CREATE VIEW <area>.<rel> AS SELECT * FROM test.<rel>`), and PostgreSQL
+  (for tables like this one, pass-through: `CREATE VIEW <area>.<rel> AS SELECT *
+  FROM test.<rel>`; `test` *views* are instead mirrored by inlining their
+  definitions — issue #9), and PostgreSQL
   resolves an INSERT's missing column against the **view's** column first — so
   the `devil_int` domain default (666) is written as an explicit value and the
   base table's column default (420) never fires. Verified both ways against the

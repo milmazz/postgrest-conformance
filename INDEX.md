@@ -378,7 +378,8 @@ grep -h '^feature:' cases/1800_format_single_domain_column.yaml
   `Prefer: missing=default` the column is left out of the INSERT target list, and:
   - against the **base table**, PostgreSQL applies the **column** default → **420**
     (upstream's assertion, and what the case expects);
-  - against the **area mirror** (`CREATE VIEW … AS SELECT * FROM test.…`), the
+  - against the **area mirror** (a pass-through view, as all *table* mirrors
+    are: `CREATE VIEW … AS SELECT * FROM test.…`), the
     missing column is resolved against the *view's* column first, where the DOMAIN
     default is found and written as an explicit value → **666**.
 

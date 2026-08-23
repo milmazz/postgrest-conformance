@@ -163,26 +163,26 @@ var areaSchemaSet = func() map[string]bool {
 // ambiguity) — and are kept byte-for-byte identical to their pre-issue-#2
 // values.
 //
-// Known trade-off (case 1824, domain_representations/write/view_post_headers_only):
-// fixtures/02_base.sql defines test.datarep_todos_computed as a VIEW over
-// the test.datarep_todos table (not a base table itself), and
+// Resolved trade-off (case 1824, domain_representations/write/view_post_headers_only,
+// issue #9): fixtures/02_base.sql defines test.datarep_todos_computed as a
+// VIEW over the test.datarep_todos table (not a base table itself), and
 // fixtures/06_area_schemas.sql's domain_representations.datarep_todos_computed
-// is in turn a view over *that* view — a two-hop chain. Real PostgREST
-// traces a view's column ancestry through pg_depend to find the ultimate
-// source table's primary key (needed to compute the Location header on
-// insert), and that traversal only considers relations in schemas actually
-// listed in db-schemas: with only "domain_representations" exposed, the
-// intermediate test.datarep_todos_computed hop is invisible, the chain
-// can't be completed, no primary key is found, and Location is silently
-// omitted (confirmed by hand: booting an otherwise-identical instance with
-// PGRST_DB_SCHEMAS="domain_representations,test" restores it). This is a
-// narrower instance of the same general trade-off as the embed-ambiguity
-// fix above — PostgREST's schema-cache introspection for a relation isn't
-// scoped to its own schema alone — surfaced by, not created by, the
-// per-area split; recorded as a suite finding rather than special-cased
-// here, since adding "test" back to just this one base would reintroduce
-// the very cross-schema-relationship exposure the fix above removes it to
-// avoid.
+// used to be a pass-through view over *that* view — a two-hop chain. Real
+// PostgREST traces a view's column ancestry through pg_depend to find the
+// ultimate source table's primary key (needed to compute the Location
+// header on insert), and that traversal only considers relations in
+// schemas actually listed in db-schemas: with only "domain_representations"
+// exposed, the intermediate test.datarep_todos_computed hop was invisible,
+// the chain couldn't be completed, no primary key was found, and Location
+// was silently omitted (confirmed by hand: booting an otherwise-identical
+// instance with PGRST_DB_SCHEMAS="domain_representations,test" restored
+// it). Re-adding "test" to this base was never an option — it would
+// reintroduce the very cross-schema-relationship exposure the fix above
+// removes it to avoid. Instead the fixture generator
+// (tools/regen_area_schemas.exs) now mirrors `test` views by copying each
+// view's own definition rather than selecting from the view, collapsing
+// every area mirror of a view to a single hop over the same base tables —
+// so the ancestry chain completes within the area's own db-schemas entry.
 //
 // auth's (and, before this change, bulk's) PGRST_DB_SCHEMAS deliberately
 // omits "openapi" even though HARNESS.md §2.1's db-schemas list names it:
