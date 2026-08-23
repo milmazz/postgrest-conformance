@@ -7,13 +7,15 @@ DB_PORT ?= 6432
 # this repo, only tags: https://github.com/eradman/pg-safeupdate/tags).
 SAFEUPDATE_REF ?= 1.7
 
-.PHONY: test build fetch run db-up db-down
+.PHONY: test build fetch run validate db-up db-down
 build:
 	go build ./...
 test:
 	go test ./...
 fetch:
 	go run ./cmd/oracle fetch
+validate:
+	go run ./cmd/oracle validate
 run:
 	go run ./cmd/oracle run -report report.json
 db-up:

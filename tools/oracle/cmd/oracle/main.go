@@ -26,5 +26,5 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, `usage: oracle <fetch|db-setup|db-teardown|run> [flags]`)
+	fmt.Fprintln(os.Stderr, `usage: oracle <fetch|db-setup|db-teardown|run|validate> [flags]`)
 }
