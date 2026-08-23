@@ -286,11 +286,35 @@ defmodule Regen do
 
     try do
       # Relations in `test` to mirror (tables + views, anything selectable).
+      #
+      # For relations that are themselves VIEWS in `test`, a pass-through
+      # mirror (`SELECT * FROM test.<view>`) creates a TWO-hop chain:
+      # area view -> test view -> base table. PostgREST's view-ancestry
+      # introspection (which finds the ultimate source table's primary key,
+      # needed e.g. for the Location header on insert) only traverses
+      # relations in schemas listed in db-schemas — on a single-schema area
+      # instance the intermediate `test` view is invisible and the chain
+      # breaks (issue #9, case 1824). So plain views are mirrored by copying
+      # the view's own definition (`pg_get_viewdef`), collapsing the mirror
+      # to a single hop over the same base relations the `test` view reads.
+      # Every `test` view is single-hop over base tables, so one level of
+      # inlining is sufficient.
+      #
+      # Views carrying INSTEAD OF triggers are the exception: copying their
+      # definition would lose the trigger, so they keep the pass-through
+      # mirror (writes must keep firing the `test` view's trigger).
       %Postgrex.Result{rows: rows} =
         Postgrex.query!(
           conn,
           """
-          SELECT c.relname
+          SELECT c.relname,
+                 CASE
+                   WHEN c.relkind = 'v' AND NOT EXISTS (
+                     SELECT 1 FROM pg_trigger t
+                     WHERE t.tgrelid = c.oid AND NOT t.tgisinternal
+                   )
+                   THEN pg_get_viewdef(c.oid)
+                 END AS viewdef
           FROM pg_class c
           JOIN pg_namespace n ON n.oid = c.relnamespace
           WHERE n.nspname = 'test'
@@ -300,7 +324,18 @@ defmodule Regen do
           []
         )
 
-      relations = Enum.map(rows, fn [name] -> name end)
+      mirror_defs =
+        Enum.map(rows, fn [name, viewdef] ->
+          body =
+            case viewdef do
+              nil -> ~s(SELECT * FROM test."#{name}")
+              def_ -> def_ |> String.trim() |> String.trim_trailing(";")
+            end
+
+          {name, body}
+        end)
+
+      relations = Enum.map(mirror_defs, fn {name, _body} -> name end)
 
       # Single-composite-argument functions in `test` (computed columns /
       # computed relationships). For each area schema we recreate a thin wrapper
@@ -321,12 +356,8 @@ defmodule Regen do
         Postgrex.query!(conn, ~s(DROP SCHEMA IF EXISTS "#{schema}" CASCADE), [])
         Postgrex.query!(conn, ~s(CREATE SCHEMA "#{schema}"), [])
 
-        for rel <- relations do
-          Postgrex.query!(
-            conn,
-            ~s(CREATE VIEW "#{schema}"."#{rel}" AS SELECT * FROM test."#{rel}"),
-            []
-          )
+        for {rel, body} <- mirror_defs do
+          Postgrex.query!(conn, ~s(CREATE VIEW "#{schema}"."#{rel}" AS #{body}), [])
         end
 
         for fn_def <- setof_fns, fn_def.ret_relation in relations do
