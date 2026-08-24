@@ -1,0 +1,22 @@
+id: 11109
+feature: select/spread/one-to-many-nested-non-spread
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(process:name,process_costs(cost))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","process":["Process A1", "Process A2"],"process_costs":[{"cost": 150.00}, {"cost": 200.00}]}
+    - {"factory":"Factory B","process":["Process B1", "Process B2"],"process_costs":[{"cost": 180.00}, {"cost": 70.00}]}
+    - {"factory":"Factory C","process":["Process C1", "Process C2", "Process XX", "Process YY"],"process_costs":[{"cost": 40.00}, {"cost": 70.00}, null, {"cost": 40.00}]}
+    - {"factory":"Factory D","process":[],"process_costs":[]}
+notes: >
+  A NON-spread one-to-one embed nested inside a spread to-many renders as
+  an array of objects (null where the nested row is missing), contrasting
+  with the flat value array of the spread form in case 11105
+  (SpreadQueriesSpec.hs:206).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L206

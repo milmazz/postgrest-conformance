@@ -1,0 +1,21 @@
+id: 11106
+feature: select/spread/one-to-many-nested-many-to-one
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(process:name,...process_categories(categories:name))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","process":["Process A1", "Process A2"],"categories":["Batch", "Mass"]}
+    - {"factory":"Factory B","process":["Process B1", "Process B2"],"categories":["Batch", "Batch"]}
+    - {"factory":"Factory C","process":["Process C1", "Process C2", "Process XX", "Process YY"],"categories":["Mass", "Mass", "Mass", "Mass"]}
+    - {"factory":"Factory D","process":[],"categories":[]}
+notes: >
+  A many-to-one spread nested inside a spread to-many contributes one
+  element per child row, repeating shared parents
+  (SpreadQueriesSpec.hs:173).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L173

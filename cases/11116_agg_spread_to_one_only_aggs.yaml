@@ -1,0 +1,20 @@
+id: 11116
+feature: select/aggregate/spread-to-one-only-aggregates
+request:
+  method: GET
+  path: /budget_expenses?select=...budget_categories(total_budget:budget_amount.sum())
+  headers: { Accept: application/json }
+schema: test
+config:
+  db-aggregates-enabled: true
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"total_budget": 9501.06}
+notes: >
+  With only aggregates supplied on the spread fields there is no GROUP BY —
+  a single row aggregates over everything. Requires
+  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:152).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L152

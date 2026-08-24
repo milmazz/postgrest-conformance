@@ -303,6 +303,11 @@ because its variant is built entirely from §2.5's hard-coded
 | 1765 | bulk | `log-level: warn` | `log_level: :warn` |
 | 1766 | bulk | `log-level: info` | `log_level: :info` |
 | 1767 | bulk | `log-level: crit` | `log_level: :crit` |
+| 11115 | bulk | `db-aggregates-enabled: true` | `db_aggregates_enabled: true` (same overlay as 1129–1133/1147–1149 — may share their instance) |
+| 11116 | bulk | `db-aggregates-enabled: true` | `db_aggregates_enabled: true` |
+| 11117 | bulk | `db-aggregates-enabled: true` | `db_aggregates_enabled: true` |
+| 11118 | bulk | `db-aggregates-enabled: true` | `db_aggregates_enabled: true` |
+| 11119 | bulk | `db-aggregates-enabled: true` | `db_aggregates_enabled: true` (the PGRST127 rejection fires with aggregates ENABLED — it is a to-many-spread limitation, not the PGRST123 disallowed error) |
 | 11800 | auth | `jwt-role-claim-key: '$["https://www.example.com/roles"][0].value'` | same key |
 | 11801 | auth | `jwt-role-claim-key: "$.myDomain[3]"` | same key |
 | 11802 | auth | `jwt-role-claim-key: "$.myRole"` | same key |

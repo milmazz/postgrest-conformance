@@ -1,0 +1,22 @@
+id: 11114
+feature: select/spread/one-to-many-order-related
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(name,...process_costs(cost))&processes.order=process_costs(cost)&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","name":["Process A1", "Process A2"],"cost":[150.00, 200.00]}
+    - {"factory":"Factory B","name":["Process B2", "Process B1"],"cost":[70.00, 180.00]}
+    - {"factory":"Factory C","name":["Process C1", "Process YY", "Process C2", "Process XX"],"cost":[40.00, 40.00, 70.00, null]}
+    - {"factory":"Factory D","name":[],"cost":[]}
+notes: >
+  processes.order=process_costs(cost) orders the arrays by a column of the
+  nested related table rather than of the spread relation itself; the
+  missing cost row (process id 7) sorts last as null
+  (SpreadQueriesSpec.hs:323).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L323

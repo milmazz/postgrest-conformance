@@ -1,0 +1,18 @@
+id: 11103
+feature: select/spread/one-to-many-null-element
+request:
+  method: GET
+  path: /managers?select=name,...organizations(organizations:name,referees:referee)&id=eq.1
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"name":"Referee Manager","organizations":["Referee Org"],"referees":[null]}
+notes: >
+  When the child row exists but the selected value is null, the spread
+  array contains a single null element — distinct from the empty array of
+  the no-children case (SpreadQueriesSpec.hs:143).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L143

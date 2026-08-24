@@ -1,0 +1,21 @@
+id: 11108
+feature: select/spread/one-to-many-nested-many-to-many
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(process:name,...supervisors(supervisors:name))&order=name&processes.order=name&processes.supervisors.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","process":["Process A1", "Process A2"],"supervisors":[["Mary"], ["John"]]}
+    - {"factory":"Factory B","process":["Process B1", "Process B2"],"supervisors":[["Peter", "Sarah"], ["John", "Mary"]]}
+    - {"factory":"Factory C","process":["Process C1", "Process C2", "Process XX", "Process YY"],"supervisors":[["Peter"], ["Peter"], [], []]}
+    - {"factory":"Factory D","process":[],"supervisors":[]}
+notes: >
+  A many-to-many spread (through the process_supervisor junction) nested
+  inside a spread to-many yields an array of arrays
+  (SpreadQueriesSpec.hs:195).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L195

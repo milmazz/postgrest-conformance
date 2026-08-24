@@ -57,9 +57,18 @@ The first `/`-delimited segment of each case's `feature:` field is the
 **authoritative** area assignment. The id bands below are derived from what is on
 disk now; read the `feature:` prefix if a row ever looks ambiguous.
 
-> **Non-contiguous bands.** **Five** areas do not occupy a single contiguous
+> **Non-contiguous bands.** **Six** areas do not occupy a single contiguous
 > range and regenerating this file must preserve that rather than collapsing it:
 >
+> - **select** (new 2026-08-23) uses **11100–11121** on top of its full primary
+>   band **1100–1149** (all 50 primary ids are in use). Unlike every earlier
+>   overflow, this one is **declared**: `spec/select.yaml` claims the closed
+>   range **[11100..11199]** (follow-up 19's convention), so 11122–11199 are
+>   reserved for select and **only** ids past 11199 are up for future band
+>   grabs. `11100` sorts immediately after `1110` in a *lexical* listing, so
+>   these 22 interleave with select's **own** 1110–1119 block — the only
+>   self-interleaving band in the tree, chosen so the collision stays inside
+>   one area.
 > - **auth** uses **11800–11818** on top of its full primary band **1450–1499**
 >   (all 50 primary ids are in use). `11800` sorts immediately after `1180` in a
 >   *lexical* listing, so they interleave with the filters area's 1180–1199 cases
@@ -91,7 +100,7 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 >   with nothing. That is luck, not design — `content_negotiation.yaml` declares
 >   no overflow range, exactly as `operators.yaml` and `mutations.yaml` do not.
 >
-> **There are still FOUR 5-digit bands, so `ls cases/` is actively
+> **There are now FIVE 5-digit bands, so `ls cases/` is actively
 > misleading — always `ls | sort -n`.** The `feature:` prefix remains
 > authoritative; an id's numeric neighbourhood never decides its area.
 >
@@ -144,26 +153,30 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > **case-sensitive-identifier** flavor, upstream's quoted `/UnitTest` relation,
 > which the fixture DB does not have.
 >
-> **The FOUR overflow bands follow four different placements and only one
-> declaration, and this pass is the fourth-area event follow-up 19 was written to
-> prevent.** `spec/filters.yaml` *declares* `[10600..10799]` as its area's closed
-> overflow range (and has used none of it); `spec/operators.yaml` declares
-> nothing — its band exists only as the ids on disk; `spec/mutations.yaml`
-> likewise declares nothing and chose 11400+, which lands numerically *between*
-> operators' and auth's ranges; **`spec/content_negotiation.yaml` declares
-> nothing either** and chose **12400+**, the highest so far. **Four areas, one
-> declaration, four ad-hoc placements.** `rpc` still holds 1400–1443 with only
-> 1444–1449 free before auth starts at 1450, while its audit left **five** open
-> findings that need more than six cases — so a **fifth** area will face the same
-> question. See [`COVERAGE.md`](COVERAGE.md) → follow-up 19 before anyone
-> picks a number.
+> **The FIVE overflow bands now follow five placements and TWO declarations —
+> and the fifth area (select, 2026-08-23) is the first to declare its range
+> at the moment it opened it,** which is the outcome follow-up 19 asked for.
+> `spec/filters.yaml` *declares* `[10600..10799]` as its area's closed
+> overflow range (and has used none of it); `spec/select.yaml` declares
+> **[11100..11199]** and has used 11100–11121 of it; `spec/operators.yaml`
+> declares nothing — its band exists only as the ids on disk;
+> `spec/mutations.yaml` likewise declares nothing and chose 11400+, which
+> lands numerically *between* operators' and auth's ranges;
+> `spec/content_negotiation.yaml` declares nothing either and chose 12400+,
+> the highest so far. `rpc` still holds 1400–1443 with only 1444–1449 free
+> before auth starts at 1450, while its audit left **five** open findings
+> that need more than six cases — when it opens a band, follow the
+> declare-at-open precedent (avoid [11100..11199] and 11400–11415/11800+/
+> 12400+). See [`COVERAGE.md`](COVERAGE.md) → follow-up 19.
 
 ## Area <-> id band <-> fixture fragment
 
-Re-derived from `cases/*.yaml` on **2026-08-23**: every count, id band and
-`schema:`-label distribution below matches the files on disk at that date
-(unchanged from the 2026-08-22 derivation — the only case edit since, the
-headers fix pass on 1573, touched no count, band or label).
+Re-derived from `cases/*.yaml` on **2026-08-23** (second derivation that
+date — after the select spread/aggregates pass added cases **11100–11121**):
+every count, id band and `schema:`-label distribution below matches the
+files on disk at that date. (The first 2026-08-23 derivation, before that
+pass, was unchanged from 2026-08-22 — the headers fix on 1573 touched no
+count, band or label.)
 The *Fixture fragment* column names each area's historical fragment (now under
 `fixtures/provenance/`, frozen, or `fixtures/inputs/` for the two live
 generator inputs); at runtime all areas load from the single numbered chain
@@ -173,7 +186,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 |------|------:|---------|------------------|-----------------------|
 | url_grammar | 36 | 1000–1035 | `fixtures/provenance/url_grammar.sql` + `fixtures/provenance/url_grammar.delta.sql` (case 1029's `test.pgrst_reserved_chars` and case 1035's `test."Server Today"`, both folded) | `test` (18), `multi` (14), `unicode` (3), `ordering` (1) |
 | operators | 87 | 1050–1099, 10200–10236 | `fixtures/provenance/operators.sql` + `fixtures/provenance/operators.delta.sql` (`test.items_with_different_col_types`, `test.tsearch_to_tsvector`, the `test.tsvector_not_null`/`tsvector_not_empty` domains and the `test.text_search_vector(test.tsearch_to_tsvector)` computed field, all folded) | `operators` (87) |
-| select | 50 | 1100–1149 | `fixtures/provenance/select.sql` | `test` (50) |
+| **select** | **72** | **1100–1149, 11100–11121** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — folded 2026-08-23; enables the spread-to-many and aggregates-on-spreads cases) | `test` (72) |
 | filters | 50 | 1150–1199 | `fixtures/provenance/filters.sql` | `test` (50) |
 | ordering | 33 | 1200–1232 | `fixtures/provenance/ordering.sql` | `ordering` (30), `test` (2), `mutations` (1) |
 | pagination | 39 | 1250–1288 | `fixtures/provenance/pagination.sql` (**no delta** — the v16.0 re-sync added eleven cases and zero fixture objects) | `pagination` (39) |
@@ -189,17 +202,17 @@ generator inputs); at runtime all areas load from the single numbered chain
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **762 cases**, **17 areas**, **17 fixture fragments**
-(plus **8** `*.delta.sql` write channels under `fixtures/provenance/`, all
-currently **comment-only** — re-verified mechanically on 2026-08-22: stripping
-comment and blank lines leaves zero lines in every one of the eight. Each
-carries a single `-- Folded into ../fixtures.sql on <date> …` provenance line
-and no DDL — the fold target named in those lines is bier-era; in this repo a
-future fold lands in `fixtures/02_base.sql`. **Three** are dated 2026-08-08
-(`headers`, `ordering`, `rpc`); **five** are dated 2026-08-09
-(`content_negotiation`, `url_grammar`, `errors`, `operators`, and
-`domain_representations`). **There is still no
-`mutations.delta.sql` and no `representations.delta.sql`.** See
+Total: **784 cases**, **17 areas**, **17 fixture fragments**
+(plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
+currently **comment-only**: stripping comment and blank lines leaves zero
+lines in every one. Each carries a `-- Folded into … on <date> …` provenance
+line and no DDL. **Three** are dated 2026-08-08 (`headers`, `ordering`,
+`rpc`); **five** are dated 2026-08-09 (`content_negotiation`, `url_grammar`,
+`errors`, `operators`, and `domain_representations`) — those eight name the
+bier-era fold target `../fixtures.sql`; the **ninth**, `select.delta.sql`
+(dated 2026-08-23, the factories family), is the first folded in this
+standalone repo and names the real target `../02_base.sql`. **There is
+still no `mutations.delta.sql` and no `representations.delta.sql`.** See
 [`fixtures/README.md`](fixtures/README.md) for who may write which file).
 
 **The domain_representations re-sync DID add a fixture object**, unlike the three

@@ -1819,6 +1819,29 @@ CREATE VIEW config.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: config; Owner: -
 --
 
@@ -1993,6 +2016,30 @@ CREATE VIEW config.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -2313,6 +2360,48 @@ CREATE VIEW config.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: config; Owner: -
 --
 
@@ -2425,6 +2514,16 @@ CREATE VIEW config.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -2611,6 +2710,29 @@ CREATE VIEW domain_representations.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: domain_representations; Owner: -
 --
 
@@ -2785,6 +2907,30 @@ CREATE VIEW domain_representations.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -3105,6 +3251,48 @@ CREATE VIEW domain_representations.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: domain_representations; Owner: -
 --
 
@@ -3217,6 +3405,16 @@ CREATE VIEW domain_representations.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -3522,6 +3720,29 @@ CREATE VIEW mutations.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: mutations; Owner: -
 --
 
@@ -3696,6 +3917,30 @@ CREATE VIEW mutations.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -4016,6 +4261,48 @@ CREATE VIEW mutations.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: mutations; Owner: -
 --
 
@@ -4128,6 +4415,16 @@ CREATE VIEW mutations.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -4314,6 +4611,29 @@ CREATE VIEW operators.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: operators; Owner: -
 --
 
@@ -4488,6 +4808,30 @@ CREATE VIEW operators.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -4808,6 +5152,48 @@ CREATE VIEW operators.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: operators; Owner: -
 --
 
@@ -4920,6 +5306,16 @@ CREATE VIEW operators.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -5106,6 +5502,29 @@ CREATE VIEW ordering.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: ordering; Owner: -
 --
 
@@ -5280,6 +5699,30 @@ CREATE VIEW ordering.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -5600,6 +6043,48 @@ CREATE VIEW ordering.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: ordering; Owner: -
 --
 
@@ -5712,6 +6197,16 @@ CREATE VIEW ordering.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -5898,6 +6393,29 @@ CREATE VIEW pagination.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: pagination; Owner: -
 --
 
@@ -6072,6 +6590,30 @@ CREATE VIEW pagination.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -6392,6 +6934,48 @@ CREATE VIEW pagination.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: pagination; Owner: -
 --
 
@@ -6504,6 +7088,16 @@ CREATE VIEW pagination.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --
@@ -6709,6 +7303,29 @@ CREATE VIEW representations.big_projects AS
 
 
 --
+-- Name: budget_categories; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.budget_categories AS
+ SELECT id,
+    category_name,
+    budget_owner,
+    budget_amount
+   FROM test.budget_categories;
+
+
+--
+-- Name: budget_expenses; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.budget_expenses AS
+ SELECT id,
+    expense_amount,
+    budget_category_id
+   FROM test.budget_expenses;
+
+
+--
 -- Name: capital; Type: VIEW; Schema: representations; Owner: -
 --
 
@@ -6883,6 +7500,30 @@ CREATE VIEW representations.evil_friends_with_column_default AS
  SELECT id,
     name
    FROM test.evil_friends_with_column_default;
+
+
+--
+-- Name: factories; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.factories AS
+ SELECT id,
+    name
+   FROM test.factories;
+
+
+--
+-- Name: factory_buildings; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.factory_buildings AS
+ SELECT id,
+    code,
+    size,
+    type,
+    factory_id,
+    inspections
+   FROM test.factory_buildings;
 
 
 --
@@ -7203,6 +7844,48 @@ CREATE VIEW representations.private_table AS
 
 
 --
+-- Name: process_categories; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.process_categories AS
+ SELECT id,
+    name
+   FROM test.process_categories;
+
+
+--
+-- Name: process_costs; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.process_costs AS
+ SELECT process_id,
+    cost
+   FROM test.process_costs;
+
+
+--
+-- Name: process_supervisor; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.process_supervisor AS
+ SELECT process_id,
+    supervisor_id
+   FROM test.process_supervisor;
+
+
+--
+-- Name: processes; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.processes AS
+ SELECT id,
+    name,
+    factory_id,
+    category_id
+   FROM test.processes;
+
+
+--
 -- Name: project_invoices; Type: VIEW; Schema: representations; Owner: -
 --
 
@@ -7315,6 +7998,16 @@ CREATE VIEW representations.stuff AS
  SELECT id,
     name
    FROM test.stuff;
+
+
+--
+-- Name: supervisors; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.supervisors AS
+ SELECT id,
+    name
+   FROM test.supervisors;
 
 
 --

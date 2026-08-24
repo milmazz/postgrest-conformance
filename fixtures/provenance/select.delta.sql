@@ -1,0 +1,10 @@
+-- Folded into ../02_base.sql on 2026-08-23 (test.factories,
+-- test.process_categories, test.processes, test.process_costs,
+-- test.supervisors, test.process_supervisor, test.factory_buildings,
+-- test.budget_categories, test.budget_expenses — DDL + seeds mirrored
+-- byte-faithfully from upstream test/spec/fixtures/schema.sql#L3588-L3599,
+-- #L3713-L3744, #L3815-L3822 and data.sql#L855-L941, including the
+-- deliberately absent budget_expenses id 4 and process_costs id 7; no
+-- GRANTs — the test base's anon role is the connection user. Enables the
+-- spread-to-many and aggregates-on-spreads cases 11100-11121); empty until
+-- the next delta.

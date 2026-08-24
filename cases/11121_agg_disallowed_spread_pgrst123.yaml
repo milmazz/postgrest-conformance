@@ -1,0 +1,22 @@
+id: 11121
+feature: select/aggregate/disallowed-spread-pgrst123
+request:
+  method: GET
+  path: /project_invoices?select=...projects(id.count())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    hint: null
+    details: null
+    code: "PGRST123"
+    message: "Use of aggregate functions is not allowed"
+notes: >
+  The PGRST123 rejection also covers aggregates inside a to-one spread
+  embed. Assumes: default db-aggregates-enabled=false
+  (AggregateFunctionsSpec.hs:334; the to-many spread flavor is asserted at
+  L345).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L334

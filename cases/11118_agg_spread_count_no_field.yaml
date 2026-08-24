@@ -1,0 +1,24 @@
+id: 11118
+feature: select/aggregate/spread-count-no-field
+request:
+  method: GET
+  path: /process_supervisor?select=supervisor_id,...processes(count())&order=supervisor_id
+  headers: { Accept: application/json }
+schema: test
+config:
+  db-aggregates-enabled: true
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"supervisor_id": 1, "count": 2}
+    - {"supervisor_id": 2, "count": 2}
+    - {"supervisor_id": 3, "count": 3}
+    - {"supervisor_id": 4, "count": 1}
+notes: >
+  count() without a field works inside a to-one spread, grouped by the
+  parent's plain column. Requires db-aggregates-enabled=true
+  (AggregateFunctionsSpec.hs:231, inside the context at L230; the second
+  get, L239, asserts the aliased form).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L231

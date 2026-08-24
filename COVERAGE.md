@@ -10,8 +10,10 @@ which `api` is the parent counted through its sub-pages).
 A docs page with no covering case (and not explicitly scoped out below) is
 flagged **GAP**.
 
-Pinned target: **PostgREST v16.0**. Total cases: **762** across 17 areas
-(counted on disk this pass, not carried over). The page set is unchanged from
+Pinned target: **PostgREST v16.0**. Total cases: **784** across 17 areas
+(counted on disk at the 2026-08-23 select spread/aggregates pass — see the
+newest refresh box below; the docs-page enumeration underneath was counted
+at 762 and every mapping row still names files that exist). The page set is unchanged from
 the previous pass — `references.html` lists 12 entries (11 pages plus
 the `api` parent: Authentication, API, CLI, Transactions, Connection Pool, Schema
 Cache, Errors, Configuration, Observability, Admin Server, HTTP Server, Listener)
@@ -22,7 +24,37 @@ Functions as RPC, Schemas, Computed Fields, Domain Representations, Pagination a
 Count, Resource Embedding, Resource Representation, Media Type Handlers, Aggregate
 Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Grammar.
 
-> **Refresh, 2026-08-23 (headers citation audit).** Re-checked at branch
+> **Refresh, 2026-08-23 (select spread/aggregates pass — the tree's first
+> case growth in this standalone repo).** Motivated by the HPC/it-block
+> coverage measurement run earlier the same day (`scratch/coverage/`),
+> which ranked spread embedding + aggregate hoisting as the largest
+> implementation-coverage hole (SpreadQueriesSpec 2/43 it-blocks cited,
+> AggregateFunctionsSpec 8/41; `PostgREST.Plan` 366 unexercised
+> expressions). This pass adds **22 cases, 11100–11121** — the select area's
+> first overflow band, **declared** as the closed range `[11100..11199]` in
+> `spec/select.yaml` per follow-up 19 (the first area to declare at open) —
+> taking select 50 → **72** cases and the tree 762 → **784**. Fixture: the
+> **nine-table factories family** (factories, process_categories,
+> processes, process_costs, supervisors, process_supervisor,
+> factory_buildings, budget_categories, budget_expenses) was folded into
+> `fixtures/02_base.sql` through the newly opened `select.delta.sql`
+> channel (the ninth delta channel, the first folded in this repo), DDL and
+> seeds mirrored byte-faithfully from upstream `test/spec/fixtures/`;
+> `06_area_schemas.sql` regenerated (694 mirror-view lines). Contract
+> knock-ons, all landed in this pass: **HARNESS.md §2.3** gains five
+> `db-aggregates-enabled: true` rows (**11115–11119**, table now 66
+> config-driven ids), `route.go`'s `harnessVariantIDs` mirror matches (64 →
+> **69** ids), and `validate_test.go`'s corpus pin moved 762 → 784. Known
+> gaps closed below: *Spread To-Many relationships* (was the second select
+> finding) and the core of *Aggregates in To-One Spreads* incl. the
+> **PGRST127** to-many-spread rejection (first case of that code anywhere
+> in the tree) and the **PGRST123** disallowed pair (11120/11121, closing
+> `select.agg_disallowed`'s empty cases list). Verification: `oracle
+> validate` clean over 784; full oracle run against the pinned v16.0
+> binary on a fresh fixture DB: **TOTAL 784/784** (an interim run showed
+> 1305 red on `Location: …id=eq.3` — sequence state left by an earlier
+> aborted run on the same DB, gone on rebuild; recorded here because it is
+> the run-once-per-db-setup assumption biting, not a suite defect). Re-checked at branch
 > `main`, HEAD **`80015a1`** — the mutations citation-audit fix pass described
 > in the 2026-08-22 box below is now **committed** (cases 1360/1368/1373,
 > PR #11) — with exactly **two uncommitted working-tree edits**: case
@@ -318,10 +350,10 @@ Its findings are itemized under **Known gaps → content_negotiation**.
 | `computed_fields` (Computed Fields) | 1128 (select computed-column), 1208 (ordering computed), 1806, **1824–1836** (domain rep. through the `datarep_todos_computed` view and its computed column) | Computed (virtual) columns in select and order. **Materially strengthened this pass**: the whole `datarep_todos_computed` write block (a POST/PATCH surface on a view that carries a computed column, **1824–1836**) pins that a computed field is rendered through its domain's `<domain> AS json` cast on a *mutation representation*, not only on a read — 1826 asserts the computed `dark_color` in a `return=representation` POST body, 1831/1832 in bulk PATCH bodies. |
 | `domain_representations` (Domain Representations) | **1800–1836 (domain_representations, 37 cases)** | **COVERED**: CREATE DOMAIN cast representations — read (format cast shapes output, incl. implicit `select=*` and through-embed), write (parser cast applied to bodies, `columns=` param), filter (domain-typed predicates, `in`/`not.in`, across relations), default (no cast → base type, plus **column-default-beats-domain-default**, 1822), error paths (1819–1820, 1834, 1836), and the pattern operators deliberately **not** wired to representations (**1821** — `ilike` on a datarep column reaches Postgres raw and 404s on SQLSTATE 42883). **The write half is new this pass** (**1823–1836**): headers-only POST, POST/PATCH through the updatable `datarep_todos_computed` view, bulk PATCH, `?columns=` on PATCH, and the no-rows-matched PATCH. One **non-blocking** residual: the docs' `json`→domain no-cast fallback note (`domain_representations.rst#L159`) has no case, because upstream ships no test for it — see **Known gaps → domain_representations**. |
 | `pagination_count` (Pagination and Count) | **1250–1288** (pagination, **39** cases), 1431 (rpc Range header), 1700–1701 (db-max-rows), 1522, 1526 (the inline 416 body's verbosity and header set) | limit/offset, Range header, exact/planned/estimated count, db-max-rows, the two properties of the **inline** out-of-range 416 that `errorResponseFor` never sees, and — new this pass — the page's table-function leg ("This also works on views and table functions", `pagination_count.rst` L61) plus the Range header's **method scoping** and its **intersection** (not override) with limit/offset. **Partial** — two gaps: embedded `<embed_path>.offset` has zero cases anywhere in the tree (**Known gaps → pagination**, and the tree's single largest *documented-parameter* hole), and the modelled suppression of `Content-Length` on a **HEAD** 416 has no case (**Known gaps → errors**). |
-| `resource_embedding` (Resource Embedding) | 1112–1127, 1133–1142 (select embed/spread/one-to-one/computed rels/aliases/`!fk` hints), 1181–1199 (filters embed), 1211–1224, 1227–1229 (ordering embed/related), 1276 (nested limit), 1028 (legacy embed target name), 1736 (`url-use-legacy-target-names` dump), **1300, 11412, 11413, 11415 (embedding in a mutation's returned representation)** | Many-to-one/one-to-many/many-to-many, one-to-one (pk-as-fk, unique FK), computed relationships, nested, inner/left, disambiguation (incl. the `table!fk` hint, 1142), spread, the v16 target-name→alias migration (1028, 1138–1141, 1188–1190, 1224), and — **new this pass** — the *mutation* flavor: `select=` with an embed on a `DELETE` returning its parent (**11412**), on a `PATCH` returning a one-to-one child (**11413**) and on a `PATCH` returning many-to-many children each with their own parent (**11415**), all three under `Prefer: return=representation`. **Partial** — Foreign Key Joins on Views / Chains of Views, Spread To-Many, and FK Joins on Partitioned Tables have no case (**Known gaps → select**); the page's *Order in spread to-many* section has no case in any band (**Known gaps → ordering**); the page's own `actors.limit=10&actors.offset=2` example is half-covered — the `.limit` half by 1276, the `.offset` half by nothing (**Known gaps → pagination**); and embedding **through a table-valued function** — which the *Table-Valued Functions* section of `functions.rst` explicitly says "can also use Resource Embedding" — is exercised only incidentally, by case **1023** in the `url_grammar` band, whose actual subject is `/rpc` profile routing (**Known gaps → rpc**); and the *mutation* flavor is covered only for the relations the consolidated fixture happens to have — the four `web_content` self-reference flavors, the `artists` order and batch-upsert flavors and the DELETE one-to-one reverse direction have no case (**Known gaps → mutations**). |
+| `resource_embedding` (Resource Embedding) | 1112–1127, 1133–1142 (select embed/spread/one-to-one/computed rels/aliases/`!fk` hints), **11100–11114 (spread to-many, new 2026-08-23)**, 1181–1199 (filters embed), 1211–1224, 1227–1229 (ordering embed/related), 1276 (nested limit), 1028 (legacy embed target name), 1736 (`url-use-legacy-target-names` dump), **1300, 11412, 11413, 11415 (embedding in a mutation's returned representation)** | Many-to-one/one-to-many/many-to-many, one-to-one (pk-as-fk, unique FK), computed relationships, nested, inner/left, disambiguation (incl. the `table!fk` hint, 1142), spread, the v16 target-name→alias migration (1028, 1138–1141, 1188–1190, 1224), and — **new this pass** — the *mutation* flavor: `select=` with an embed on a `DELETE` returning its parent (**11412**), on a `PATCH` returning a one-to-one child (**11413**) and on a `PATCH` returning many-to-many children each with their own parent (**11415**), all three under `Prefer: return=representation`. **Partial** — Foreign Key Joins on Views / Chains of Views, Spread To-Many, and FK Joins on Partitioned Tables have no case (**Known gaps → select**); the page's *Order in spread to-many* section has no case in any band (**Known gaps → ordering**); the page's own `actors.limit=10&actors.offset=2` example is half-covered — the `.limit` half by 1276, the `.offset` half by nothing (**Known gaps → pagination**); and embedding **through a table-valued function** — which the *Table-Valued Functions* section of `functions.rst` explicitly says "can also use Resource Embedding" — is exercised only incidentally, by case **1023** in the `url_grammar` band, whose actual subject is `/rpc` profile routing (**Known gaps → rpc**); and the *mutation* flavor is covered only for the relations the consolidated fixture happens to have — the four `web_content` self-reference flavors, the `artists` order and batch-upsert flavors and the DELETE one-to-one reverse direction have no case (**Known gaps → mutations**). |
 | `resource_representation` (Resource Representation) | **1300–1327 + 1330–1333 (representations, 32 cases)**, 1230 (order applied to a PATCH's returned representation), **1823, 1824** (`return=headers-only` on a datarep table and on an updatable view — the body is still *parsed* through the `json AS <domain>` cast even though nothing is echoed), 1550–1556 (Prefer), 1610–1615, 1629, **1649** (singular), 1630–1635, **12400–12401** (nulls-stripped), **11412–11415** (representations carrying an embed) | Prefer: return=representation/minimal/headers-only, singular object, vnd.pgrst.object, stripped nulls. **Strengthened this pass on the nulls-stripped rule, and the strengthening is a scope correction**: `nulls=stripped` was cased only on reads, which left it readable as a read-only formatting flag. Cases **12400** (`POST … Prefer: return=representation` → 201 and a stripped array, so explicitly-sent `null` columns are absent from the echoed row) and **12401** (the `PATCH` counterpart, where a column set to `null` by the patch is stripped while untouched non-null columns remain) pin that it governs the **mutation representation** too; case **1649** adds the stripped *singular* type composed with an explicit `select=` naming the null columns. | **Materially strengthened this pass** — the page's `return=` rule gained the eight cases the area had modelled but never exercised: the two remaining **Location suppressions** under `return=headers-only` (a bulk insert, **1315**, and a relation with no PK at all, **1317**, each sufficient on its own — `Query/Statements.hs#L48`/`#L49`), the rule that `return=representation` **never** carries a Location even on a PK'd table (**1316**), the three `Prefer`-parsing rules the page's token grammar implies but does not spell out — a **duplicate** `return=` resolving to the *first* token in request order rather than the first in `prefMap` (**1318**, `return=minimal, return=representation` → 201 with an empty body), an **unrecognized** `return=` value being *ignored* rather than rejected (**1319**, and it is only a 400 if `handling=strict` is also sent), and `Preference-Applied` emitting its tokens in the **fixed `prefsVals` order** rather than the client's (**1327**, `count=exact, return=representation` echoed back as `return=representation, count=exact`) — plus the two halves of the *"`return=` is echoed only for mutations"* rule, on a plain read (**1325**) and on an RPC (**1326**, the representations band's only `schema: rpc` case). Case **1309** was rewritten in the same pass. **Ownership note, not a gap**: the `PUT` + `return=minimal` wire contract (204, no `Content-Type`, `Preference-Applied: return=minimal`) is owned by case **1332** here; the mutations re-sync authored a band-local clone of it (11406) and **dropped it again** as strictly weaker — same anchor (`UpsertSpec.hs#L543`), same it-block, fewer assertions. That deletion is why the mutations band is **11400–11405 + 11407–11415**, with 11406 absent by design. **The representations audit has now retro-justified that deletion**: 1332 was the *unaudited* case a cross-area deletion leaned on, and it is unaudited no longer. **Still Partial** — the `is.null` rendering of a NULL key column in a headers-only `Location` is modelled and citable but **unreachable on a base table**, and upstream reaches it only through a multi-base-table view; see **Known gaps → representations**. |
 | `media_type_handlers` (Media Type Handlers) | **1600–1649 + 12400–12401** (content_negotiation, **52** cases, incl. 1636–1638/1642/1644/1646 custom-media-handler), 1426 (rpc csv), **11402** (`x-www-form-urlencoded` **request** payload on a table insert), 1442 (the same on an RPC POST) | JSON/CSV/GeoJSON/octet-stream/text, Accept negotiation and precedence (1639–1641, 1645), custom media handlers (anyelement, override-builtin, any-handler, vendored-not-overridable, table aggregate, default-select requirement), plan output. **Materially strengthened this pass, and materially re-scoped**: new cases pin the unparsable-`Accept` echo (**1647** — `Accept: undefined` is *not* rejected at parse time; it becomes `MTOther` and is echoed verbatim in the PGRST107 message), case-insensitive media-type matching (**1648** — `ApplicatIon/vnd.PgRsT.object+json` negotiates the singular handler and the response `Content-Type` comes back canonically lowercase, upstream issue #3478) and the **negative** that anchors the whole octet-stream rule (**1623**, re-issued: a scalar RPC with no mime-named-domain return is **not** negotiable as octet-stream → 406/PGRST107). Case **1622** was rewritten to assert byte equality (`body_raw`) and to cite its status, `Content-Type` and negotiability *separately*, because its anchored it-block asserts only `respBody == file`. **Still Partial, and this page now carries the tree's densest cluster of open findings** — the audit named **five** behaviors of this page with no case: the `db-plan-enabled = false` **406** gate (declared in five cases' inert `preconditions:` and pinned by none), the `*/*` handler's `Content-Type` **override** from inside the function *and* its rejection of non-matching types, the `*/*` handler on **TABLES/VIEWS** (only the function flavor, 1638, exists) , overriding the builtin **`application/geo+json`** handler for a single relation, and **q-factor ordering** of the `Accept` list (case 1601 carries q values but resolves identically with or without q-sorting). The *single unnamed parameter* trio remains covered only in its **bytea** flavor (**case 1622 alone** — 1623 no longer names that case); the `text/plain` and `text/xml` flavors have no case, leaving the `MTTextPlain`/`MTTextXML` PGRST202 branches unexercised, recorded under **Known gaps → rpc** because the rule is RPC parameter binding rather than negotiation. **Retained**: the `application/x-www-form-urlencoded` *request* payload is pinned on both sides of the API — **11402** on a table insert and **1442** on an RPC POST. See **Known gaps → content_negotiation**. |
-| `aggregate_functions` (Aggregate Functions) | 1129–1133, 1147–1149 (select aggregate), 1644 (aggregate through a custom media handler) | count/sum/group-by/alias+cast, cast of the aggregated column and of the result (1147–1148), group-by across an embed (1149), agg in embed. **Partial** — *Aggregates in To-One Spreads* and the PGRST127 to-many-spread rejection have no case; see **Known gaps → select**. |
+| `aggregate_functions` (Aggregate Functions) | 1129–1133, 1147–1149, **11115–11121** (select aggregate), 1644 (aggregate through a custom media handler) | count/sum/group-by/alias+cast, cast of the aggregated column and of the result (1147–1148), group-by across an embed (1149), agg in embed, and — **new 2026-08-23** — *Aggregates in To-One Spreads* (**11115–11118**: spread aggregate + implicit GROUP BY on the spread field, only-aggregates, grouped by another spread, `count()` no-field), the **PGRST127** to-many-spread rejection (**11119**) and the **PGRST123** disallowed-by-default error, plain and in a to-one spread (**11120–11121**). **Partial** — the nested-relationship spread-aggregate flavors (AggregateFunctionsSpec.hs#L167-L295 beyond the four cased blocks) and the embedded/to-many-spread PGRST123 flavors are traced in `select.yaml`'s entry notes but not cased; see **Known gaps → select**. |
 | `openapi` (OpenAPI) | **1650–1688 (openapi, 39 cases)**, 1619–1621, 1645 (content_negotiation openapi) | Root spec, comments→summary/description, type mapping, modes, security, `db-root-spec`. **Materially strengthened this pass, and the strengthening is mostly about the document's *own* structure rather than about any relation in it**: the root path item the document emits for itself (**1687** — `paths./` with `tags: ["Introspection"]`, the two-element `produces`, `responses.200.description == "OK"` and **no** `parameters` key), the document-level four-element `produces`/`consumes` list asserted **in order** (**1688**), the shared `preferParams` definition asserted whole together with the **absence** of its `enum` key (**1686**, the empty-enum suppression of `OpenAPI.hs#L177`), the all-OUT-parameters args schema that emits neither `properties` nor `required` (**1683**), its INOUT-with-no-DEFAULT complement (**1684**) and the **IMMUTABLE** arm of the volatility→methods switch (**1685**, which 1674 covered only for VOLATILE and STABLE). Three of the six are anchored at the generator rather than at an `it`-block **because upstream has no Feature test that reads those keys** — its only witness is the whole-document schema validation of `SpecHelper.hs#L115-123`. **Now Partial, and it was not marked Partial before**: the audit found two behaviors emitted by *every* document with zero coverage *and* zero disclosure — the per-operation `produces` / `responses.200` on every `/rpc/*` path item (`OpenAPI.hs#L357-358`) and the shared `$.parameters.on_conflict` definition (`#L239-245`). Six further legs are fixture-blocked and correctly disclosed (foreign table, partitioned table, materialized view, UNIQUE-key FK view, O2O FK, fk-points-to-TABLE), one is the INOUT-with-DEFAULT half of `OpenApiSpec.hs#L1032-1038`, one is Accept-Profile schema scoping, and one — `openapi-server-proxy-uri` — is modelled in full with `cases: []` and blocked on the harness. See **Known gaps → openapi**. |
 | `preferences` (Prefer Header) | 1550–1556, 1577–1581, 1584 (headers prefer), 1302–1304, 1313–1314, 1322, 1324, 1332–1333 (return=minimal / headers-only), **1318, 1319, 1325, 1326, 1327** (the `return=` token grammar and its echo rule), 1390–1392, **11404–11405, 11407, 11410–11411, 11414** (mutations max-affected + resolution), 1441 (rpc PGRST128), 1267–1268, 1286, 1288 (pagination count preferences) | Prefer: return, handling=strict/lenient, timezone (incl. ± offsets, leap seconds, invalid under default/lenient/strict, and the single- vs two-token `Preference-Applied` echo in 1553/1584), max-affected, missing-defaults via `columns`, count, the RPC-only **PGRST128** rule (1441), the `resolution=merge-duplicates` / `resolution=ignore-duplicates` pair asserted with its **exact two-token `Preference-Applied` echo** (11410/11411/11414), the `max-affected` **UPDATE** flavor (11405) and the ignore-duplicates-yet-201 case (11404). **New this pass, and it closes the page's own header-grammar rules rather than any one preference**: duplicate-token resolution is *first in **request** order*, not first in the parser's list (**1318**); an unknown token value is **ignored**, becoming a 400 PGRST122 only under `handling=strict` (**1319**); `Preference-Applied` renders in the **fixed `prefsVals` order**, independent of the order the client sent (**1327**); and `return=` is echoed **only** for mutations — never on a read (**1325**) or an RPC (**1326**), and its presence there is not an error either, because the token is in `acceptedPrefs` and so never reaches the strict guard. **Partial** — the RPC flavor of `handling=strict` (PGRST122) and of the `max-affected` **count** check (PGRST124) still has no case. See **Known gaps → headers**. |
 | `vary_header` (Vary Header) | 1575 (default `Vary: Accept, Prefer, Range` on a read), 1576 (`response.headers` GUC override replaces it verbatim), 1582 (the default is appended by `toWaiResponse` for every non-error response, witnessed on OPTIONS), 1583 (error responses carry no `Vary` — they bypass `toWaiResponse`) | **NEW page in v16** — covered. 1582/1583 match the modelled entries `headers.vary.non_read_responses` / `headers.vary.absent_on_errors`. The one remaining leg — a *CORS preflight* answered by the wai-cors middleware, which never reaches `toWaiResponse` — is a gap; see **Known gaps → headers**. |
@@ -2139,35 +2171,44 @@ Cases **1142–1149** were authored after the review; they close none of finding
   (`projects_view`-style chains), so it is a fixture decision, not a case-only
   edit.
 
-- **Spread To-Many relationships — modeled, gap recorded, but the gap's
-  justification does not hold.**
-  [`resource_embedding.html#spread-to-many-relationships`](https://postgrest.org/en/v16/references/api/resource_embedding.html#spread-to-many-relationships)
-  documents spreading a one-to-many so that each child column becomes a JSON
-  *array* on the parent. `spec/select.yaml` carries entry
-  `select.spread_one_to_many_arrays` with the gap "it needs the
-  factories/processes fixture, which bier_test does not have"
-  ([`SpreadQueriesSpec.hs#L93`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L93)).
-  That justification is **weak**: this area already reproduces upstream *shapes*
-  on local relations where the upstream fixture is missing — cases **1124** and
-  **1140** do exactly that, by their own `notes:` — and
-  `/projects?select=name,...tasks(name)` exercises the same behavior on
-  relations `bier_test` already has. **Actionable with no fixture work**; the
-  gap text should be rewritten or the case written.
+- **CLOSED 2026-08-23: Spread To-Many relationships.** This finding argued
+  the fixture-blocked justification was weak and the case should be written;
+  the close went further than the finding asked — instead of reproducing the
+  shape on local relations, the **fixture owner took the upstream family**
+  (nine tables — factories, process_categories, processes, process_costs,
+  supervisors, process_supervisor, factory_buildings, budget_categories,
+  budget_expenses — folded into `fixtures/02_base.sql` via the
+  `select.delta.sql` channel), so cases **11100–11114** transcribe upstream's
+  own seed values byte-faithfully:
+  the JSON-array flatten ([`SpreadQueriesSpec.hs#L93`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L93),
+  11100), parallel arrays incl. `*` (L114/L151), empty-array vs
+  single-null-element (L135/L143), all four nested-spread cardinalities
+  (L162/L173/L184/L195), the nested non-spread one-to-one rendering (L206),
+  embed filters and `!inner` (L261/L272), and the three ordering rules
+  (L291/L312/L323). The OpenAPI-visibility concern that deferred the fixture
+  was re-checked at fold time: every openapi case asserts fixed keys by
+  JSONPath, so the new relations change no existing assertion. **Residual**:
+  the many-to-many spread context (L335–L603) needs the still-absent
+  `operators`/`process_operator` pair; the non-spread nested renderings
+  L217/L228/L239, the JSON-path-ordering get at L302 and the empty-spread
+  context (L602) are traced in `select.yaml`'s entry notes, uncased.
 
-- **Aggregates in To-One Spreads — an entire upstream context with no case and
-  no entry; the paired PGRST127 rejection is absent from the whole tree.**
-  [`aggregate_functions.html#aggregates-in-to-one-spreads`](https://postgrest.org/en/v16/references/api/aggregate_functions.html#aggregates-in-to-one-spreads)
-  is backed upstream by
-  [`AggregateFunctionsSpec.hs#L143`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L143)
-  through `#L295`, including nested spreads and the `count()`-without-field
-  variants. Neither `spec/select.yaml` nor any case mentions it. Its negative
-  counterpart — aggregates in a **to-many** spread are rejected with
-  **PGRST127** ([`AggregateFunctionsSpec.hs#L298`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L298))
-  — is likewise absent: re-checked this pass, `grep -rl PGRST127 spec/` matches
-  **only this file and `conformance/INDEX.md`**, i.e. the two documents that
-  record the gap. No case asserts the code and no area model mentions it. Note
-  any new case here inherits the harness constraint below (aggregates need
-  `db-aggregates-enabled: true`).
+- **CLOSED (core) 2026-08-23: Aggregates in To-One Spreads + PGRST127.**
+  The context is now modeled (`select.yaml` entries `select.agg_spread_*`)
+  and cased: **11115** (spread aggregate + implicit GROUP BY on the spread
+  field, [`AggregateFunctionsSpec.hs#L145`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L145)),
+  **11116** (only-aggregates, L152), **11117** (grouped by a field spread
+  from a different relationship, L156), **11118** (`count()` without a
+  field, L231), all as `db-aggregates-enabled: true` variant instances
+  (HARNESS.md §2.3, route.go mirror). The **PGRST127** to-many-spread
+  rejection is now asserted by **11119** (L298, fires with aggregates
+  ENABLED), and the **PGRST123** disallowed-by-default error by
+  **11120/11121** (L312/L334 — closing `select.agg_disallowed`'s empty
+  cases list, with no config block: the shared test instance already runs
+  the default). **Residual, recorded in the entry notes**: the
+  nested-relationship spread-aggregate it-blocks (L167–L228), the remaining
+  `count()` contexts (L246–L295), and the embedded/to-many-spread PGRST123
+  flavors (L323/L345).
 
 - **Foreign Key Joins on Partitioned Tables — not cased, not recorded.**
   [`resource_embedding.html#foreign-key-joins-on-partitioned-tables`](https://postgrest.org/en/v16/references/api/resource_embedding.html#foreign-key-joins-on-partitioned-tables),
@@ -4925,10 +4966,16 @@ Open follow-ups:
     `needed_assertion:` entries. This is the single highest-leverage harness
     change in this document: two capabilities close two docs sections and one
     scoped page.
-19. **Settle the overflow-band and gap-list conventions. This follow-up has now
+19. **Settle the overflow-band and gap-list conventions.** *(Update
+    2026-08-23: the band half now has a precedent going the right way — the
+    FIFTH area to open an overflow band, select, DECLARED its closed range
+    `[11100..11199]` in `spec/select.yaml` at the moment it opened it
+    (cases 11100–11121), adopting filters' convention; INDEX.md's
+    non-contiguous-bands note records it. The rpc band decision and the
+    gap-list backfill remain open.)* This follow-up had previously
     been overtaken by events TWICE: a THIRD and then a FOURTH area picked a number
     ad hoc while it was open, and the fourth did so in the very pass the follow-up
-    list had scheduled as the next audit.** `filters.yaml` *declares*
+    list had scheduled as the next audit. `filters.yaml` *declares*
     `[10600..10799]` as a closed overflow range
     and has used none of it; `operators.yaml` declares nothing and has used
     **10200–10236** (10237+ free); `mutations.yaml` declares nothing and has

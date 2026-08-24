@@ -1,0 +1,20 @@
+id: 11104
+feature: select/spread/one-to-many-all-columns
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(*)&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","id":[1, 2],"name":["Process A1", "Process A2"],"factory_id":[1, 1],"category_id":[1, 2]}
+    - {"factory":"Factory B","id":[3, 4],"name":["Process B1", "Process B2"],"factory_id":[2, 2],"category_id":[1, 1]}
+    - {"factory":"Factory C","id":[5, 6, 7, 8],"name":["Process C1", "Process C2", "Process XX", "Process YY"],"factory_id":[3, 3, 3, 3],"category_id":[2, 2, 2, 2]}
+    - {"factory":"Factory D","id":[],"name":[],"factory_id":[],"category_id":[]}
+notes: >
+  `...processes(*)` spreads every child column as its own parallel array
+  (SpreadQueriesSpec.hs:151).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L151
