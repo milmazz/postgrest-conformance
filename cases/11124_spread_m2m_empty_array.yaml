@@ -1,0 +1,17 @@
+id: 11124
+feature: select/spread/many-to-many-empty-array
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(processes:name)&processes=is.null
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Liz","processes":[]}
+notes: >
+  An m2m spread with no junction rows yields an empty array, and the embed
+  is filterable with is.null (SpreadQueriesSpec.hs:382).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L382

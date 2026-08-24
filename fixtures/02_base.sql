@@ -851,6 +851,18 @@ CREATE TABLE test.process_supervisor (
   PRIMARY KEY (process_id, supervisor_id)
 );
 
+CREATE TABLE test.operators (
+  id int PRIMARY KEY,
+  name text,
+  status jsonb
+);
+
+CREATE TABLE test.process_operator (
+  process_id int REFERENCES test.processes(id),
+  operator_id int REFERENCES test.operators(id),
+  PRIMARY KEY (process_id, operator_id)
+);
+
 CREATE TABLE test.factory_buildings (
   id int PRIMARY KEY,
   code char(4),
@@ -2058,6 +2070,24 @@ INSERT INTO test.process_supervisor VALUES (4, 1);
 INSERT INTO test.process_supervisor VALUES (4, 2);
 INSERT INTO test.process_supervisor VALUES (5, 3);
 INSERT INTO test.process_supervisor VALUES (6, 3);
+
+INSERT INTO test.operators VALUES (1, 'Anne', '{"id": "543210", "afk": true}');
+INSERT INTO test.operators VALUES (2, 'Louis', '{"id": "012345"}');
+INSERT INTO test.operators VALUES (3, 'Jeff', '{"id": "666666", "afk": true}');
+INSERT INTO test.operators VALUES (4, 'Liz', '{"id": "999999"}');
+INSERT INTO test.operators VALUES (5, 'Alfred', '{"id": "000000"}');
+
+INSERT INTO test.process_operator VALUES (1,1);
+INSERT INTO test.process_operator VALUES (1,2);
+INSERT INTO test.process_operator VALUES (2,1);
+INSERT INTO test.process_operator VALUES (2,2);
+INSERT INTO test.process_operator VALUES (2,3);
+INSERT INTO test.process_operator VALUES (3,3);
+INSERT INTO test.process_operator VALUES (4,1);
+INSERT INTO test.process_operator VALUES (4,3);
+INSERT INTO test.process_operator VALUES (6,3);
+INSERT INTO test.process_operator VALUES (6,5);
+INSERT INTO test.process_operator VALUES (7,5);
 
 INSERT INTO test.factory_buildings VALUES (1, 'A001', 150, 'A', 1, '{"ins": "2024C", "pending": true}');
 INSERT INTO test.factory_buildings VALUES (2, 'A002', 200, 'A', 1, '{"ins": "2025A", "pending": true}');

@@ -1,0 +1,28 @@
+id: 11135
+feature: select/spread/many-to-many-order-json-path
+request:
+  method: GET
+  path: /processes?select=process:name,...operators(*)&operators.order=status->afk.asc.nullsfirst,status->id.desc&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"process":"Process A1","id":[2, 1],"name":["Louis", "Anne"],"status":[{"id": "012345"}, {"id": "543210", "afk": true}]}
+    - {"process":"Process A2","id":[2, 3, 1],"name":["Louis", "Jeff", "Anne"],"status":[{"id": "012345"}, {"id": "666666", "afk": true}, {"id": "543210", "afk": true}]}
+    - {"process":"Process B1","id":[3],"name":["Jeff"],"status":[{"id": "666666", "afk": true}]}
+    - {"process":"Process B2","id":[3, 1],"name":["Jeff", "Anne"],"status":[{"id": "666666", "afk": true}, {"id": "543210", "afk": true}]}
+    - {"process":"Process C1","id":[],"name":[],"status":[]}
+    - {"process":"Process C2","id":[5, 3],"name":["Alfred", "Jeff"],"status":[{"id": "000000"}, {"id": "666666", "afk": true}]}
+    - {"process":"Process XX","id":[5],"name":["Alfred"],"status":[{"id": "000000"}]}
+    - {"process":"Process YY","id":[],"name":[],"status":[]}
+notes: >
+  Spread ordering columns may be JSON paths with nulls handling
+  (operators.order=status->afk.asc.nullsfirst,status->id.desc). Anchor
+  deviates from the file-header convention: L563 is the second get inside
+  the it-block at L551; only it demonstrates the JSON-path flavor — the
+  one-to-many twin (factory_buildings, L302) stays traced-only in
+  select.yaml (SpreadQueriesSpec.hs:563).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L563

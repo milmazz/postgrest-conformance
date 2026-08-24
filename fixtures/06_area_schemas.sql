@@ -2325,6 +2325,17 @@ CREATE VIEW config.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: config; Owner: -
 --
 
@@ -2377,6 +2388,16 @@ CREATE VIEW config.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: config; Owner: -
+--
+
+CREATE VIEW config.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -3216,6 +3237,17 @@ CREATE VIEW domain_representations.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: domain_representations; Owner: -
 --
 
@@ -3268,6 +3300,16 @@ CREATE VIEW domain_representations.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: domain_representations; Owner: -
+--
+
+CREATE VIEW domain_representations.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -4226,6 +4268,17 @@ CREATE VIEW mutations.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: mutations; Owner: -
 --
 
@@ -4278,6 +4331,16 @@ CREATE VIEW mutations.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: mutations; Owner: -
+--
+
+CREATE VIEW mutations.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -5117,6 +5180,17 @@ CREATE VIEW operators.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: operators; Owner: -
 --
 
@@ -5169,6 +5243,16 @@ CREATE VIEW operators.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: operators; Owner: -
+--
+
+CREATE VIEW operators.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -6008,6 +6092,17 @@ CREATE VIEW ordering.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: ordering; Owner: -
 --
 
@@ -6060,6 +6155,16 @@ CREATE VIEW ordering.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: ordering; Owner: -
+--
+
+CREATE VIEW ordering.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -6899,6 +7004,17 @@ CREATE VIEW pagination.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: pagination; Owner: -
 --
 
@@ -6951,6 +7067,16 @@ CREATE VIEW pagination.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: pagination; Owner: -
+--
+
+CREATE VIEW pagination.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --
@@ -7809,6 +7935,17 @@ CREATE VIEW representations.openapi_types AS
 
 
 --
+-- Name: operators; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.operators AS
+ SELECT id,
+    name,
+    status
+   FROM test.operators;
+
+
+--
 -- Name: organizations; Type: VIEW; Schema: representations; Owner: -
 --
 
@@ -7861,6 +7998,16 @@ CREATE VIEW representations.process_costs AS
  SELECT process_id,
     cost
    FROM test.process_costs;
+
+
+--
+-- Name: process_operator; Type: VIEW; Schema: representations; Owner: -
+--
+
+CREATE VIEW representations.process_operator AS
+ SELECT process_id,
+    operator_id
+   FROM test.process_operator;
 
 
 --

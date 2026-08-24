@@ -130,8 +130,8 @@ func TestLoadAllRealCorpus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cs) != 784 {
-		t.Fatalf("got %d cases, want 784", len(cs))
+	if len(cs) != 801 {
+		t.Fatalf("got %d cases, want 801", len(cs))
 	}
 	cli := 0
 	for _, c := range cs {

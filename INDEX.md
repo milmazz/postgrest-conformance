@@ -60,13 +60,13 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > **Non-contiguous bands.** **Six** areas do not occupy a single contiguous
 > range and regenerating this file must preserve that rather than collapsing it:
 >
-> - **select** (new 2026-08-23) uses **11100–11121** on top of its full primary
+> - **select** (new 2026-08-23) uses **11100–11138** on top of its full primary
 >   band **1100–1149** (all 50 primary ids are in use). Unlike every earlier
 >   overflow, this one is **declared**: `spec/select.yaml` claims the closed
->   range **[11100..11199]** (follow-up 19's convention), so 11122–11199 are
+>   range **[11100..11199]** (follow-up 19's convention), so 11139–11199 are
 >   reserved for select and **only** ids past 11199 are up for future band
 >   grabs. `11100` sorts immediately after `1110` in a *lexical* listing, so
->   these 22 interleave with select's **own** 1110–1119 block — the only
+>   these 39 interleave with select's **own** 1110–1119 block — the only
 >   self-interleaving band in the tree, chosen so the collision stays inside
 >   one area.
 > - **auth** uses **11800–11818** on top of its full primary band **1450–1499**
@@ -171,12 +171,13 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 
 ## Area <-> id band <-> fixture fragment
 
-Re-derived from `cases/*.yaml` on **2026-08-23** (second derivation that
-date — after the select spread/aggregates pass added cases **11100–11121**):
-every count, id band and `schema:`-label distribution below matches the
-files on disk at that date. (The first 2026-08-23 derivation, before that
-pass, was unchanged from 2026-08-22 — the headers fix on 1573 touched no
-count, band or label.)
+Re-derived from `cases/*.yaml` on **2026-08-23** (third derivation that
+date — after the select spread/aggregates pass added cases **11100–11121**
+and the follow-on m2m spread pass added **11122–11138**): every count, id
+band and `schema:`-label distribution below matches the files on disk at
+that date. (The first 2026-08-23 derivation, before those passes, was
+unchanged from 2026-08-22 — the headers fix on 1573 touched no count, band
+or label.)
 The *Fixture fragment* column names each area's historical fragment (now under
 `fixtures/provenance/`, frozen, or `fixtures/inputs/` for the two live
 generator inputs); at runtime all areas load from the single numbered chain
@@ -186,7 +187,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 |------|------:|---------|------------------|-----------------------|
 | url_grammar | 36 | 1000–1035 | `fixtures/provenance/url_grammar.sql` + `fixtures/provenance/url_grammar.delta.sql` (case 1029's `test.pgrst_reserved_chars` and case 1035's `test."Server Today"`, both folded) | `test` (18), `multi` (14), `unicode` (3), `ordering` (1) |
 | operators | 87 | 1050–1099, 10200–10236 | `fixtures/provenance/operators.sql` + `fixtures/provenance/operators.delta.sql` (`test.items_with_different_col_types`, `test.tsearch_to_tsvector`, the `test.tsvector_not_null`/`tsvector_not_empty` domains and the `test.text_search_vector(test.tsearch_to_tsvector)` computed field, all folded) | `operators` (87) |
-| **select** | **72** | **1100–1149, 11100–11121** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — folded 2026-08-23; enables the spread-to-many and aggregates-on-spreads cases) | `test` (72) |
+| **select** | **89** | **1100–1149, 11100–11138** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (**folded twice, both 2026-08-23**: the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — enabling the spread-to-many/aggregates-on-spreads cases 11100–11121; then the operators + process_operator m2m pair, enabling 11122–11138) | `test` (89) |
 | filters | 50 | 1150–1199 | `fixtures/provenance/filters.sql` | `test` (50) |
 | ordering | 33 | 1200–1232 | `fixtures/provenance/ordering.sql` | `ordering` (30), `test` (2), `mutations` (1) |
 | pagination | 39 | 1250–1288 | `fixtures/provenance/pagination.sql` (**no delta** — the v16.0 re-sync added eleven cases and zero fixture objects) | `pagination` (39) |
@@ -202,7 +203,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **784 cases**, **17 areas**, **17 fixture fragments**
+Total: **801 cases**, **17 areas**, **17 fixture fragments**
 (plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
 currently **comment-only**: stripping comment and blank lines leaves zero
 lines in every one. Each carries a `-- Folded into … on <date> …` provenance
@@ -210,7 +211,8 @@ line and no DDL. **Three** are dated 2026-08-08 (`headers`, `ordering`,
 `rpc`); **five** are dated 2026-08-09 (`content_negotiation`, `url_grammar`,
 `errors`, `operators`, and `domain_representations`) — those eight name the
 bier-era fold target `../fixtures.sql`; the **ninth**, `select.delta.sql`
-(dated 2026-08-23, the factories family), is the first folded in this
+(folded **twice** on 2026-08-23 — the factories family, then the
+operators/process_operator m2m pair), is the first folded in this
 standalone repo and names the real target `../02_base.sql`. **There is
 still no `mutations.delta.sql` and no `representations.delta.sql`.** See
 [`fixtures/README.md`](fixtures/README.md) for who may write which file).

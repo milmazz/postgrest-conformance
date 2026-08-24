@@ -1,0 +1,21 @@
+id: 11127
+feature: select/spread/many-to-many-nested-one-to-one
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(process:name,...process_costs(process_costs:cost))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","process":["Process C2", "Process XX"],"process_costs":[70.00, null]}
+    - {"operator":"Anne","process":["Process A1", "Process A2", "Process B2"],"process_costs":[150.00, 200.00, 70.00]}
+    - {"operator":"Jeff","process":["Process A2", "Process B1", "Process B2", "Process C2"],"process_costs":[200.00, 180.00, 70.00, 70.00]}
+    - {"operator":"Liz","process":[],"process_costs":[]}
+    - {"operator":"Louis","process":["Process A1", "Process A2"],"process_costs":[150.00, 200.00]}
+notes: >
+  A one-to-one spread nested inside an m2m spread joins the parallel
+  arrays, null where the nested row is missing (SpreadQueriesSpec.hs:410).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L410

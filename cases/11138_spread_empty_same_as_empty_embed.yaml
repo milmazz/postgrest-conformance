@@ -1,0 +1,25 @@
+id: 11138
+feature: select/spread/empty-spread
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes()
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A"}
+    - {"factory":"Factory B"}
+    - {"factory":"Factory C"}
+    - {"factory":"Factory D"}
+notes: >
+  An empty spread `...processes()` contributes no keys at all — same
+  result as an empty embed, one row per parent, no order= (upstream
+  asserts physical order). Anchor deviates from the file-header
+  convention: the transcribed get is the it-block's third (L624); the
+  first (L604) needs the absent actors/films pair and the second (L611)
+  is the grandchild_entities flavor, both traced in select.yaml
+  (SpreadQueriesSpec.hs:603).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603

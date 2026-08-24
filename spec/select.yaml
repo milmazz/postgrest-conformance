@@ -21,8 +21,9 @@
 # Id bands: primary [1100..1149], fully allocated. This area's overflow
 # range is [11100..11199], CLOSED and declared here per COVERAGE.md
 # follow-up 19 (adopting filters.yaml's declare-the-range convention) —
-# opened 2026-08-23 by the spread-to-many/aggregates-on-spreads pass with
-# cases 11100-11121; 11122+ within the range is free.
+# opened 2026-08-23 by the spread-to-many/aggregates-on-spreads pass
+# (11100-11121) and extended the same day by the many-to-many spread pass
+# (11122-11138); 11139+ within the range is free.
 #
 # Convention for `source_url`: raw.githubusercontent.com line anchors, pinned to
 # the v16.0 tag, matching the form mandated by spec/case.schema.json (the lint
@@ -501,8 +502,89 @@ entries:
       Ordering columns selected at L291 (11112), unselected at L312 (11113),
       related-table at L323 (11114). L291's second get (L302) additionally
       exercises JSON-path ordering columns on factory_buildings — traced,
-      not cased.
+      not cased in this one-to-many flavor; the m2m twin of the JSON-path
+      rule IS cased (11135, SpreadQueriesSpec.hs#L563).
     cases: [11112, 11113, 11114]
+
+  - entry_id: select.spread_many_to_many_arrays
+    claim: >
+      Spreading a many-to-many relationship (through a junction) flattens
+      each selected far-table column into a parallel JSON array on the
+      parent — empty for a parent with no junction rows; `*` spreads all
+      far-table columns and no junction columns.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L336
+    source_line: 336
+    note: >-
+      Single column at L336 (11122), many columns at L359 (11123), `*` at
+      L398 (11126).
+    cases: [11122, 11123, 11126]
+
+  - entry_id: select.spread_m2m_empty_vs_null
+    claim: >
+      On an m2m spread, no junction rows yields an empty array (filterable
+      via is.null), while an existing far row whose nested spread value is
+      null yields a single-null-element array.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L382
+    source_line: 382
+    note: >-
+      Empty at L382 (11124); null element at L390 (11125 — transcribed
+      verbatim including upstream's stray trailing `)` in the select tree,
+      which v16.0 accepts).
+    cases: [11124, 11125]
+
+  - entry_id: select.spread_m2m_nested
+    claim: >
+      A spread nested inside an m2m spread joins the parallel arrays with
+      the same shapes as the one-to-many flavor: nested to-one contributes
+      one element per far row (null where missing), nested to-many an
+      array of arrays.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L410
+    source_line: 410
+    note: >-
+      One it-block per nested cardinality: one-to-one at L410 (11127),
+      many-to-one at L422 (11128), one-to-many at L434 (11129),
+      many-to-many at L446 (11130). Non-spread nested one-to-one at L458
+      (11131, array of objects); the non-spread m2o/o2m/m2m renderings
+      (L470/L482/L494) and nested `*` (L506) are traced, not cased.
+    cases: [11127, 11128, 11129, 11130, 11131]
+
+  - entry_id: select.spread_m2m_filters
+    claim: >
+      Filters on an m2m spread embed narrow the arrays without dropping
+      parents; `!inner` (or not.is.null) drops parents with no junction
+      rows.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L518
+    source_line: 518
+    note: >-
+      Column filters at L518 (11132); !inner at L530 (11133, whose second
+      get L541 asserts the not.is.null equivalent).
+    cases: [11132, 11133]
+
+  - entry_id: select.spread_m2m_ordering
+    claim: >
+      `<embed>.order=` on an m2m spread orders every array in lockstep —
+      by spread columns (selected or not), by JSON paths with nulls
+      handling (`status->afk.asc.nullsfirst`), or by a column of a nested
+      related table.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L551
+    source_line: 551
+    note: >-
+      Spread columns at L551 (11134); JSON-path at L563 (11135 — anchor is
+      the it-block's second get, the only one demonstrating that flavor);
+      unselected at L577 (11136); related-table at L589 (11137).
+    cases: [11134, 11135, 11136, 11137]
+
+  - entry_id: select.spread_empty
+    claim: >
+      An empty spread `...relation()` contributes no keys — the same
+      result as an empty embed, one row per parent.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603
+    source_line: 603
+    note: >-
+      11138 transcribes the it-block's factories get (L624); the
+      actors/films get (L604) needs a still-absent fixture pair and the
+      grandchild_entities get (L611) is traced, not cased.
+    cases: [11138]
 
   - entry_id: select.spread_drop_junction
     claim: >
@@ -689,12 +771,17 @@ gaps:
     CLOSED 2026-08-23: spread one-to-many producing JSON arrays (entry
     select.spread_one_to_many_arrays) is now cased (11100) — the factories
     family was folded into fixtures/02_base.sql via select.delta.sql. The
-    same fold enabled cases 11101-11121. Remaining uncased flavors from the
-    same upstream file: the many-to-many spread context
-    (SpreadQueriesSpec.hs#L335-L603, needs the operators/process_operator
-    fixture pair), the non-spread nested many-to-one/one-to-many/
-    many-to-many renderings (L217/L228/L239), the factory_buildings
-    JSON-path ordering get (L302), and the empty-spread context (L602).
+    same fold enabled cases 11101-11121. A second fold the same day took
+    the operators/process_operator pair, closing the many-to-many spread
+    context too (cases 11122-11137, entries select.spread_m2m_*) and the
+    empty-spread it-block (11138). Remaining uncased flavors from the same
+    upstream file, all traced in entry notes: the non-spread nested
+    many-to-one/one-to-many/many-to-many renderings (both contexts —
+    L217/L228/L239 and L470/L482/L494), nested `*` in the m2m context
+    (L506), the factory_buildings JSON-path ordering get (L302 — the rule
+    itself is pinned by m2m twin 11135), and the empty-spread it-block's
+    actors/films get (L604, needs a still-absent fixture pair) and
+    grandchild_entities get (L611).
   - >
     CLOSED 2026-08-23: db-aggregates-enabled=false PGRST123 (entry
     select.agg_disallowed) is now cased (11120 plain, 11121 to-one spread)
@@ -740,8 +827,12 @@ gaps:
     11100-11121). The OpenAPI-visibility concern that deferred it was
     re-checked at fold time: every openapi case asserts fixed keys by
     JSONPath, so new relations in `test` change no existing assertion.
-    Still absent: `operators`/`process_operator` (the many-to-many spread
-    context, SpreadQueriesSpec.hs#L335-L603).
+    A second fold the same day took `operators` (with its jsonb status
+    column) and the `process_operator` junction — from schema.sql
+    #L3803-L3813 and data.sql#L913-L933 — unlocking the many-to-many
+    spread context (cases 11122-11138). Still absent from this upstream
+    file's needs: the `actors`/`films` pair (the empty-spread it-block's
+    first get, SpreadQueriesSpec.hs#L604).
   - >
     harness_exposure: ten cases in this area carry a `config:` block that the
     frozen runner currently ignores. `@variant_case_ids`

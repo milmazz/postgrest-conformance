@@ -1,0 +1,22 @@
+id: 11126
+feature: select/spread/many-to-many-all-columns
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(*)&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","id":[6, 7],"name":["Process C2", "Process XX"],"factory_id":[3, 3],"category_id":[2, 2]}
+    - {"operator":"Anne","id":[1, 2, 4],"name":["Process A1", "Process A2", "Process B2"],"factory_id":[1, 1, 2],"category_id":[1, 2, 1]}
+    - {"operator":"Jeff","id":[2, 3, 4, 6],"name":["Process A2", "Process B1", "Process B2", "Process C2"],"factory_id":[1, 2, 2, 3],"category_id":[2, 1, 1, 2]}
+    - {"operator":"Liz","id":[],"name":[],"factory_id":[],"category_id":[]}
+    - {"operator":"Louis","id":[1, 2],"name":["Process A1", "Process A2"],"factory_id":[1, 1],"category_id":[1, 2]}
+notes: >
+  `...processes(*)` on an m2m spread flattens all far-table columns as
+  parallel arrays; junction columns do not appear
+  (SpreadQueriesSpec.hs:398).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L398

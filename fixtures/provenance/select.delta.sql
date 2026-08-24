@@ -1,10 +1,16 @@
--- Folded into ../02_base.sql on 2026-08-23 (test.factories,
--- test.process_categories, test.processes, test.process_costs,
--- test.supervisors, test.process_supervisor, test.factory_buildings,
--- test.budget_categories, test.budget_expenses — DDL + seeds mirrored
--- byte-faithfully from upstream test/spec/fixtures/schema.sql#L3588-L3599,
--- #L3713-L3744, #L3815-L3822 and data.sql#L855-L941, including the
--- deliberately absent budget_expenses id 4 and process_costs id 7; no
--- GRANTs — the test base's anon role is the connection user. Enables the
--- spread-to-many and aggregates-on-spreads cases 11100-11121); empty until
--- the next delta.
+-- Folded into ../02_base.sql TWICE on 2026-08-23, both times for the
+-- select area's spread/aggregates passes:
+-- (1) the nine-table factories family — test.factories,
+--     test.process_categories, test.processes, test.process_costs,
+--     test.supervisors, test.process_supervisor, test.factory_buildings,
+--     test.budget_categories, test.budget_expenses — DDL + seeds mirrored
+--     byte-faithfully from upstream test/spec/fixtures/schema.sql
+--     #L3588-L3599, #L3713-L3744, #L3815-L3822 and data.sql#L855-L941,
+--     including the deliberately absent budget_expenses id 4 and
+--     process_costs id 7 (cases 11100-11121);
+-- (2) the many-to-many pair — test.operators (with its jsonb status
+--     column) and the test.process_operator junction — from schema.sql
+--     #L3803-L3813 and data.sql#L913-L933 (11 junction rows), enabling the
+--     m2m spread context cases 11122-11138.
+-- No GRANTs either time — the test base's anon role is the connection
+-- user. Empty until the next delta.

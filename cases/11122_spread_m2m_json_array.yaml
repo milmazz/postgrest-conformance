@@ -1,0 +1,24 @@
+id: 11122
+feature: select/spread/many-to-many-arrays
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(name)&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","name":["Process C2", "Process XX"]}
+    - {"operator":"Anne","name":["Process A1", "Process A2", "Process B2"]}
+    - {"operator":"Jeff","name":["Process A2", "Process B1", "Process B2", "Process C2"]}
+    - {"operator":"Liz","name":[]}
+    - {"operator":"Louis","name":["Process A1", "Process A2"]}
+notes: >
+  Spreading a many-to-many relationship (through the process_operator
+  junction) flattens each selected far-table column into a JSON array on
+  the parent; a parent with no junction rows gets an empty array
+  (SpreadQueriesSpec.hs:336; the second get, L348, asserts the aliased
+  form).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L336
