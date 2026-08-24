@@ -4,12 +4,18 @@ Cross-reference of the **801** conformance cases under [`cases/`](cases/).
 Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-23**
 at the current 801-case state: 801 files, 801 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2149** of them — carries the
+URL across `spec/` (18 files) and `cases/` — **2147** of them — carries the
 single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
-state; the +56 is the spread/aggregates pass — 39 new `source:` anchors, one
-per case, plus 17 in `spec/select.yaml`. Further back, an earlier revision
-said 2088; the same scan at that state returns 2090, so that figure was a
-miscount. Zero refs are stale at any of these states.) The state verified
+state and 2149 right after the spread/aggregates passes — +56: 39 new
+`source:` anchors, one per case, plus 17 in `spec/select.yaml`. The PR #18
+review fold then moved it to 2147: its `spec/ordering.yaml`
+`order.spread_embed` rewrite dropped four raw URLs from the gap text and
+added one entry anchor (62 → 59), while `spec/select.yaml` gained one
+gap-list Source (69 → 70) — the review's own sentence here said 2149,
+measured before its own edit, which is the same self-referential drift it
+was correcting elsewhere. Further back, an earlier revision said 2088; the
+same scan at that state returns 2090, so that figure was a miscount. Zero
+refs are stale at any of these states.) The state verified
 includes the
 **2026-08-22 mutations citation-audit fix pass** (cases **1360, 1368, 1373**:
 PGRST205 messages re-qualified to the request's active schema
