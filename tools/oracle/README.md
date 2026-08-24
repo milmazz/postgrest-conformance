@@ -63,9 +63,8 @@ path.
 
 ## `oracle validate` — the tree check
 
-`oracle validate` (or `make validate`) is the suite tree check — the Go
-port of `tools/validate.py`, run from anywhere inside the repository, no
-database or PostgREST binary needed. Per case file it checks YAML
+`oracle validate` (or `make validate`) is the suite tree check, run from
+anywhere inside the repository, no database or PostgREST binary needed. Per case file it checks YAML
 parseability, `case.schema.json` (draft 2020-12) validity, loadability
 through the runner's own strict loader (`internal/cases`), id uniqueness,
 the filename-prefix == id rule, and that `source:` cites
@@ -74,10 +73,15 @@ as a whole it checks `INDEX.md`'s "Area ↔ id band" table (per-area counts,
 band membership, and the `Total: N cases` line) against what is on disk.
 It prints one line per finding and exits non-zero on any violation.
 
-Parity with `tools/validate.py` is enforced by test
-(`internal/validate`'s cross-check runs both validators over the real
-corpus and over deliberately-broken trees and diffs their verdicts); CI
-runs both during the transition period.
+`oracle validate` began as a port of `tools/validate.py`, with parity
+enforced by test while both ran side by side in CI; the Python script was
+removed after the v16.0.0-suite.3 transition cycle (issue #16) and this is
+now the sole tree check. One guarantee from that era is still enforced:
+`internal/cases`'s pyyaml cross-check keeps every published case parsing
+identically under YAML 1.1 (pyyaml) and YAML 1.2 (yaml.v3), so consumers
+on either dialect see the same corpus (see the `internal/validate` package
+comment; the test skips without python3+pyyaml, and CI's tree job always
+runs it).
 
 ## Environment variables
 

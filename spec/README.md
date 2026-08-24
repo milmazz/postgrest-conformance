@@ -752,9 +752,9 @@ execute the HTTP (or CLI) request it describes, collect the response, and
 assert it against `expect` using the rules `HARNESS.md` defines
 (`case.schema.json` defines the case/assertion shape; `HARNESS.md` defines
 what each assertion means). The area models guide interpretation; the cases
-are the pass/fail contract. This repository's own CI runs `tools/validate.py`,
-which validates every case against `case.schema.json` and the other machine
-checks described in `CONTRIBUTING.md`.
+are the pass/fail contract. This repository's own CI runs `oracle validate`
+(`tools/oracle`), which validates every case against `case.schema.json` and
+the other machine checks described in `CONTRIBUTING.md`.
 
 Everything under `spec/`, `cases/`, and `fixtures/provenance/` is **frozen
 ground truth**: an implementer fixes their own server to match the cases,

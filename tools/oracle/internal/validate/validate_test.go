@@ -94,6 +94,18 @@ func mustTree(t *testing.T, root string) Result {
 	return res
 }
 
+// TestFullCorpusIsHealthy runs the tree check over the real repository:
+// every case in cases/ must validate cleanly.
+func TestFullCorpusIsHealthy(t *testing.T) {
+	res := mustTree(t, repoRoot(t))
+	if len(res.Findings) != 0 {
+		t.Fatalf("full corpus has findings:\n%s", strings.Join(res.Findings, "\n"))
+	}
+	if res.CasesChecked != 762 {
+		t.Fatalf("checked %d cases, want 762", res.CasesChecked)
+	}
+}
+
 // wantFinding asserts exactly one finding containing each of the given
 // substrings.
 func wantFinding(t *testing.T, res Result, substrs ...string) {

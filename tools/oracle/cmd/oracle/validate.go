@@ -11,14 +11,14 @@ func init() {
 	dispatch["validate"] = cmdValidate
 }
 
-// cmdValidate runs the suite tree check (the Go port of tools/validate.py):
-// per-case schema validation, id/filename/source checks, and INDEX.md
-// consistency. It prints one line per finding and returns a non-nil error
-// (non-zero exit) iff the tree is unhealthy, in validate.py's
-// "N cases checked" / findings / "OK" output shape. (On a broken tree the
-// count can differ from validate.py's: this counts every case file
-// examined, validate.py counts unique ids of schema-passing files; the two
-// agree on any healthy tree.)
+// cmdValidate runs the suite tree check (see the internal/validate package
+// comment): per-case schema validation, id/filename/source checks, and
+// INDEX.md consistency. It prints one line per finding and returns a
+// non-nil error (non-zero exit) iff the tree is unhealthy, in the
+// "N cases checked" / findings / "OK" output shape inherited from the
+// retired tools/validate.py. (The count is every case file examined;
+// validate.py counted unique ids of schema-passing files, so on a broken
+// tree the two could differ while agreeing on any healthy tree.)
 func cmdValidate(args []string) error {
 	fs := flag.NewFlagSet("validate", flag.ExitOnError)
 	if err := fs.Parse(args); err != nil {
