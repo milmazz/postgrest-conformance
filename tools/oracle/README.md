@@ -142,5 +142,5 @@ This runner has no skip mechanism, and none should be added to it — see
 `HARNESS.md` §6 ("Divergence convention") for where a *consumer's* deliberate
 divergence belongs (never here) and `CONTRIBUTING.md` ("Divergences belong
 to consumers, not here") for the same rule stated for this repository. A
-run that reports fewer than 801/801 is not this tool asking for a
+run that reports fewer than 805/805 is not this tool asking for a
 workaround; it is the tool doing its job.

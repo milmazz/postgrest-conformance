@@ -722,12 +722,102 @@ cli:
     stale_role_claim_key_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L753
   nonexistent_config_file_fatal:
     source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L22
+  ready_flag:
+    flag: "--ready"
+    # Health-checks a RUNNING PostgREST by requesting the admin server's
+    # /ready endpoint (PostgREST.Client.ready): prints "OK: <url>" on stdout
+    # and exits 0 on a 2xx, otherwise prints "ERROR: ..." on stderr and
+    # exits 1. The URL is http://<admin-server-host>:<admin-server-port>/ready,
+    # where admin-server-host defaults to server-host (itself defaulting to
+    # the special "!4").
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L32
+    cli_wiring_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/CLI.hs#L40
+    special_hostnames_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Network.hs#L39
+    # Every failure path prints to STDERR and exits 1 (Client.hs#L88); the
+    # success path prints to STDOUT and exits 0 (Client.hs#L84). The cases
+    # assert `exit_code: nonzero` rather than 1 because upstream's own helper
+    # only asserts a non-zero return code (test_cli.py#L67).
+    failure_exit_code: 1
+    failure_stream: stderr
+    exit_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L88
+    # The five error strings, all built by clientErrorMsg with a literal
+    # "ERROR: " prefix. Four are reachable without a running instance and are
+    # cased; PostgRESTNotReady is not (see gaps below).
+    messages:
+      no_admin_server:
+        message: "ERROR: Admin server is not running. Please check admin-server-port config."
+        case: 1745
+        # admin-server-port unset: the Nothing branch is tested first, before
+        # the special-hostname check and before any URL is built.
+        source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L404
+        message_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L94
+      connection_refused:
+        message: "ERROR: connection refused to <url>"
+        case: 1746
+        # The config parser accepts any int, so the URL builds; the TCP
+        # connect then fails. Note handleHttpException maps EVERY
+        # HttpExceptionRequest here — refused, reset, DNS failure, timeout —
+        # and renders <url> from getUri req, not from resolution.
+        source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L367
+        message_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L99
+      invalid_url:
+        message: "ERROR: invalid url - <url>"
+        case: 1747
+        # admin-server-port = -1 parses but yields http://host:-1/ready,
+        # which http-client rejects as InvalidUrlException before connecting.
+        source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L377
+        message_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L100
+      special_hostname:
+        message: 'ERROR: The `--ready` flag cannot be used when server-host is configured as "<host>". Please update your server-host config to "localhost".'
+        case: 1748
+        # Rejected pre-connection: with a special hostname the client cannot
+        # know the actual address. Checked after the Nothing branch above, so
+        # admin-server-port must be set (and must differ from server-port,
+        # which Config.hs#L358 rejects earlier still — case 1717).
+        source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L390
+        message_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L96
+      not_ready:
+        message: "ERROR: <url>"
+        case: null  # not caseable — see gaps below
+        # The admin server answered non-2xx (schema cache never loaded). The
+        # message is the bare URL, with no explanatory text.
+        source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L348
+        message_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Client.hs#L98
 
 # ===========================================================================
 # Gaps: behaviors not traceable to a single source line in v16.0, or out of
 # scope for black-box conformance.
 # ===========================================================================
 gaps:
+  - >
+      needed_assertion: against_running_instance — the `--ready` success path
+      (test_cli.py#L303, "OK: <url>" on stdout, exit 0, IPv4 and IPv6
+      parametrized) requires a RUNNING PostgREST admin server at a port the
+      case can name, which the CLI case shape cannot express: a kind:cli
+      invocation is a lone subprocess, and the runner assigns both the server
+      and the admin port via freePort() at instance boot, so no case can name
+      either. Needed: a harness mechanism that boots an instance and exposes
+      its admin port to a subsequent CLI invocation (e.g. a
+      `config.against_running_instance: true` key that substitutes the live
+      admin port into env and expected output). The cheap alternative —
+      pinning a fixed admin-server-port in HARNESS.md's shared option set —
+      was considered and REJECTED: it would couple a kind:cli case to a live
+      instance (the CLI set otherwise touches nothing but its own
+      subprocess) and would collide with the dynamic port allocation the
+      runner uses to keep instances parallel-safe. The four failure flavors
+      (cases 1745-1748) need no such mechanism and are cased.
+  - >
+      needed_assertion: against_running_instance + degraded_instance — the
+      `--ready` not-ready path (test_cli.py#L320, "ERROR: <url>", the bare URL
+      with no explanatory text, when the admin server answers non-2xx because
+      the schema cache never loaded) needs the running-instance mechanism
+      above PLUS a degraded instance: upstream induces it with a
+      statement-timeout (400ms) set below the schema-cache query's internal
+      sleep (PGRST_INTERNAL_SCHEMA_CACHE_QUERY_SLEEP=500), then forces a
+      reconnect with SIGUSR1. That is two harness mechanisms this suite does
+      not have, plus a signal channel. Recorded, not cased. This is the fifth
+      and last of PostgREST.Client's exit paths; the other four are cased
+      (1745-1748) and the success path is the gap above.
   - "Connection-string augmentation (addFallbackAppName / addTargetSessionAttrs / toConnectionSettings) is documented only via doctests in Config.hs#L592-L659; effect is on the wire to Postgres, not observable via HTTP, so no conformance case."
   - "db-pre-config hook semantics are exercised only by the db-settings golden file (no-defaults-with-db-other-authenticator.config); a runtime HTTP assertion was not located in v16.0 test/spec."
   - "internal-schema-cache-query-sleep{,-before-queries} (Config.hs#L332-L333) are internal test hooks; not part of the public docs ToC, no dedicated conformance case."
