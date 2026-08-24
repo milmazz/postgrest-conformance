@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+#
+# check — run every local gate that needs no database: formatting, vet, the
+# tree check, and the Go test suite.
+#
+# Read-only, so trivially safe to re-run. Runs every step even when one
+# fails (use --fail-fast to stop early) and prints a summary, because
+# knowing that three of four gates are green is more useful than stopping at
+# the first red one. Exits non-zero if any step failed.
+#
+# The Go module lives at tools/oracle, not the repo root, so every go
+# invocation here is `go -C <abs module dir>` — no directory changes, and
+# nothing depends on where you ran this from.
+#
+# Usage:
+#   scripts/check [--fail-fast] [--fresh] [--quiet] [--help]
+#
+#   --fail-fast   stop at the first failing step
+#   --fresh       clear the Go test cache first, so tests really re-run
+#   --quiet       only print step headers and the summary
+#
+# Environment:
+#   REPO_ROOT   override the repo to operate on (default: this script's ../)
+#
+# Exit status:
+#   0  every step passed
+#   1  at least one step failed
+#   2  usage or environment error
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="${REPO_ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd -P)}"
+MODULE_DIR="${REPO_ROOT}/tools/oracle"
+
+FAIL_FAST=0
+FRESH=0
+QUIET=0
+
+die()  { printf 'check: %s\n' "$*" >&2; exit 2; }
+say()  { printf '%s\n' "$*"; }
+vsay() { [ "$QUIET" -eq 1 ] || printf '%s\n' "$*"; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --fail-fast) FAIL_FAST=1; shift ;;
+    --fresh) FRESH=1; shift ;;
+    --quiet|-q) QUIET=1; shift ;;
+    --help|-h) sed -n '2,29p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) die "unknown argument: $1 (try --help)" ;;
+  esac
+done
+
+[ -f "${MODULE_DIR}/go.mod" ] || die "no go.mod at ${MODULE_DIR}"
+command -v go >/dev/null 2>&1 || die "go is not on PATH"
+command -v gofmt >/dev/null 2>&1 || die "gofmt is not on PATH"
+
+FAILED=0
+RESULTS=""
+
+record() { RESULTS="${RESULTS}${1}"$'\t'"${2}"$'\n'; }
+
+summary() {
+  say ""
+  say "==> summary"
+  printf '%s' "$RESULTS" | while IFS=$'\t' read -r status name; do
+    [ -n "$name" ] || continue
+    printf '    %-6s %s\n' "$status" "$name"
+  done
+  if [ "$FAILED" -eq 0 ]; then
+    say "    all gates passed"
+  else
+    say "    ${FAILED} gate(s) failed"
+  fi
+}
+
+step() {
+  local name="$1"; shift
+  vsay ""
+  vsay "==> ${name}"
+  if "$@"; then
+    record "ok" "$name"
+  else
+    record "FAIL" "$name"
+    FAILED=$((FAILED + 1))
+    if [ "$FAIL_FAST" -eq 1 ]; then
+      summary
+      exit 1
+    fi
+  fi
+}
+
+# gofmt -l exits 0 whether or not it found anything, so the check is on its
+# output, not its status.
+gofmt_check() {
+  local unformatted
+  unformatted="$(gofmt -l "$MODULE_DIR")"
+  if [ -n "$unformatted" ]; then
+    printf 'needs gofmt:\n%s\n' "$unformatted" >&2
+    return 1
+  fi
+  vsay "    formatting clean"
+  return 0
+}
+
+say "repo:   ${REPO_ROOT}"
+say "module: ${MODULE_DIR}"
+
+if [ "$FRESH" -eq 1 ]; then
+  vsay ""
+  vsay "==> go clean -testcache"
+  go -C "$MODULE_DIR" clean -testcache
+fi
+
+# Cheapest first, so --fail-fast surfaces the likeliest problems soonest.
+step "gofmt"           gofmt_check
+step "go vet"          go -C "$MODULE_DIR" vet ./...
+step "oracle validate" go -C "$MODULE_DIR" run ./cmd/oracle validate
+step "go test"         go -C "$MODULE_DIR" test ./...
+
+summary
+[ "$FAILED" -eq 0 ] || exit 1

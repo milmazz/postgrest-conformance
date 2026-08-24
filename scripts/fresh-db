@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+#
+# fresh-db — drop and rebuild the oracle fixture database from
+# fixtures/01..07, then run the full suite against the pinned PostgREST
+# binary.
+#
+# DESTRUCTIVE by design: it runs DROP DATABASE on the fixture database named
+# below. That database exists only to be rebuilt, and holds nothing you
+# authored — but nothing else is touched, and the name is printed before any
+# drop happens.
+#
+# Idempotent: rebuilding is teardown-then-setup, so a second run leaves the
+# same database and the same result. Run it whenever a suite failure might be
+# leftover state rather than a real defect — sequence values surviving an
+# aborted earlier run have caused exactly that.
+#
+# The pinned binary is fetched on demand into tools/oracle/.cache/ and reused,
+# so only the first run needs the network.
+#
+# Usage:
+#   scripts/fresh-db [--db NAME] [--no-run] [--help]
+#
+#   --db NAME   fixture database to rebuild (default: postgrest_conf_oracle)
+#   --no-run    rebuild the database and stop; do not run the suite
+#
+# Environment:
+#   REPO_ROOT   override the repo to operate on (default: this script's ../)
+#   PGHOST      default localhost   (see tools/oracle/internal/db/db.go)
+#   PGPORT      default 6432        — matches the oracle-pg container
+#   PGUSER, PGPASSWORD as usual
+#
+# Exit status:
+#   0  database rebuilt (and the suite passed, unless --no-run)
+#   1  the suite reported failures
+#   2  usage or environment error, including an unreachable server
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="${REPO_ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd -P)}"
+MODULE_DIR="${REPO_ROOT}/tools/oracle"
+
+DB="postgrest_conf_oracle"
+DO_RUN=1
+
+die() { printf 'fresh-db: %s\n' "$*" >&2; exit 2; }
+say() { printf '%s\n' "$*"; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --db) [ $# -ge 2 ] || die "--db needs a value"; DB="$2"; shift 2 ;;
+    --no-run) DO_RUN=0; shift ;;
+    --help|-h) sed -n '2,36p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) die "unknown argument: $1 (try --help)" ;;
+  esac
+done
+
+[ -f "${MODULE_DIR}/go.mod" ] || die "no go.mod at ${MODULE_DIR}"
+command -v go >/dev/null 2>&1 || die "go is not on PATH"
+
+# The oracle rejects anything that is not a bare identifier; fail here with a
+# clearer message than a mid-teardown error.
+case "$DB" in
+  *[!A-Za-z0-9_]*|"") die "invalid --db '${DB}': must match ^[A-Za-z0-9_]+$" ;;
+esac
+
+PG_HOST="${PGHOST:-localhost}"
+PG_PORT="${PGPORT:-6432}"
+
+say "repo:     ${REPO_ROOT}"
+say "server:   ${PG_HOST}:${PG_PORT}"
+say "database: ${DB}  (will be DROPPED and rebuilt)"
+
+# Fail early and actionably rather than part-way through a teardown.
+if command -v pg_isready >/dev/null 2>&1; then
+  if ! pg_isready -h "$PG_HOST" -p "$PG_PORT" >/dev/null 2>&1; then
+    die "no server at ${PG_HOST}:${PG_PORT} — start it (e.g. docker start oracle-pg) and re-run"
+  fi
+fi
+
+say ""
+say "==> oracle db-teardown --db ${DB}"
+go -C "$MODULE_DIR" run ./cmd/oracle db-teardown -db "$DB"
+
+say ""
+say "==> oracle db-setup --db ${DB}"
+go -C "$MODULE_DIR" run ./cmd/oracle db-setup -db "$DB"
+
+if [ "$DO_RUN" -eq 0 ]; then
+  say ""
+  say "done: ${DB} rebuilt (suite skipped, --no-run)"
+  exit 0
+fi
+
+say ""
+say "==> oracle run --db ${DB}"
+if go -C "$MODULE_DIR" run ./cmd/oracle run -db "$DB"; then
+  say ""
+  say "done: ${DB} rebuilt, suite green"
+  exit 0
+fi
+
+say ""
+say "suite reported failures against a freshly built ${DB}"
+say "— a clean rebuild rules out leftover state, so treat these as real."
+exit 1
