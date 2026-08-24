@@ -1,0 +1,22 @@
+id: 11115
+feature: select/aggregate/spread-to-one
+request:
+  method: GET
+  path: /budget_expenses?select=total_expenses:expense_amount.sum(),...budget_categories(budget_owner,total_budget:budget_amount.sum())&order=budget_categories(budget_owner)
+  headers: { Accept: application/json }
+schema: test
+config:
+  db-aggregates-enabled: true
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"total_expenses": 600.52, "budget_owner": "Brian Smith", "total_budget": 2000.42}
+    - {"total_expenses": 100.22, "budget_owner": "Jane Clarkson", "total_budget": 7000.41}
+    - {"total_expenses": 900.27, "budget_owner": "Sally Hughes", "total_budget": 500.23}
+notes: >
+  Aggregates apply to fields spread from a to-one embed; the plain spread
+  field (budget_owner) joins the implicit GROUP BY. Requires
+  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:145).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L145

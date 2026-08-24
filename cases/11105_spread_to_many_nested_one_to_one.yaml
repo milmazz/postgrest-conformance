@@ -1,0 +1,21 @@
+id: 11105
+feature: select/spread/one-to-many-nested-one-to-one
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(process:name,...process_costs(process_costs:cost))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","process":["Process A1", "Process A2"],"process_costs":[150.00, 200.00]}
+    - {"factory":"Factory B","process":["Process B1", "Process B2"],"process_costs":[180.00, 70.00]}
+    - {"factory":"Factory C","process":["Process C1", "Process C2", "Process XX", "Process YY"],"process_costs":[40.00, 70.00, null, 40.00]}
+    - {"factory":"Factory D","process":[],"process_costs":[]}
+notes: >
+  A spread nested inside a spread to-many: the one-to-one process_costs
+  value joins the parallel arrays, null where the nested row is missing
+  (process id 7 has no cost row) (SpreadQueriesSpec.hs:162).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162

@@ -18,6 +18,13 @@
 # The one real behavior change in this area is the embed-alias target-name
 # deprecation (`url-use-legacy-target-names`, entries select.embed_alias_*).
 #
+# Id bands: primary [1100..1149], fully allocated. This area's overflow
+# range is [11100..11199], CLOSED and declared here per COVERAGE.md
+# follow-up 19 (adopting filters.yaml's declare-the-range convention) —
+# opened 2026-08-23 by the spread-to-many/aggregates-on-spreads pass
+# (11100-11121) and extended the same day by the many-to-many spread pass
+# (11122-11138); 11139+ within the range is free.
+#
 # Convention for `source_url`: raw.githubusercontent.com line anchors, pinned to
 # the v16.0 tag, matching the form mandated by spec/case.schema.json (the lint
 # gate for conformance cases). Each #Lnn lands on the `it`/`spec` line of the
@@ -411,10 +418,174 @@ entries:
   - entry_id: select.spread_one_to_many_arrays
     claim: >
       Spreading a one-to-many relationship flattens each selected child column
-      into a JSON array on the parent (e.g. names of all child processes).
+      into a JSON array on the parent (e.g. names of all child processes); a
+      parent with no children gets an empty array.
     source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L93
     source_line: 93
-    cases: []
+    cases: [11100]
+
+  - entry_id: select.spread_to_many_parallel_columns
+    claim: >
+      Every column selected in a spread to-many becomes its own parallel JSON
+      array (element i of each array belongs to the same child row); `*`
+      spreads all child columns this way.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L114
+    source_line: 114
+    note: >-
+      The all-columns flavor is its own it-block at L151 (case 11104).
+    cases: [11101, 11104]
+
+  - entry_id: select.spread_to_many_empty_array
+    claim: >
+      A spread to-many with no matching children yields an empty array, and
+      the embed is filterable with `<embed>=is.null`.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L135
+    source_line: 135
+    cases: [11102]
+
+  - entry_id: select.spread_to_many_null_element
+    claim: >
+      When the child row exists but the selected value is null, the spread
+      array contains a single null element — distinct from the empty array of
+      the no-children case.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L143
+    source_line: 143
+    cases: [11103]
+
+  - entry_id: select.spread_to_many_nested_spread
+    claim: >
+      A spread nested inside a spread to-many joins the parallel arrays: a
+      nested to-one contributes one element per intermediate child (null
+      where the nested row is missing); a nested to-many contributes an
+      array of arrays.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162
+    source_line: 162
+    note: >-
+      One it-block per nested cardinality: one-to-one at L162 (11105),
+      many-to-one at L173 (11106), one-to-many at L184 (11107),
+      many-to-many at L195 (11108).
+    cases: [11105, 11106, 11107, 11108]
+
+  - entry_id: select.spread_to_many_nested_non_spread
+    claim: >
+      A NON-spread embed nested inside a spread to-many renders as an array
+      of objects (to-one; null where missing) or an array of arrays
+      (to-many), not as flattened value arrays.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L206
+    source_line: 206
+    note: >-
+      The one-to-one flavor (L206) is cased; the many-to-one (L217),
+      one-to-many (L228) and many-to-many (L239) flavors are traced but not
+      cased — same rendering rule, different cardinality.
+    cases: [11109]
+
+  - entry_id: select.spread_to_many_filters
+    claim: >
+      Filters on the spread embed narrow the arrays without dropping parents;
+      `!inner` (or `<embed>=not.is.null`) drops parents with no children.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L261
+    source_line: 261
+    note: >-
+      Column filters at L261 (11110); !inner and its not.is.null equivalent
+      share the it-block at L272 (11111 transcribes the !inner get).
+    cases: [11110, 11111]
+
+  - entry_id: select.spread_to_many_ordering
+    claim: >
+      `<embed>.order=` orders every resulting array in lockstep by the spread
+      relationship's ordering columns — selected or not — and can order by a
+      column of a nested related table (`processes.order=process_costs(cost)`,
+      missing nested rows sorting as null).
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L291
+    source_line: 291
+    note: >-
+      Ordering columns selected at L291 (11112), unselected at L312 (11113),
+      related-table at L323 (11114). L291's second get (L302) additionally
+      exercises JSON-path ordering columns on factory_buildings — traced,
+      not cased in this one-to-many flavor; the m2m twin of the JSON-path
+      rule IS cased (11135, the get at SpreadQueriesSpec.hs#L563).
+    cases: [11112, 11113, 11114]
+
+  - entry_id: select.spread_many_to_many_arrays
+    claim: >
+      Spreading a many-to-many relationship (through a junction) flattens
+      each selected far-table column into a parallel JSON array on the
+      parent — empty for a parent with no junction rows; `*` spreads all
+      far-table columns and no junction columns.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L336
+    source_line: 336
+    note: >-
+      Single column at L336 (11122), many columns at L359 (11123), `*` at
+      L398 (11126).
+    cases: [11122, 11123, 11126]
+
+  - entry_id: select.spread_m2m_empty_vs_null
+    claim: >
+      On an m2m spread, no junction rows yields an empty array (filterable
+      via is.null), while an existing far row whose nested spread value is
+      null yields a single-null-element array.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L382
+    source_line: 382
+    note: >-
+      Empty at L382 (11124); null element at L390 (11125 — transcribed
+      verbatim including upstream's stray trailing `)` in the select tree,
+      which v16.0 accepts).
+    cases: [11124, 11125]
+
+  - entry_id: select.spread_m2m_nested
+    claim: >
+      A spread nested inside an m2m spread joins the parallel arrays with
+      the same shapes as the one-to-many flavor: nested to-one contributes
+      one element per far row (null where missing), nested to-many an
+      array of arrays.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L410
+    source_line: 410
+    note: >-
+      One it-block per nested cardinality: one-to-one at L410 (11127),
+      many-to-one at L422 (11128), one-to-many at L434 (11129),
+      many-to-many at L446 (11130). Non-spread nested one-to-one at L458
+      (11131, array of objects); the non-spread m2o/o2m/m2m renderings
+      (L470/L482/L494) and nested `*` (L506) are traced, not cased.
+    cases: [11127, 11128, 11129, 11130, 11131]
+
+  - entry_id: select.spread_m2m_filters
+    claim: >
+      Filters on an m2m spread embed narrow the arrays without dropping
+      parents; `!inner` (or not.is.null) drops parents with no junction
+      rows.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L518
+    source_line: 518
+    note: >-
+      Column filters at L518 (11132); !inner at L530 (11133, whose second
+      get L541 asserts the not.is.null equivalent).
+    cases: [11132, 11133]
+
+  - entry_id: select.spread_m2m_ordering
+    claim: >
+      `<embed>.order=` on an m2m spread orders every array in lockstep —
+      by spread columns (selected or not), by JSON paths with nulls
+      handling (`status->afk.asc.nullsfirst`), or by a column of a nested
+      related table.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L551
+    source_line: 551
+    note: >-
+      Spread columns at L551 (11134); JSON-path at L563 (11135 — the second
+      get of the same it-block, the only one demonstrating that flavor, so
+      both cases anchor the it-line at L551); unselected at L577 (11136);
+      related-table at L589 (11137).
+    cases: [11134, 11135, 11136, 11137]
+
+  - entry_id: select.spread_empty
+    claim: >
+      An empty spread `...relation()` contributes no keys — the same
+      result as an empty embed, one row per parent.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603
+    source_line: 603
+    note: >-
+      11138 transcribes the it-block's factories get (L624); the
+      actors/films get (L604) needs a still-absent fixture pair and the
+      grandchild_entities get (L611) is traced, not cased.
+    cases: [11138]
 
   - entry_id: select.spread_drop_junction
     claim: >
@@ -533,27 +704,93 @@ entries:
     source_line: 100
     cases: [1133]
 
+  - entry_id: select.agg_spread_to_one
+    claim: >
+      Aggregates apply to fields spread from a to-one embed
+      (`...budget_categories(budget_owner,total_budget:budget_amount.sum())`);
+      plain spread fields join the implicit GROUP BY, and with only
+      aggregates supplied a single row aggregates over everything.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L145
+    source_line: 145
+    note: >-
+      The only-aggregates flavor is its own it-block at L152 (case 11116).
+      Documented as "Aggregates in To-One Spreads"
+      (docs/references/api/aggregate_functions.rst).
+    cases: [11115, 11116]
+
+  - entry_id: select.agg_spread_group_by_other_spread
+    claim: >
+      An aggregate on one to-one spread may be grouped by a plain field
+      spread from a different relationship
+      (`...process_costs(cost.sum()),...process_categories(name)`).
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L156
+    source_line: 156
+    note: >-
+      Deeper flavors — nested-relationship spreads (L167-L228) — are traced
+      but not cased; same mechanism, longer chains.
+    cases: [11117]
+
+  - entry_id: select.agg_spread_count_no_field
+    claim: >
+      `count()` without a field works inside a to-one spread, grouped by the
+      parent's plain columns.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L231
+    source_line: 231
+    note: >-
+      L231 sits inside the context at L230; the alongside-other-columns
+      (L246), nested (L261-L288) and multi-level (L289) flavors are traced
+      but not cased.
+    cases: [11118]
+
+  - entry_id: select.agg_spread_to_many_unsupported
+    claim: >
+      Even with db-aggregates-enabled=true, an aggregate inside a to-many
+      (one-to-many or many-to-many) spread returns HTTP 400 with code
+      PGRST127 "Feature not implemented".
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L298
+    source_line: 298
+    cases: [11119]
+
   - entry_id: select.agg_disallowed
     claim: >
       When db-aggregates-enabled is false (PostgREST default), use of an
       aggregate function returns HTTP 400 with code PGRST123 ("Use of aggregate
-      functions is not allowed").
+      functions is not allowed") — on a plain select, inside an embed, and
+      inside spreads.
     source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L312
     source_line: 312
-    cases: []
+    note: >-
+      Plain form at L312 (11120), to-one spread at L334 (11121); the
+      embedded (L323) and to-many spread (L345) flavors are traced but not
+      cased — same guard, same body.
+    cases: [11120, 11121]
 
 # Behaviors observed in PostgREST v16.0 within this area but NOT modeled as
 # black-box conformance cases (recorded per the HARD RULE rather than guessed).
 gaps:
   - >
-    spread one-to-many producing JSON arrays (entry select.spread_one_to_many_arrays)
-    is modeled but lacks a case: it needs the factories/processes fixture, which
-    bier_test does not have.
-    Source: test/spec/Feature/Query/SpreadQueriesSpec.hs#L93.
+    CLOSED 2026-08-23: spread one-to-many producing JSON arrays (entry
+    select.spread_one_to_many_arrays) is now cased (11100) — the factories
+    family was folded into fixtures/02_base.sql via select.delta.sql. The
+    same fold enabled cases 11101-11121. A second fold the same day took
+    the operators/process_operator pair, closing the many-to-many spread
+    context too (cases 11122-11137, entries select.spread_m2m_*) and the
+    empty-spread it-block (11138). Remaining uncased flavors from the same
+    upstream file, all traced in entry notes: the non-spread nested
+    many-to-one/one-to-many/many-to-many renderings (both contexts —
+    L217/L228/L239 and L470/L482/L494), nested `*` in the m2m context
+    (L506), the factory_buildings JSON-path ordering get (L302 — the rule
+    itself is pinned by m2m twin 11135), and the empty-spread it-block's
+    actors/films get (L604, needs a still-absent fixture pair) and
+    grandchild_entities get (L611).
   - >
-    db-aggregates-enabled=false PGRST123 (entry select.agg_disallowed) is
-    modeled but not cased: the conformance runner must drive PostgREST/Bier
-    with aggregates disabled, a config concern outside select.sql.
+    CLOSED 2026-08-23: db-aggregates-enabled=false PGRST123 (entry
+    select.agg_disallowed) is now cased (11120 plain, 11121 to-one spread)
+    — no config block needed; the shared test instance runs with
+    PostgREST's default db-aggregates-enabled=false. The embedded (L323)
+    and to-many spread (L345) flavors stay traced-only. Aggregates on
+    nested-relationship spreads (AggregateFunctionsSpec.hs#L167-L295
+    beyond the four cased blocks) are traced in the entry notes.
   - >
     JSON path negative array indexes (data->>-1::int) are traced at
     JsonOperatorSpec.hs#L283 but not given a separate case; covered indirectly
@@ -573,38 +810,54 @@ gaps:
     (regex) covers the product-version token in the new deprecation `Warning`
     header (case 1138) and `headers_absent` covers its absence (case 1141).
   - >
-    loader_exposure: four upstream fixture tables this area's cases would
-    otherwise mirror byte-for-byte are absent from the consolidated bier_test
+    loader_exposure: three upstream fixture table families this area's cases
+    would otherwise mirror byte-for-byte remain absent from the consolidated
     `test` schema — `places`/`visits` (v16.0's new same-table-twice test,
-    QuerySpec.hs#L1699-L1707), `factories`/`processes`/`process_costs`
-    (spread-as-json-array, SpreadQueriesSpec.hs#L93), `oid_test`
-    (underscore/digit cast targets, QuerySpec.hs#L621) and `message`/`person`
-    (the unknown-FK-hint 400, EmbedDisambiguationSpec.hs#L216). Cases 1140 and
-    1124 therefore reproduce the upstream *shape* on projects/tasks and
-    projects/clients respectively (see their notes); the other two behaviors are
-    modeled without a case. Deliberately NOT added via
-    spec/conformance/fixtures/select.delta.sql: new relations in the `test`
-    schema are visible to the OpenAPI area's document assertions and to every
-    other area mirroring `test`, so the fixture owner should decide whether to
-    take them, not this area.
+    QuerySpec.hs#L1699-L1707), `oid_test` (underscore/digit cast targets,
+    QuerySpec.hs#L621) and `message`/`person` (the unknown-FK-hint 400,
+    EmbedDisambiguationSpec.hs#L216). Cases 1140 and 1124 therefore reproduce
+    the upstream *shape* on projects/tasks and projects/clients respectively
+    (see their notes); the other two behaviors are modeled without a case.
+    The fourth family this note used to list —
+    `factories`/`processes`/`process_costs` (spread-as-json-array,
+    SpreadQueriesSpec.hs#L93) — WAS taken by the fixture owner on
+    2026-08-23: the full nine-table family (factories, process_categories,
+    processes, process_costs, supervisors, process_supervisor,
+    factory_buildings, budget_categories, budget_expenses) is folded into
+    fixtures/02_base.sql via the select.delta.sql channel (cases
+    11100-11121). The OpenAPI-visibility concern that deferred it was
+    re-checked at fold time: every openapi case asserts fixed keys by
+    JSONPath, so new relations in `test` change no existing assertion.
+    A second fold the same day took `operators` (with its jsonb status
+    column) and the `process_operator` junction — from schema.sql
+    #L3803-L3813 and data.sql#L913-L933 — unlocking the many-to-many
+    spread context (cases 11122-11138). Still absent from this upstream
+    file's needs: the `actors`/`films` pair (the empty-spread it-block's
+    first get, SpreadQueriesSpec.hs#L604).
   - >
-    harness_exposure: ten cases in this area carry a `config:` block that the
-    frozen runner currently ignores. `@variant_case_ids`
+    harness_exposure: fifteen cases in this area carry a `config:` block that
+    the frozen runner currently ignores. `@variant_case_ids`
     (test/support/conformance_server.ex:58-59) lists only
     [1467..1473, 1491, 1493, 1654, 1677, 1678, 1680, 1682, 1703, 1758, 1763,
     1764]; every id outside that list silently runs on the shared instance with
     default config. Two groups need wiring:
     (a) `db-aggregates-enabled: true` — cases 1129, 1130, 1131, 1132, 1133,
-    1147, 1148, 1149. PostgREST's default for this key is False
+    1147, 1148, 1149, and since 2026-08-23 also 11115, 11116, 11117, 11118,
+    11119 (this repo's oracle runner honors all of them as variant
+    instances — HARNESS.md §2.3 and route.go's harnessVariantIDs carry the
+    new rows; the inert-config concern is bier's own harness, not this
+    repo). PostgREST's default for this key is False
     (`fromMaybe False <$> optBool "db-aggregates-enabled"`,
     src/library/PostgREST/Config.hs#L276) and the upstream suite runs these
     specs under a dedicated `baseCfg { configDbAggregates = True }` config
-    (AggregateFunctionsSpec.hs#L13), so on a default instance all eight cases
-    would get the PGRST123 400 of entry select.agg_disallowed instead of the
-    asserted 200 body.
+    (AggregateFunctionsSpec.hs#L13), so on a default instance all thirteen
+    cases in group (a) would get the PGRST123 400 of entry
+    select.agg_disallowed instead of the asserted 200 body — which is exactly
+    what cases 11120/11121 assert deliberately, carrying no `config:` block
+    for two of the same requests.
     (b) `url-use-legacy-target-names: false` — cases 1139 and 1140, which also
     need `url_use_legacy_target_names` mapped in `Bier.Config`.
-    Until the harness owner adds all ten ids to `@variant_case_ids`, their
+    Until the harness owner adds all fifteen ids to `@variant_case_ids`, their
     `config:` blocks are inert.
     Source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L276
   - >
@@ -632,3 +885,18 @@ gaps:
     url_grammar added 1028. Cases 1138/1141 here are the select-area statements
     of the same boundary — the four areas must stay in agreement if the
     upstream message text ever changes.
+  - >
+    ordering-on-nested-spread aggregate (inherited 2026-08-23 from the ordering
+    area, whose `order.spread_embed` gap this band closed):
+    `/process_supervisor?select=...processes(factory_id,...process_costs(cost.sum()))&order=processes(factory_id).desc`
+    (AggregateFunctionsSpec.hs#L167, the `get` at #L168) is uncased in any
+    band. Every relation it needs now exists — the select.delta.sql folds stood
+    up processes, process_costs and process_supervisor for 11100-11138 — so
+    the fixture argument that justified the ordering-area gap no longer applies
+    to it. What is left is a genuine authoring gap, not an ownership one: it
+    belongs here, beside 11118 (the other `...processes(count())` aggregate over
+    process_supervisor), and the band has room at 11139+. Its it-block also
+    carries a second `get` at #L174 aliasing the aggregate (`cost_sum:`), so
+    the block is worth two cases, not one. Deferred only because this pass
+    stopped at the two SpreadQueriesSpec contexts it set out to close.
+    Source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L167

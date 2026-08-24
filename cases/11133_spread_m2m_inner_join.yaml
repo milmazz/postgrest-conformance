@@ -1,0 +1,21 @@
+id: 11133
+feature: select/spread/many-to-many-inner-join
+request:
+  method: GET
+  path: /supervisors?select=supervisor:name,...processes!inner(name)&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"supervisor":"John","name":["Process A2", "Process B2"]}
+    - {"supervisor":"Mary","name":["Process A1", "Process B2"]}
+    - {"supervisor":"Peter","name":["Process B1", "Process C1", "Process C2"]}
+    - {"supervisor":"Sarah","name":["Process B1"]}
+notes: >
+  `!inner` on an m2m spread drops parents with no junction rows (Jane
+  disappears). The same it-block's second get (L541) asserts the
+  equivalent processes=not.is.null form (SpreadQueriesSpec.hs:530).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L530

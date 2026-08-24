@@ -1,14 +1,22 @@
 # Conformance case index
 
-Cross-reference of the **762** conformance cases under [`cases/`](cases/).
+Cross-reference of the **801** conformance cases under [`cases/`](cases/).
 Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-23**
-at the current 762-case state: 762 files, 762 distinct integer ids, 0 schema
+at the current 801-case state: 801 files, 801 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2093** of them — carries the
-single ref `v16.0`, matching `PIN` (an earlier revision said 2088; the same
-scan at the prior state returns 2090, so that figure was a miscount — the
-+3 to 2093 is the headers fix pass's new anchors, and zero refs are stale
-either way). The state verified includes the
+URL across `spec/` (18 files) and `cases/` — **2147** of them — carries the
+single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
+state and 2149 right after the spread/aggregates passes — +56: 39 new
+`source:` anchors, one per case, plus 17 in `spec/select.yaml`. The PR #18
+review fold then moved it to 2147: its `spec/ordering.yaml`
+`order.spread_embed` rewrite dropped four raw URLs from the gap text and
+added one entry anchor (62 → 59), while `spec/select.yaml` gained one
+gap-list Source (69 → 70) — the review's own sentence here said 2149,
+measured before its own edit, which is the same self-referential drift it
+was correcting elsewhere. Further back, an earlier revision said 2088; the
+same scan at that state returns 2090, so that figure was a miscount. Zero
+refs are stale at any of these states.) The state verified
+includes the
 **2026-08-22 mutations citation-audit fix pass** (cases **1360, 1368, 1373**:
 PGRST205 messages re-qualified to the request's active schema
 `mutations.…`, anchors moved onto `Error.hs#L255` — now committed at
@@ -16,7 +24,10 @@ PGRST205 messages re-qualified to the request's active schema
 case **1573** gains `config: {server-trace-header: ""}` pinning upstream's
 `configServerTraceHeader = Nothing` context, `spec/headers.yaml` gains the
 matching CONFIG CONTEXT note; no `source:` anchor moved — see
-[`COVERAGE.md`](COVERAGE.md) → *Review status*). The tree's
+[`COVERAGE.md`](COVERAGE.md) → *Review status*) **and the 2026-08-23
+spread/aggregates pass** (cases **11100–11138**: the two spread to-many
+contexts, aggregates on spreads, and select's first overflow band). The
+tree's
 implementation-anchored `source:` count stands at **60** (with 2
 docs-anchored: 1279, 1682); the "53" figures quoted in the pass narratives
 below are historical snapshots of earlier states.
@@ -57,9 +68,18 @@ The first `/`-delimited segment of each case's `feature:` field is the
 **authoritative** area assignment. The id bands below are derived from what is on
 disk now; read the `feature:` prefix if a row ever looks ambiguous.
 
-> **Non-contiguous bands.** **Five** areas do not occupy a single contiguous
+> **Non-contiguous bands.** **Six** areas do not occupy a single contiguous
 > range and regenerating this file must preserve that rather than collapsing it:
 >
+> - **select** (new 2026-08-23) uses **11100–11138** on top of its full primary
+>   band **1100–1149** (all 50 primary ids are in use). Unlike every earlier
+>   overflow, this one is **declared**: `spec/select.yaml` claims the closed
+>   range **[11100..11199]** (follow-up 19's convention), so 11139–11199 are
+>   reserved for select and **only** ids past 11199 are up for future band
+>   grabs. `11100` sorts immediately after `1110` in a *lexical* listing, so
+>   these 39 interleave with select's **own** 1110–1119 block — the only
+>   self-interleaving band in the tree, chosen so the collision stays inside
+>   one area.
 > - **auth** uses **11800–11818** on top of its full primary band **1450–1499**
 >   (all 50 primary ids are in use). `11800` sorts immediately after `1180` in a
 >   *lexical* listing, so they interleave with the filters area's 1180–1199 cases
@@ -91,7 +111,7 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 >   with nothing. That is luck, not design — `content_negotiation.yaml` declares
 >   no overflow range, exactly as `operators.yaml` and `mutations.yaml` do not.
 >
-> **There are still FOUR 5-digit bands, so `ls cases/` is actively
+> **There are now FIVE 5-digit bands, so `ls cases/` is actively
 > misleading — always `ls | sort -n`.** The `feature:` prefix remains
 > authoritative; an id's numeric neighbourhood never decides its area.
 >
@@ -144,26 +164,31 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > **case-sensitive-identifier** flavor, upstream's quoted `/UnitTest` relation,
 > which the fixture DB does not have.
 >
-> **The FOUR overflow bands follow four different placements and only one
-> declaration, and this pass is the fourth-area event follow-up 19 was written to
-> prevent.** `spec/filters.yaml` *declares* `[10600..10799]` as its area's closed
-> overflow range (and has used none of it); `spec/operators.yaml` declares
-> nothing — its band exists only as the ids on disk; `spec/mutations.yaml`
-> likewise declares nothing and chose 11400+, which lands numerically *between*
-> operators' and auth's ranges; **`spec/content_negotiation.yaml` declares
-> nothing either** and chose **12400+**, the highest so far. **Four areas, one
-> declaration, four ad-hoc placements.** `rpc` still holds 1400–1443 with only
-> 1444–1449 free before auth starts at 1450, while its audit left **five** open
-> findings that need more than six cases — so a **fifth** area will face the same
-> question. See [`COVERAGE.md`](COVERAGE.md) → follow-up 19 before anyone
-> picks a number.
+> **The FIVE overflow bands now follow five placements and TWO declarations —
+> and the fifth area (select, 2026-08-23) is the first to declare its range
+> at the moment it opened it,** which is the outcome follow-up 19 asked for.
+> `spec/filters.yaml` *declares* `[10600..10799]` as its area's closed
+> overflow range (and has used none of it); `spec/select.yaml` declares
+> **[11100..11199]** and has used 11100–11121 of it; `spec/operators.yaml`
+> declares nothing — its band exists only as the ids on disk;
+> `spec/mutations.yaml` likewise declares nothing and chose 11400+, which
+> lands numerically *between* operators' and auth's ranges;
+> `spec/content_negotiation.yaml` declares nothing either and chose 12400+,
+> the highest so far. `rpc` still holds 1400–1443 with only 1444–1449 free
+> before auth starts at 1450, while its audit left **five** open findings
+> that need more than six cases — when it opens a band, follow the
+> declare-at-open precedent (avoid [11100..11199] and 11400–11415/11800+/
+> 12400+). See [`COVERAGE.md`](COVERAGE.md) → follow-up 19.
 
 ## Area <-> id band <-> fixture fragment
 
-Re-derived from `cases/*.yaml` on **2026-08-23**: every count, id band and
-`schema:`-label distribution below matches the files on disk at that date
-(unchanged from the 2026-08-22 derivation — the only case edit since, the
-headers fix pass on 1573, touched no count, band or label).
+Re-derived from `cases/*.yaml` on **2026-08-23** (third derivation that
+date — after the select spread/aggregates pass added cases **11100–11121**
+and the follow-on m2m spread pass added **11122–11138**): every count, id
+band and `schema:`-label distribution below matches the files on disk at
+that date. (The first 2026-08-23 derivation, before those passes, was
+unchanged from 2026-08-22 — the headers fix on 1573 touched no count, band
+or label.)
 The *Fixture fragment* column names each area's historical fragment (now under
 `fixtures/provenance/`, frozen, or `fixtures/inputs/` for the two live
 generator inputs); at runtime all areas load from the single numbered chain
@@ -173,7 +198,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 |------|------:|---------|------------------|-----------------------|
 | url_grammar | 36 | 1000–1035 | `fixtures/provenance/url_grammar.sql` + `fixtures/provenance/url_grammar.delta.sql` (case 1029's `test.pgrst_reserved_chars` and case 1035's `test."Server Today"`, both folded) | `test` (18), `multi` (14), `unicode` (3), `ordering` (1) |
 | operators | 87 | 1050–1099, 10200–10236 | `fixtures/provenance/operators.sql` + `fixtures/provenance/operators.delta.sql` (`test.items_with_different_col_types`, `test.tsearch_to_tsvector`, the `test.tsvector_not_null`/`tsvector_not_empty` domains and the `test.text_search_vector(test.tsearch_to_tsvector)` computed field, all folded) | `operators` (87) |
-| select | 50 | 1100–1149 | `fixtures/provenance/select.sql` | `test` (50) |
+| **select** | **89** | **1100–1149, 11100–11138** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (**folded twice, both 2026-08-23**: the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — enabling the spread-to-many/aggregates-on-spreads cases 11100–11121; then the operators + process_operator m2m pair, enabling 11122–11138) | `test` (89) |
 | filters | 50 | 1150–1199 | `fixtures/provenance/filters.sql` | `test` (50) |
 | ordering | 33 | 1200–1232 | `fixtures/provenance/ordering.sql` | `ordering` (30), `test` (2), `mutations` (1) |
 | pagination | 39 | 1250–1288 | `fixtures/provenance/pagination.sql` (**no delta** — the v16.0 re-sync added eleven cases and zero fixture objects) | `pagination` (39) |
@@ -189,17 +214,18 @@ generator inputs); at runtime all areas load from the single numbered chain
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **762 cases**, **17 areas**, **17 fixture fragments**
-(plus **8** `*.delta.sql` write channels under `fixtures/provenance/`, all
-currently **comment-only** — re-verified mechanically on 2026-08-22: stripping
-comment and blank lines leaves zero lines in every one of the eight. Each
-carries a single `-- Folded into ../fixtures.sql on <date> …` provenance line
-and no DDL — the fold target named in those lines is bier-era; in this repo a
-future fold lands in `fixtures/02_base.sql`. **Three** are dated 2026-08-08
-(`headers`, `ordering`, `rpc`); **five** are dated 2026-08-09
-(`content_negotiation`, `url_grammar`, `errors`, `operators`, and
-`domain_representations`). **There is still no
-`mutations.delta.sql` and no `representations.delta.sql`.** See
+Total: **801 cases**, **17 areas**, **17 fixture fragments**
+(plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
+currently **comment-only**: stripping comment and blank lines leaves zero
+lines in every one. Each carries a `-- Folded into … on <date> …` provenance
+line and no DDL. **Three** are dated 2026-08-08 (`headers`, `ordering`,
+`rpc`); **five** are dated 2026-08-09 (`content_negotiation`, `url_grammar`,
+`errors`, `operators`, and `domain_representations`) — those eight name the
+bier-era fold target `../fixtures.sql`; the **ninth**, `select.delta.sql`
+(folded **twice** on 2026-08-23 — the factories family, then the
+operators/process_operator m2m pair), is the first folded in this
+standalone repo and names the real target `../02_base.sql`. **There is
+still no `mutations.delta.sql` and no `representations.delta.sql`.** See
 [`fixtures/README.md`](fixtures/README.md) for who may write which file).
 
 **The domain_representations re-sync DID add a fixture object**, unlike the three
@@ -952,7 +978,7 @@ sub-features present per area (second segment, as on disk):
 
 ## Case file shapes
 
-Most cases are HTTP request/response (**724**). The **config** area additionally
+Most cases are HTTP request/response (**763**). The **config** area additionally
 uses a **CLI** shape (`request.kind: cli`, `request.flag: "--dump-config"`)
 asserting on `expect.exit_code`, `expect.dump_contains`,
 `expect.dump_reparse_stable`, and `expect.stderr_contains` rather than an HTTP
@@ -1000,14 +1026,18 @@ ids listed in `@variant_case_ids`
 1654, 1677, 1678, 1680, 1682, 1703, 1758, 1763, 1764) plus every `kind: cli`
 case. On any other HTTP case the `config:` block is **inert** — it documents the
 upstream configuration the assertion depends on, but the case still runs against
-a shared instance. Mechanically, **61** HTTP cases carry a non-empty `config:`
+a shared instance. Mechanically, **66** HTTP cases carry a non-empty `config:`
 outside `@variant_case_ids` (re-derived on disk this pass against the harness's
-live 18-id list), now out of **724** HTTP cases (762 − 38 CLI); most simply
-restate what the shared instance already provides. The 61st is **1573**
-(added 2026-08-23 by the headers citation-audit fix pass), and it is **not**
-one of the restaters: its `server-trace-header: ""` must *clear* the shared
-headers instance's `X-Request-Id` for `headers_no_blank` to hold, so it
-belongs on the diverging list below. This repo's oracle runner honours it via
+live 18-id list), now out of **763** HTTP cases (801 − 38 CLI); most simply
+restate what the shared instance already provides. The five most recent are
+**11115–11119**, and none of them restates: each needs
+`db-aggregates-enabled: true`, and the shared instance leaves aggregates
+disabled — which is precisely what **11120**/**11121** pin, expecting the
+PGRST123 400 for the same requests without the block. Before them the 61st
+was **1573** (added 2026-08-23 by the headers citation-audit fix pass),
+likewise not a restater: its `server-trace-header: ""` must *clear* the
+shared headers instance's `X-Request-Id` for `headers_no_blank` to hold, so
+it belongs on the diverging list below. This repo's oracle runner honours it via
 dynamic config overlay (`tools/oracle/internal/route/route.go` → `Route`,
 which spins a variant instance for any unsatisfied `config:` entry regardless
 of the id list), and `HARNESS.md` §2.3's variant table plus route.go's
@@ -1116,19 +1146,22 @@ deferral; `case.schema.json` itself has no `pending` field. (Earlier revisions o
 this file claimed 6 such cases, listing 1509, 1513 and 1514 as well — those three
 only *mention* `status_text` in `notes:` or in an expected `hint:` string and
 carry no `expect.status_text` key, so they run normally. Re-verified at the
-**762**-case state: still exactly three.)
+**801**-case state: still exactly three.)
 
 **13** cases use the HTTP `HEAD` method (1020, 1272, 1274, 1275, 1277, 1284,
 1425, 1681, 1756, 1760, 1761, 1762, 1771) and **every one expects a 2xx** —
-re-derived mechanically at the 762-case state. No case in the tree issues a HEAD
+re-derived mechanically at the 801-case state. No case in the tree issues a HEAD
 request that errors, which is the tree's only *request-shape* blind spot; see
 [`COVERAGE.md`](COVERAGE.md) → *Known gaps → errors*. **The count has now
-not moved in nine re-syncs while the tree grew by 86 cases.** This pass is the
-first with a structural excuse: fourteen of its sixteen new cases are mutations,
-and a HEAD on a mutation is not a shape upstream asserts anywhere. Full method
-distribution at **762**: GET **511**, POST **114**, CLI **38**, PATCH **35**,
-DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 762). **PATCH
-27 → 35 is the largest single-pass growth that method has had.**
+not moved in ten re-syncs while the tree grew by 125 cases.** The last two
+passes each have a structural excuse: fourteen of the mutations pass's sixteen
+new cases are mutations, and a HEAD on a mutation is not a shape upstream
+asserts anywhere; every one of this pass's thirty-nine transcribes a `get`
+it-block, so there was no HEAD in reach to transcribe. Full method
+distribution at **801**: GET **550**, POST **114**, CLI **38**, PATCH **35**,
+DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 801). **GET
+511 → 550 is the largest single-pass growth any method has had; the previous
+holder was PATCH's 27 → 35.**
 
 ## Looking up a case
 

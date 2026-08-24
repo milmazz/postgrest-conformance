@@ -1,0 +1,22 @@
+id: 11112
+feature: select/spread/one-to-many-order-spread-columns
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(*)&processes.order=category_id.asc,name.desc&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","id":[1, 2],"name":["Process A1", "Process A2"],"factory_id":[1, 1],"category_id":[1, 2]}
+    - {"factory":"Factory B","id":[4, 3],"name":["Process B2", "Process B1"],"factory_id":[2, 2],"category_id":[1, 1]}
+    - {"factory":"Factory C","id":[8, 7, 6, 5],"name":["Process YY", "Process XX", "Process C2", "Process C1"],"factory_id":[3, 3, 3, 3],"category_id":[2, 2, 2, 2]}
+    - {"factory":"Factory D","id":[],"name":[],"factory_id":[],"category_id":[]}
+notes: >
+  processes.order=category_id.asc,name.desc orders every resulting array in
+  lockstep by the spread relationship's ordering columns
+  (SpreadQueriesSpec.hs:291; the it-block's second get, L302, asserts the
+  same on factory_buildings with JSON-path ordering columns).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L291

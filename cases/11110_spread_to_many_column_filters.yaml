@@ -1,0 +1,20 @@
+id: 11110
+feature: select/spread/one-to-many-column-filters
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(*)&processes.name=not.like.*1&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","id":[2],"name":["Process A2"],"factory_id":[1],"category_id":[2]}
+    - {"factory":"Factory B","id":[4],"name":["Process B2"],"factory_id":[2],"category_id":[1]}
+    - {"factory":"Factory C","id":[6, 7, 8],"name":["Process C2", "Process XX", "Process YY"],"factory_id":[3, 3, 3],"category_id":[2, 2, 2]}
+    - {"factory":"Factory D","id":[],"name":[],"factory_id":[],"category_id":[]}
+notes: >
+  Filters on the spread embed (processes.name=not.like.*1) narrow the
+  arrays without dropping parents (SpreadQueriesSpec.hs:261).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L261

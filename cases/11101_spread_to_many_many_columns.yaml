@@ -1,0 +1,21 @@
+id: 11101
+feature: select/spread/one-to-many-many-columns
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(name,category_id)&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","name":["Process A1", "Process A2"],"category_id":[1, 2]}
+    - {"factory":"Factory B","name":["Process B1", "Process B2"],"category_id":[1, 1]}
+    - {"factory":"Factory C","name":["Process C1", "Process C2", "Process XX", "Process YY"],"category_id":[2, 2, 2, 2]}
+    - {"factory":"Factory D","name":[],"category_id":[]}
+notes: >
+  Each column selected in a spread to-many becomes its own parallel JSON
+  array; element i of every array belongs to the same child row
+  (SpreadQueriesSpec.hs:114).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L114

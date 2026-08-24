@@ -1,0 +1,21 @@
+id: 11129
+feature: select/spread/many-to-many-nested-one-to-many
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(process:name,...process_supervisor(supervisor_ids:supervisor_id))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","process":["Process C2", "Process XX"],"supervisor_ids":[[3], []]}
+    - {"operator":"Anne","process":["Process A1", "Process A2", "Process B2"],"supervisor_ids":[[1], [2], [1, 2]]}
+    - {"operator":"Jeff","process":["Process A2", "Process B1", "Process B2", "Process C2"],"supervisor_ids":[[2], [3, 4], [1, 2], [3]]}
+    - {"operator":"Liz","process":[],"supervisor_ids":[]}
+    - {"operator":"Louis","process":["Process A1", "Process A2"],"supervisor_ids":[[1], [2]]}
+notes: >
+  A one-to-many spread nested inside an m2m spread yields an array of
+  arrays — one inner array per far row (SpreadQueriesSpec.hs:434).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L434

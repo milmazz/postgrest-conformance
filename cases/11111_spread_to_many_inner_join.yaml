@@ -1,0 +1,20 @@
+id: 11111
+feature: select/spread/one-to-many-inner-join
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes!inner(name)&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","name":["Process A1", "Process A2"]}
+    - {"factory":"Factory B","name":["Process B1", "Process B2"]}
+    - {"factory":"Factory C","name":["Process C1", "Process C2", "Process XX", "Process YY"]}
+notes: >
+  `!inner` on a spread to-many drops parents with no children (Factory D
+  disappears). The same it-block's second get (L282) asserts the equivalent
+  processes=not.is.null form (SpreadQueriesSpec.hs:272).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L272

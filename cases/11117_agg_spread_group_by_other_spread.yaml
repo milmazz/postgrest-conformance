@@ -1,0 +1,22 @@
+id: 11117
+feature: select/aggregate/spread-group-by-other-spread
+request:
+  method: GET
+  path: /processes?select=...process_costs(cost.sum()),...process_categories(name)&order=process_categories(name)
+  headers: { Accept: application/json }
+schema: test
+config:
+  db-aggregates-enabled: true
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"sum": 400.00, "name": "Batch"}
+    - {"sum": 350.00, "name": "Mass"}
+notes: >
+  An aggregate on one to-one spread grouped by a plain field spread from a
+  DIFFERENT relationship; the key defaults to the aggregate's name.
+  Requires db-aggregates-enabled=true (AggregateFunctionsSpec.hs:156; the
+  it-block's second get, L162, asserts the aliased form).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L156

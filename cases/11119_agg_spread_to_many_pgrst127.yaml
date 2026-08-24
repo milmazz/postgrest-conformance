@@ -1,0 +1,23 @@
+id: 11119
+feature: select/aggregate/spread-to-many-pgrst127
+request:
+  method: GET
+  path: /factories?select=name,...factory_buildings(type,size.sum())
+  headers: { Accept: application/json }
+schema: test
+config:
+  db-aggregates-enabled: true
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    code: "PGRST127"
+    message: "Feature not implemented"
+    details: "Aggregates are not implemented for one-to-many or many-to-many spreads."
+    hint: null
+notes: >
+  Even with aggregates enabled, an aggregate inside a to-many spread is
+  rejected with PGRST127 "Feature not implemented"
+  (AggregateFunctionsSpec.hs:298).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L298

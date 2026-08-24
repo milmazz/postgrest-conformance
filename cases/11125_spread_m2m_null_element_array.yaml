@@ -1,0 +1,20 @@
+id: 11125
+feature: select/spread/many-to-many-null-element
+request:
+  method: GET
+  path: /operators?select=name,...processes(process:name,...process_costs(cost)))&id=eq.5&processes.id=eq.7
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"name":"Alfred","process":["Process XX"],"cost":[null]}
+notes: >
+  When the far row exists but the nested spread value is null (process 7
+  has no process_costs row), the array holds a single null element.
+  Transcribed VERBATIM from upstream including the stray trailing `)` in
+  the select tree — upstream's own assertion carries it and v16.0 accepts
+  it, so the case pins that tolerance too (SpreadQueriesSpec.hs:390).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L390

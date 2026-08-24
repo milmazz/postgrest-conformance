@@ -1,0 +1,21 @@
+id: 11128
+feature: select/spread/many-to-many-nested-many-to-one
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(process:name,...process_categories(categories:name))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","process":["Process C2", "Process XX"],"categories":["Mass", "Mass"]}
+    - {"operator":"Anne","process":["Process A1", "Process A2", "Process B2"],"categories":["Batch", "Mass", "Batch"]}
+    - {"operator":"Jeff","process":["Process A2", "Process B1", "Process B2", "Process C2"],"categories":["Mass", "Batch", "Batch", "Mass"]}
+    - {"operator":"Liz","process":[],"categories":[]}
+    - {"operator":"Louis","process":["Process A1", "Process A2"],"categories":["Batch", "Mass"]}
+notes: >
+  A many-to-one spread nested inside an m2m spread contributes one element
+  per far row, repeating shared parents (SpreadQueriesSpec.hs:422).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L422

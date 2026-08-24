@@ -353,6 +353,22 @@ entries:
     source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L67
     cases: [1222]
 
+  - id: order.spread_embed
+    claim: >
+      NEW in v16.0. Ordering interacts with SPREAD embeds (`...rel(cols)`) in
+      three ways, all of which behave as they do for a plain embed. An
+      `<embed>.order` sorts the flattened arrays a to-many spread produces, and
+      every parallel column array a single spread emits shares that one order
+      (`...processes(process:name,...process_costs(process_costs:cost))&order=name&processes.order=name`);
+      the embedded order may itself be nested a further level
+      (`processes.supervisors.order=name`); and a top-level `order` may target
+      a column that was spread in rather than selected directly
+      (`order=budget_categories(budget_owner)`, `order=process_categories(name)`).
+      The last form is what lets an aggregate hoisted onto a spread be ordered
+      by its own GROUP BY key.
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162
+    cases: []   # asserted from the select band, not duplicated here — see gaps
+
   - id: order.mutation_representation
     claim: >
       `order` is not a read-only parameter: it also orders the rows a MUTATION
@@ -504,24 +520,41 @@ gaps:
 
   - id: order.spread_embed
     why: >
-      v16.0 newly exercises embedded orders on SPREAD embeds
-      (`...processes(...)&order=name&processes.order=name`, and its nested twin
-      `processes.supervisors.order=name`) and related orders that target a
-      spread embed (`order=process_categories(name)`,
-      `order=processes(factory_id).desc`,
-      `order=budget_categories(budget_owner)`).
-      Sources:
-      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L163
-      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L157
-      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L168
-      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L146
-      Both are real ordering behaviors, but every relation they need
+      CLOSED 2026-08-23 — and the premise this gap rested on is now false,
+      which is itself the finding. It read: every relation these orders need
       (factories, processes, process_costs, process_categories, supervisors,
-      process_supervisor, budget_expenses, budget_categories) is absent from the
-      consolidated fixture DB — no spec/ area owns the spread/aggregate fixture
-      graph. Standing them up in ordering.delta.sql would mint a large shared
-      fixture surface outside this area's ownership, so no case is added; the
-      behavior is recorded here instead.
+      process_supervisor, budget_expenses, budget_categories) is absent from
+      the consolidated fixture DB, no spec/ area owns the spread/aggregate
+      fixture graph, and standing them up in ordering.delta.sql would mint a
+      large shared fixture surface outside this area's ownership. The select
+      area then took that ownership: `fixtures/provenance/select.delta.sql`
+      folded all eight relations (plus factory_buildings, operators and
+      process_operator) into `fixtures/02_base.sql` for cases 11100–11138.
+      Three of the four sources this gap cited are consequently asserted on
+      disk, each by the case anchoring the `it` line one above the `get` this
+      gap cited:
+      SpreadQueriesSpec.hs#L163 (`...processes(...)&order=name&processes.order=name`)
+      by case 11105 at #L162; AggregateFunctionsSpec.hs#L146
+      (`order=budget_categories(budget_owner)`) by case 11115 at #L145;
+      AggregateFunctionsSpec.hs#L157 (`order=process_categories(name)`) by case
+      11117 at #L156. The nested twin `processes.supervisors.order=name`
+      (SpreadQueriesSpec.hs#L196) is asserted by case 11108, and the select
+      band adds seven further spread-ordering cases with no analogue in the
+      list above: 11112–11114 and 11134–11137, including the JSON-path flavor
+      `operators.order=status->afk.asc.nullsfirst` (11135).
+      Per the `order.embed.alias.legacy_disabled` precedent above, an
+      ordering-band duplicate of a request already asserted byte-for-byte in
+      another band would assert nothing new, so entry `order.spread_embed`
+      records the claim with `cases: []` and defers to those ids rather than
+      minting copies.
+      RESIDUAL, and the only one: AggregateFunctionsSpec.hs#L168
+      (`/process_supervisor?select=...processes(factory_id,...process_costs(cost.sum()))&order=processes(factory_id).desc`,
+      the `it` block at #L167) is uncased in any band. Its fixtures now exist,
+      so the fixture argument no longer applies to it either; what remains is
+      only the band-ownership question — it is an aggregate-on-nested-spread
+      assertion whose ordering clause is incidental, which puts it closer to
+      select's aggregate coverage than to this area's. Recorded in
+      spec/select.yaml's gap list, not re-litigated here.
   - id: order.aggregate_column
     why: >
       No upstream assertion orders BY an aggregate result (e.g.
@@ -529,8 +562,8 @@ gaps:
       request orders by a plain or spread-embed column, so nothing in this area is
       traceable for "ordering on aggregate columns" — an exhaustive scan of
       v16.0's test/spec for `order=<...>(sum|count|avg|max|min)()` returns zero
-      hits. The spread-embed related orders it does use are covered by the
-      `order.spread_embed` gap above, not here.
+      hits. The spread-embed related orders it does use belong to entry
+      `order.spread_embed` (asserted from the select band), not here.
   - id: order.without_other_constraints
     why: >
       QuerySpec.hs#L1151 ("without other constraints") only asserts status 200 for

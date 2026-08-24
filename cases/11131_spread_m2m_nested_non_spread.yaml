@@ -1,0 +1,23 @@
+id: 11131
+feature: select/spread/many-to-many-nested-non-spread
+request:
+  method: GET
+  path: /operators?select=operator:name,...processes(process:name,process_costs(cost))&order=name&processes.order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"operator":"Alfred","process":["Process C2", "Process XX"],"process_costs":[{"cost": 70.00}, null]}
+    - {"operator":"Anne","process":["Process A1", "Process A2", "Process B2"],"process_costs":[{"cost": 150.00}, {"cost": 200.00}, {"cost": 70.00}]}
+    - {"operator":"Jeff","process":["Process A2", "Process B1", "Process B2", "Process C2"],"process_costs":[{"cost": 200.00}, {"cost": 180.00}, {"cost": 70.00}, {"cost": 70.00}]}
+    - {"operator":"Liz","process":[],"process_costs":[]}
+    - {"operator":"Louis","process":["Process A1", "Process A2"],"process_costs":[{"cost": 150.00}, {"cost": 200.00}]}
+notes: >
+  A NON-spread one-to-one embed nested inside an m2m spread renders as an
+  array of objects, null where the nested row is missing — the m2m
+  statement of the rule case 11109 pins for one-to-many
+  (SpreadQueriesSpec.hs:458).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L458

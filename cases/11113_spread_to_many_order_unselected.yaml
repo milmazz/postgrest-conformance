@@ -1,0 +1,21 @@
+id: 11113
+feature: select/spread/one-to-many-order-unselected
+request:
+  method: GET
+  path: /factories?select=factory:name,...processes(name)&processes.order=category_id.asc,name.desc&order=name
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"factory":"Factory A","name":["Process A1", "Process A2"]}
+    - {"factory":"Factory B","name":["Process B2", "Process B1"]}
+    - {"factory":"Factory C","name":["Process YY", "Process XX", "Process C2", "Process C1"]}
+    - {"factory":"Factory D","name":[]}
+notes: >
+  The spread ordering columns need not be selected — category_id orders the
+  name arrays without appearing in the output
+  (SpreadQueriesSpec.hs:312).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L312

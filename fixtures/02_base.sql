@@ -812,6 +812,87 @@ CREATE TABLE test.organizations (
   manager_id integer REFERENCES test.managers(id)
 );
 
+-- factories family: spread to-many embeds + aggregates on spreads
+-- (select.delta.sql, folded 2026-08-23 in two passes; upstream
+-- test/spec/fixtures/schema.sql — factories/process_categories/processes/
+-- process_costs/supervisors/process_supervisor at #L3713-L3744,
+-- factory_buildings at #L3815, budget_categories/budget_expenses at
+-- #L3588-L3599, and from the second fold operators/process_operator at
+-- #L3803-L3813).
+--
+-- Mirrored structurally, not byte-for-byte: column names, types, order,
+-- constraints and NULL-ability are exact, but every statement is
+-- test.-qualified and its keywords uppercased (upstream writes them lower
+-- case throughout), and budget_categories/budget_expenses additionally
+-- normalize upstream's leading-comma column layout to trailing commas.
+-- The SEEDS below are the byte-faithful half.
+CREATE TABLE test.factories (
+  id int PRIMARY KEY,
+  name text
+);
+
+CREATE TABLE test.process_categories (
+  id int PRIMARY KEY,
+  name text
+);
+
+CREATE TABLE test.processes (
+  id int PRIMARY KEY,
+  name text,
+  factory_id int REFERENCES test.factories(id),
+  category_id int REFERENCES test.process_categories(id)
+);
+
+CREATE TABLE test.process_costs (
+  process_id int REFERENCES test.processes(id) PRIMARY KEY,
+  cost numeric
+);
+
+CREATE TABLE test.supervisors (
+  id int PRIMARY KEY,
+  name text
+);
+
+CREATE TABLE test.process_supervisor (
+  process_id int REFERENCES test.processes(id),
+  supervisor_id int REFERENCES test.supervisors(id),
+  PRIMARY KEY (process_id, supervisor_id)
+);
+
+CREATE TABLE test.operators (
+  id int PRIMARY KEY,
+  name text,
+  status jsonb
+);
+
+CREATE TABLE test.process_operator (
+  process_id int REFERENCES test.processes(id),
+  operator_id int REFERENCES test.operators(id),
+  PRIMARY KEY (process_id, operator_id)
+);
+
+CREATE TABLE test.factory_buildings (
+  id int PRIMARY KEY,
+  code char(4),
+  size numeric,
+  "type" char(1),
+  factory_id int REFERENCES test.factories(id),
+  inspections jsonb
+);
+
+CREATE TABLE test.budget_categories (
+  id int PRIMARY KEY,
+  category_name text,
+  budget_owner text,
+  budget_amount numeric
+);
+
+CREATE TABLE test.budget_expenses (
+  id int PRIMARY KEY,
+  expense_amount numeric,
+  budget_category_id integer REFERENCES test.budget_categories(id)
+);
+
 -- trash / trash_details: one-to-one related ordering (ordering.sql).
 CREATE TABLE test.trash (
   id int PRIMARY KEY
@@ -1953,6 +2034,90 @@ INSERT INTO test.organizations (id, name, referee, auditor, manager_id) VALUES
   (4, 'Umbrella',    1,    2,    4),
   (5, 'Cyberdyne',   3,    4,    5),
   (6, 'Oscorp',      3,    4,    6);
+
+-- test.factories family (select.delta.sql, folded 2026-08-23; seeds mirror
+-- upstream test/spec/fixtures/data.sql byte-faithfully — budget
+-- #L855-L867, factories through process_supervisor #L869-L913,
+-- operators + process_operator #L915-L933 (the second fold),
+-- factory_buildings #L935-L941 — including the deliberately absent
+-- budget_expenses id 4 and process_costs id 7, and upstream's stray space
+-- in the factory_buildings id 5 row).
+INSERT INTO test.factories VALUES (1, 'Factory A');
+INSERT INTO test.factories VALUES (2, 'Factory B');
+INSERT INTO test.factories VALUES (3, 'Factory C');
+INSERT INTO test.factories VALUES (4, 'Factory D');
+
+INSERT INTO test.process_categories VALUES (1, 'Batch');
+INSERT INTO test.process_categories VALUES (2, 'Mass');
+
+INSERT INTO test.processes VALUES (1, 'Process A1', 1, 1);
+INSERT INTO test.processes VALUES (2, 'Process A2', 1, 2);
+INSERT INTO test.processes VALUES (3, 'Process B1', 2, 1);
+INSERT INTO test.processes VALUES (4, 'Process B2', 2, 1);
+INSERT INTO test.processes VALUES (5, 'Process C1', 3, 2);
+INSERT INTO test.processes VALUES (6, 'Process C2', 3, 2);
+INSERT INTO test.processes VALUES (7, 'Process XX', 3, 2);
+INSERT INTO test.processes VALUES (8, 'Process YY', 3, 2);
+
+INSERT INTO test.process_costs VALUES (1, 150.00);
+INSERT INTO test.process_costs VALUES (2, 200.00);
+INSERT INTO test.process_costs VALUES (3, 180.00);
+INSERT INTO test.process_costs VALUES (4, 70.00);
+INSERT INTO test.process_costs VALUES (5, 40.00);
+INSERT INTO test.process_costs VALUES (6, 70.00);
+INSERT INTO test.process_costs VALUES (8, 40.00);
+
+INSERT INTO test.supervisors VALUES (1, 'Mary');
+INSERT INTO test.supervisors VALUES (2, 'John');
+INSERT INTO test.supervisors VALUES (3, 'Peter');
+INSERT INTO test.supervisors VALUES (4, 'Sarah');
+INSERT INTO test.supervisors VALUES (5, 'Jane');
+
+INSERT INTO test.process_supervisor VALUES (1, 1);
+INSERT INTO test.process_supervisor VALUES (2, 2);
+INSERT INTO test.process_supervisor VALUES (3, 3);
+INSERT INTO test.process_supervisor VALUES (3, 4);
+INSERT INTO test.process_supervisor VALUES (4, 1);
+INSERT INTO test.process_supervisor VALUES (4, 2);
+INSERT INTO test.process_supervisor VALUES (5, 3);
+INSERT INTO test.process_supervisor VALUES (6, 3);
+
+INSERT INTO test.operators VALUES (1, 'Anne', '{"id": "543210", "afk": true}');
+INSERT INTO test.operators VALUES (2, 'Louis', '{"id": "012345"}');
+INSERT INTO test.operators VALUES (3, 'Jeff', '{"id": "666666", "afk": true}');
+INSERT INTO test.operators VALUES (4, 'Liz', '{"id": "999999"}');
+INSERT INTO test.operators VALUES (5, 'Alfred', '{"id": "000000"}');
+
+INSERT INTO test.process_operator VALUES (1,1);
+INSERT INTO test.process_operator VALUES (1,2);
+INSERT INTO test.process_operator VALUES (2,1);
+INSERT INTO test.process_operator VALUES (2,2);
+INSERT INTO test.process_operator VALUES (2,3);
+INSERT INTO test.process_operator VALUES (3,3);
+INSERT INTO test.process_operator VALUES (4,1);
+INSERT INTO test.process_operator VALUES (4,3);
+INSERT INTO test.process_operator VALUES (6,3);
+INSERT INTO test.process_operator VALUES (6,5);
+INSERT INTO test.process_operator VALUES (7,5);
+
+INSERT INTO test.factory_buildings VALUES (1, 'A001', 150, 'A', 1, '{"ins": "2024C", "pending": true}');
+INSERT INTO test.factory_buildings VALUES (2, 'A002', 200, 'A', 1, '{"ins": "2025A", "pending": true}');
+INSERT INTO test.factory_buildings VALUES (3, 'B001', 50, 'B', 2, '{"ins": "2025A", "pending": true}');
+INSERT INTO test.factory_buildings VALUES (4, 'B002', 120, 'C', 2, '{"ins": "2023A"}');
+INSERT INTO test.factory_buildings VALUES (5, 'C001', 240, 'B', 3, '{"ins": "2022B"}' );
+INSERT INTO test.factory_buildings VALUES (6, 'D001', 310, 'A', 4, '{"ins": "2024C", "pending": true}');
+
+INSERT INTO test.budget_categories VALUES (1, 'Beanie Babies', 'Brian Smith', 1000.31);
+INSERT INTO test.budget_categories VALUES (2, 'DVDs', 'Jane Clarkson', 2000.12);
+INSERT INTO test.budget_categories VALUES (3, 'Pizza', 'Brian Smith', 1000.11);
+INSERT INTO test.budget_categories VALUES (4, 'Opera Tickets', 'Jane Clarkson', 7000.41);
+INSERT INTO test.budget_categories VALUES (5, 'Nuclear Fusion Research', 'Sally Hughes', 500.23);
+INSERT INTO test.budget_categories VALUES (6, 'T-5hirts', 'Dana de Groot', 500.33);
+
+INSERT INTO test.budget_expenses VALUES (1, 200.26, 1);
+INSERT INTO test.budget_expenses VALUES (2, 400.26, 3);
+INSERT INTO test.budget_expenses VALUES (3, 100.22, 4);
+INSERT INTO test.budget_expenses VALUES (5, 900.27, 5);
 
 -- test.trash / trash_details
 INSERT INTO test.trash(id) VALUES (1), (2), (3);
