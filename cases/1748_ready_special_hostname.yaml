@@ -1,0 +1,19 @@
+id: 1748
+feature: config/ready/special-hostname
+request:
+  kind: cli
+  flag: "--ready"
+schema: config
+config:
+  env:
+    PGRST_SERVER_HOST: "*4"
+    PGRST_ADMIN_SERVER_PORT: "3001"
+expect:
+  exit_code: nonzero
+  stderr_contains: 'ERROR: The `--ready` flag cannot be used when server-host is configured as "*4". Please update your server-host config to "localhost".'
+notes: >
+  When admin-server-host (defaulting to server-host) is a special hostname
+  (*, *4, !4, *6, !6), `--ready` cannot know the actual address and exits 1
+  before any connection attempt — the configured admin port's value never
+  matters. Mirrors test_cli.py:test_cli_ready_flag_fail_with_special_hostname.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L380

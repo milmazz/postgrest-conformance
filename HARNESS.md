@@ -765,11 +765,11 @@ assignment if the two ever look inconsistent.
 | headers | 1550–1584 | 35 | `headers`, `test` |
 | content_negotiation | 1600–1649, 12400–12401 | 52 | `test` |
 | openapi | 1650–1688 | 39 | `test`, `openapi_no_comment` |
-| config | 1700–1744 | 45 | `config` |
+| config | 1700–1748 | 49 | `config` |
 | observability | 1750–1771 | 22 | `observability` |
 | domain_representations | 1800–1836 | 37 | `domain_representations`, `test` |
 
-**Total: 801 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+45+22+37 = 801).
+**Total: 805 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+49+22+37 = 805).
 
 Recover a case's area directly from its own file, no index lookup needed:
 

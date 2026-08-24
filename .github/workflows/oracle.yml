@@ -42,7 +42,7 @@ jobs:
         run: cd tools/oracle && go run ./cmd/oracle db-setup
       - name: Fetch pinned PostgREST binary
         run: cd tools/oracle && go run ./cmd/oracle fetch
-      - name: Run all 762 cases against PostgREST
+      - name: Run all cases against PostgREST
         run: cd tools/oracle && go run ./cmd/oracle run -report report.json
       - name: Upload report
         if: always()

@@ -1,14 +1,16 @@
 # Conformance case index
 
-Cross-reference of the **801** conformance cases under [`cases/`](cases/).
-Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-23**
-at the current 801-case state: 801 files, 801 distinct integer ids, 0 schema
+Cross-reference of the **805** conformance cases under [`cases/`](cases/).
+Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-24**
+at the current 805-case state: 805 files, 805 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2147** of them — carries the
+URL across `spec/` (18 files) and `cases/` — **2154** of them — carries the
 single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
-state and 2149 right after the spread/aggregates passes — +56: 39 new
-`source:` anchors, one per case, plus 17 in `spec/select.yaml`. The PR #18
-review fold then moved it to 2147: its `spec/ordering.yaml`
+state, 2149 right after the spread/aggregates passes — +56: 39 new
+`source:` anchors, one per case, plus 17 in `spec/select.yaml` — and 2154
+after the `--ready` CLI pass: 4 case anchors plus 3 in `spec/config.yaml`
+(Client.hs, CLI.hs, Network.hs). Between those, the PR #18
+review fold moved 2149 to 2147: its `spec/ordering.yaml`
 `order.spread_embed` rewrite dropped four raw URLs from the gap text and
 added one entry anchor (62 → 59), while `spec/select.yaml` gained one
 gap-list Source (69 → 70) — the review's own sentence here said 2149,
@@ -182,13 +184,12 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 
 ## Area <-> id band <-> fixture fragment
 
-Re-derived from `cases/*.yaml` on **2026-08-23** (third derivation that
-date — after the select spread/aggregates pass added cases **11100–11121**
-and the follow-on m2m spread pass added **11122–11138**): every count, id
-band and `schema:`-label distribution below matches the files on disk at
-that date. (The first 2026-08-23 derivation, before those passes, was
-unchanged from 2026-08-22 — the headers fix on 1573 touched no count, band
-or label.)
+Re-derived from `cases/*.yaml` on **2026-08-24** — after the `--ready` CLI
+pass added cases **1745–1748** to the config band (2026-08-23 saw three
+derivations: before the select passes, unchanged from 2026-08-22; after the
+spread/aggregates pass added **11100–11121**; and after the m2m spread pass
+added **11122–11138**): every count, id band and `schema:`-label
+distribution below matches the files on disk at that date.
 The *Fixture fragment* column names each area's historical fragment (now under
 `fixtures/provenance/`, frozen, or `fixtures/inputs/` for the two live
 generator inputs); at runtime all areas load from the single numbered chain
@@ -210,11 +211,11 @@ generator inputs); at runtime all areas load from the single numbered chain
 | headers | 35 | 1550–1584 | `fixtures/inputs/headers.sql` + `fixtures/provenance/headers.delta.sql` (`test.get_vary_header_override()`, folded) | `headers` (34), `test` (1) |
 | **content_negotiation** | **52** | **1600–1649, 12400–12401** | `fixtures/provenance/content_negotiation.sql` + `fixtures/provenance/content_negotiation.delta.sql` (**folded twice** — the vendored media-type domains + handlers on 2026-08-08, then on **2026-08-09** the octet-stream **correction**: the new `public."application/octet-stream"` domain plus `test.unnamed_bytea_param` **re-declared in place** to return that domain instead of plain `bytea`, without which case 1622 is unreachable) | `test` (52) |
 | **openapi** | **39** | **1650–1688** | `fixtures/provenance/openapi.sql` (**no delta** — the v16.0 re-sync added six cases, rewrote the other 33 and touched **no** fixture object; `fixtures.sql` does not appear in `git status`) | `test` (38), `openapi_no_comment` (1 — case 1654) |
-| config | 45 | 1700–1744 | `fixtures/provenance/config.sql` | `config` (45) |
+| **config** | **49** | **1700–1748** | `fixtures/provenance/config.sql` | `config` (49) |
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **801 cases**, **17 areas**, **17 fixture fragments**
+Total: **805 cases**, **17 areas**, **17 fixture fragments**
 (plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
 currently **comment-only**: stripping comment and blank lines leaves zero
 lines in every one. Each carries a `-- Folded into … on <date> …` provenance
@@ -571,7 +572,7 @@ sub-features present per area (second segment, as on disk):
 | headers | 1550–1584 | prefer, profile, location, content-location, guc, vary |
 | **content_negotiation** | **1600–1649, 12400–12401** | json, csv, geojson, octet-stream (incl. the **negative** 1623 — a scalar RPC with no media-type domain is not negotiable as octet-stream — alongside the SETOF flavor 1624), singular, nulls-stripped (incl. the mutation-representation pair **12400**/**12401** and the explicit-`select=` singular 1649), plan, openapi, precedence, error (incl. the unparsable-media-type echo 1647), custom-media-handler, **case-insensitivity** (1648). The band is 1600–**1649**, not 1646: 1647/1648/1649 and the overflow pair 12400/12401 are on disk |
 | **openapi** | **1650–1688** | root (10 — incl. the document's own `/` path item **1687** and the document-level `produces`/`consumes` list **1688**, both anchored at the generator because no upstream Feature it-block reads either), rpc (8 — incl. the all-OUT args schema that emits neither `properties` nor `required` **1683**, its INOUT-with-no-DEFAULT complement **1684**, and the IMMUTABLE half of the volatility switch **1685**), table (5 — incl. the shared `preferParams` definition and its **suppressed empty enum** **1686**), comments (5), types (4), mode (4), security (2), defaults (1). **No sub-feature exists for the `/rpc/*` per-operation `produces`/`responses` pair or for `$.parameters.on_conflict`**; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → openapi* |
-| config | 1700–1744 | dump-config, sources, aliases, validation, coercion, parsing, precedence, db-max-rows, db-tx-end, db-extra-search-path, app-settings, server-cors-allowed-origins, cli, client-error-verbosity, server-reuseport, url-use-legacy-target-names, admin-server-unix-socket |
+| config | 1700–1748 | dump-config, ready, sources, aliases, validation, coercion, parsing, precedence, db-max-rows, db-tx-end, db-extra-search-path, app-settings, server-cors-allowed-origins, cli, client-error-verbosity, server-reuseport, url-use-legacy-target-names, admin-server-unix-socket |
 | observability | 1750–1771 | server-timing (incl. **1770**, the exact five-metric render), trace-header, log-level, server (**1771**, the `Server: postgrest/…` version header — the tree's only `Server:` assertion) |
 | **domain_representations** | **1800–1836** | **write** (18 — the area's largest sub-feature after this pass, and all but four are new: headers-only POST on a table **1823** and on the updatable view **1824**, POST-through-view formatting incl. the computed column **1825**/**1826**, `?columns=` on that view **1827**/**1836**, and the entire PATCH block **1828–1835** — single, bulk, `?columns=`, unknown column, and no-rows-matched), read (11), filter (6 — incl. **1821**, the `ilike`-on-a-datarep-column 404/`42883` that proves pattern operators are deliberately NOT wired to representations), default (2 — no-cast-uses-base-type **1814** and **column-default-beats-domain-default 1822**, the area's only `schema: test` case). **No sub-feature exists for data representations in the presence of COMPUTED RELATIONSHIPS** (upstream `ComputedRelsSpec.hs#L105`), which is blocked by `Prefer: tx=commit` *and* by the single-`request` case shape; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → domain_representations* |
 
@@ -1028,7 +1029,7 @@ case. On any other HTTP case the `config:` block is **inert** — it documents t
 upstream configuration the assertion depends on, but the case still runs against
 a shared instance. Mechanically, **66** HTTP cases carry a non-empty `config:`
 outside `@variant_case_ids` (re-derived on disk this pass against the harness's
-live 18-id list), now out of **763** HTTP cases (801 − 38 CLI); most simply
+live 18-id list), now out of **763** HTTP cases (805 − 42 CLI); most simply
 restate what the shared instance already provides. The five most recent are
 **11115–11119**, and none of them restates: each needs
 `db-aggregates-enabled: true`, and the shared instance leaves aggregates
@@ -1158,8 +1159,8 @@ passes each have a structural excuse: fourteen of the mutations pass's sixteen
 new cases are mutations, and a HEAD on a mutation is not a shape upstream
 asserts anywhere; every one of this pass's thirty-nine transcribes a `get`
 it-block, so there was no HEAD in reach to transcribe. Full method
-distribution at **801**: GET **550**, POST **114**, CLI **38**, PATCH **35**,
-DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 801). **GET
+distribution at **805**: GET **550**, POST **114**, CLI **42**, PATCH **35**,
+DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 805). **GET
 511 → 550 is the largest single-pass growth any method has had; the previous
 holder was PATCH's 27 → 35.**
 
