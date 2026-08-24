@@ -70,7 +70,21 @@ through the runner's own strict loader (`internal/cases`), id uniqueness,
 the filename-prefix == id rule, and that `source:` cites
 `raw.githubusercontent.com` at the exact tag pinned in `PIN`; for the tree
 as a whole it checks `INDEX.md`'s "Area ↔ id band" table (per-area counts,
-band membership, and the `Total: N cases` line) against what is on disk.
+band membership, and the `Total: N cases` line) against what is on disk,
+and the same table in `HARNESS.md` §7.
+
+It also checks the **CLI-set claims** — how many `request.kind: cli` cases
+exist, which ids they are, and how the `request.flag` values distribute —
+which `INDEX.md`, `HARNESS.md`, `COVERAGE.md` and `spec/README.md` restate
+in running prose rather than in a table. Those claims went stale in five
+places at once while every table stayed correct (issue #21), so each site
+is anchored on its own wording and **must** match: a claim reworded past
+its anchor reports `could not find …` rather than quietly dropping out of
+the check. COVERAGE.md's dated `Re-verified an Nth time at the N-case
+state` snapshots restate older sets deliberately and are not read as live
+claims. Adding or removing a CLI case now fails the check until every site
+agrees.
+
 It prints one line per finding and exits non-zero on any violation.
 
 `oracle validate` began as a port of `tools/validate.py`, with parity
