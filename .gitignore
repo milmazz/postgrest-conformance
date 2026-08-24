@@ -1,2 +1,6 @@
 *.dump
 scratch/
+
+# Worktrees created by the Claude Code harness (EnterWorktree); the branch
+# and its commits live in the shared object store, only the checkout is here.
+.claude/worktrees/

@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+#
+# sync-main — fast-forward this repo's default branch to its remote and drop
+# stale remote-tracking refs.
+#
+# Idempotent: a second run reports "already current" and changes nothing.
+# Never rewrites history, never switches your branch, never touches a dirty
+# working tree. Every path it uses is absolute.
+#
+# Usage:
+#   scripts/sync-main [--remote NAME] [--quiet] [--help]
+#
+# Environment:
+#   REPO_ROOT   override the repo to operate on (default: this script's ../)
+#
+# Exit status:
+#   0  the default branch is at the remote (or was already)
+#   1  refused to act — divergence, or a dirty checkout of the default branch
+#   2  usage or environment error
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="${REPO_ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd -P)}"
+
+REMOTE="origin"
+QUIET=0
+
+die()  { printf 'sync-main: %s\n' "$*" >&2; exit 2; }
+say()  { [ "$QUIET" -eq 1 ] || printf '%s\n' "$*"; }
+warn() { printf 'sync-main: %s\n' "$*" >&2; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --remote) [ $# -ge 2 ] || die "--remote needs a value"; REMOTE="$2"; shift 2 ;;
+    --quiet|-q) QUIET=1; shift ;;
+    --help|-h) sed -n '2,24p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) die "unknown argument: $1 (try --help)" ;;
+  esac
+done
+
+[ -d "$REPO_ROOT" ] || die "REPO_ROOT is not a directory: $REPO_ROOT"
+GIT=(git -C "$REPO_ROOT")
+"${GIT[@]}" rev-parse --git-common-dir >/dev/null 2>&1 \
+  || die "not a git repository: $REPO_ROOT"
+"${GIT[@]}" remote get-url "$REMOTE" >/dev/null 2>&1 \
+  || die "no such remote: $REMOTE"
+
+# The default branch, from the remote's own HEAD when it is known locally.
+if ref="$("${GIT[@]}" symbolic-ref --quiet "refs/remotes/${REMOTE}/HEAD" 2>/dev/null)"; then
+  # Strip both spellings: a well-formed origin/HEAD points at
+  # refs/remotes/<remote>/<branch>, but a hand-set one often names
+  # refs/heads/<branch> instead.
+  ref="${ref#refs/remotes/"${REMOTE}"/}"
+  DEFAULT_BRANCH="${ref#refs/heads/}"
+else
+  DEFAULT_BRANCH="$("${GIT[@]}" config --get "init.defaultBranch" 2>/dev/null || printf 'main')"
+  warn "refs/remotes/${REMOTE}/HEAD is unset; assuming default branch '${DEFAULT_BRANCH}'"
+fi
+UPSTREAM="${REMOTE}/${DEFAULT_BRANCH}"
+
+# Absolute path of the worktree that has DEFAULT_BRANCH checked out, if any.
+# Parsed from porcelain so paths containing spaces survive.
+worktree_holding() {
+  # No early exit: awk runs END even after `exit`, which would emit the hit
+  # twice. The !found guard makes flush idempotent instead.
+  "${GIT[@]}" worktree list --porcelain | awk -v want="refs/heads/$1" '
+    function flush() { if (!found && p != "" && b == want) { print p; found = 1 } }
+    /^worktree /  { flush(); p = substr($0, 10); b = ""; next }
+    /^branch /    { b = substr($0, 8); next }
+    END           { flush() }
+  '
+}
+
+say "repo:    ${REPO_ROOT}"
+say "branch:  ${DEFAULT_BRANCH} (tracking ${UPSTREAM})"
+
+# --- fetch, pruning remote-tracking refs the remote has deleted ------------
+# --prune is the whole point on a squash-and-delete workflow: merged PR
+# branches vanish upstream and their local refs.../ linger indefinitely.
+say ""
+say "==> git fetch --prune --tags ${REMOTE}"
+"${GIT[@]}" fetch --prune --tags "$REMOTE"
+
+"${GIT[@]}" rev-parse --verify --quiet "refs/remotes/${UPSTREAM}" >/dev/null \
+  || die "${UPSTREAM} does not exist after fetching"
+
+# --- how far apart are we? -------------------------------------------------
+if ! "${GIT[@]}" rev-parse --verify --quiet "refs/heads/${DEFAULT_BRANCH}" >/dev/null; then
+  say ""
+  say "==> creating local ${DEFAULT_BRANCH} from ${UPSTREAM}"
+  "${GIT[@]}" branch --track "$DEFAULT_BRANCH" "refs/remotes/${UPSTREAM}"
+  say "done: ${DEFAULT_BRANCH} created at $("${GIT[@]}" rev-parse --short "$DEFAULT_BRANCH")"
+  exit 0
+fi
+
+counts="$("${GIT[@]}" rev-list --left-right --count "refs/heads/${DEFAULT_BRANCH}...refs/remotes/${UPSTREAM}")"
+AHEAD="$(printf '%s' "$counts" | awk '{print $1}')"
+BEHIND="$(printf '%s' "$counts" | awk '{print $2}')"
+
+if [ "$AHEAD" -gt 0 ]; then
+  warn "${DEFAULT_BRANCH} is ${AHEAD} commit(s) ahead of ${UPSTREAM}; refusing to touch it."
+  warn "Push or drop those commits, then re-run. Nothing was changed."
+  exit 1
+fi
+
+if [ "$BEHIND" -eq 0 ]; then
+  say ""
+  say "already current: ${DEFAULT_BRANCH} == ${UPSTREAM} ($("${GIT[@]}" rev-parse --short "$DEFAULT_BRANCH"))"
+  exit 0
+fi
+
+# --- fast-forward ----------------------------------------------------------
+HOLDER="$(worktree_holding "$DEFAULT_BRANCH")"
+
+say ""
+say "==> fast-forwarding ${DEFAULT_BRANCH} ${BEHIND} commit(s) to ${UPSTREAM}"
+
+if [ -n "$HOLDER" ]; then
+  # Checked out somewhere: merge in place so the index and files follow.
+  if [ -n "$(git -C "$HOLDER" status --porcelain)" ]; then
+    warn "${DEFAULT_BRANCH} is checked out at ${HOLDER}, which has local changes."
+    warn "Refusing to fast-forward a dirty checkout. Commit or stash there, then re-run."
+    warn "(${BEHIND} commit(s) behind ${UPSTREAM}. Nothing was changed.)"
+    exit 1
+  fi
+  git -C "$HOLDER" merge --ff-only "refs/remotes/${UPSTREAM}"
+else
+  # Not checked out anywhere: move the ref alone. This refspec form is
+  # fast-forward-only, so it fails loudly rather than clobbering.
+  "${GIT[@]}" fetch "$REMOTE" "${DEFAULT_BRANCH}:${DEFAULT_BRANCH}"
+fi
+
+say ""
+say "done: ${DEFAULT_BRANCH} at $("${GIT[@]}" rev-parse --short "$DEFAULT_BRANCH")"

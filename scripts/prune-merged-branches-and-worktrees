@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+#
+# prune-merged-branches-and-worktrees — remove worktrees and local branches
+# whose work has already landed on the default branch.
+#
+# Built for this repo's squash-and-delete PR workflow. That workflow is the
+# reason a naive `git branch --merged` prune finds nothing here: a squash
+# merge rewrites the branch into one new commit, so the original commits are
+# never ancestors of main. Branches are therefore classified two ways:
+#
+#   merged   — the branch tip is an ancestor of the default branch
+#              (a real merge or a fast-forward). Deleted with `git branch -d`.
+#   squashed — the branch's TREE is already reachable as an equivalent patch
+#              on the default branch, proved by synthesising a single commit
+#              of the branch tree on the merge base and asking `git cherry`.
+#              Deleted with `git branch -D`, since git will not see it as
+#              merged. The tip sha is printed so `git reflog`/`git branch
+#              <name> <sha>` can restore it.
+#
+# Anything else is left alone and reported.
+#
+# Never touches: the default branch, a locked worktree, a worktree with
+# local changes, a worktree containing your current directory, the main
+# worktree, or a branch checked out in a surviving worktree.
+#
+# Idempotent: a second run finds nothing to do. Every path is absolute.
+#
+# Usage:
+#   scripts/prune-merged-branches-and-worktrees [-n|--dry-run] [--remote NAME] [--help]
+#
+# Environment:
+#   REPO_ROOT   override the repo to operate on (default: this script's ../)
+#
+# Exit status:
+#   0  finished (including "nothing to do")
+#   2  usage or environment error
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="${REPO_ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd -P)}"
+
+REMOTE="origin"
+DRY_RUN=0
+
+die()  { printf 'prune: %s\n' "$*" >&2; exit 2; }
+say()  { printf '%s\n' "$*"; }
+warn() { printf 'prune: %s\n' "$*" >&2; }
+run()  { if [ "$DRY_RUN" -eq 1 ]; then say "    would run: $*"; else "$@"; fi; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -n|--dry-run) DRY_RUN=1; shift ;;
+    --remote) [ $# -ge 2 ] || die "--remote needs a value"; REMOTE="$2"; shift 2 ;;
+    --help|-h) sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) die "unknown argument: $1 (try --help)" ;;
+  esac
+done
+
+[ -d "$REPO_ROOT" ] || die "REPO_ROOT is not a directory: $REPO_ROOT"
+GIT=(git -C "$REPO_ROOT")
+"${GIT[@]}" rev-parse --git-common-dir >/dev/null 2>&1 \
+  || die "not a git repository: $REPO_ROOT"
+
+# Operate from the main worktree: it owns the branch refs, and it is the one
+# worktree this script must never remove.
+MAIN_WORKTREE="$("${GIT[@]}" worktree list --porcelain | awk '/^worktree /{print substr($0, 10); exit}')"
+[ -n "$MAIN_WORKTREE" ] || die "could not determine the main worktree"
+GIT=(git -C "$MAIN_WORKTREE")
+
+if ref="$("${GIT[@]}" symbolic-ref --quiet "refs/remotes/${REMOTE}/HEAD" 2>/dev/null)"; then
+  # Strip both spellings: a well-formed origin/HEAD points at
+  # refs/remotes/<remote>/<branch>, but a hand-set one often names
+  # refs/heads/<branch> instead.
+  ref="${ref#refs/remotes/"${REMOTE}"/}"
+  DEFAULT_BRANCH="${ref#refs/heads/}"
+else
+  DEFAULT_BRANCH="$("${GIT[@]}" config --get "init.defaultBranch" 2>/dev/null || printf 'main')"
+  warn "refs/remotes/${REMOTE}/HEAD is unset; assuming default branch '${DEFAULT_BRANCH}'"
+fi
+"${GIT[@]}" rev-parse --verify --quiet "refs/heads/${DEFAULT_BRANCH}" >/dev/null \
+  || die "no local branch '${DEFAULT_BRANCH}' (derived from refs/remotes/${REMOTE}/HEAD); run scripts/sync-main first"
+
+CWD="$(pwd -P)"
+
+say "repo:    ${MAIN_WORKTREE}"
+say "keeping: ${DEFAULT_BRANCH} ($("${GIT[@]}" rev-parse --short "$DEFAULT_BRANCH"))"
+[ "$DRY_RUN" -eq 1 ] && say "mode:    DRY RUN — nothing will be deleted"
+
+# --- is the branch's content already on the default branch? ----------------
+# Synthesise one commit holding the branch's tree, parented on the merge
+# base, and ask whether an equivalent patch is already upstream. `git cherry`
+# prints "- <sha>" when it finds one, "+ <sha>" when it does not. The
+# synthetic commit is unreferenced and is collected by the next `git gc`.
+is_squash_merged() {
+  local branch="$1" base tree synthetic verdict
+  base="$("${GIT[@]}" merge-base "$DEFAULT_BRANCH" "$branch" 2>/dev/null)" || return 1
+  tree="$("${GIT[@]}" rev-parse "${branch}^{tree}" 2>/dev/null)" || return 1
+  synthetic="$("${GIT[@]}" commit-tree "$tree" -p "$base" -m "prune-probe" 2>/dev/null)" || return 1
+  verdict="$("${GIT[@]}" cherry "$DEFAULT_BRANCH" "$synthetic" 2>/dev/null)" || return 1
+  case "$verdict" in
+    -*) return 0 ;;
+    *)  return 1 ;;
+  esac
+}
+
+# --- step 1: drop admin records for worktree directories that are gone -----
+say ""
+say "==> git worktree prune"
+if [ "$DRY_RUN" -eq 1 ]; then
+  stale="$("${GIT[@]}" worktree prune --dry-run -v 2>&1 || true)"
+  if [ -n "$stale" ]; then
+    # git's --dry-run still phrases these as "Removing ..."; indent them so
+    # they read as predictions here.
+    printf '%s\n' "$stale" | sed 's/^/    would prune: /'
+  else
+    say "    nothing stale"
+  fi
+else
+  "${GIT[@]}" worktree prune -v
+fi
+
+# --- step 2: remove worktrees whose branch has landed ----------------------
+WORKTREES="$("${GIT[@]}" worktree list --porcelain | awk '
+  function flush() { if (p != "") printf "%s\t%s\t%d\t%d\n", p, b, l, r }
+  /^worktree /  { flush(); p = substr($0, 10); b = ""; l = 0; r = 0; next }
+  /^branch /    { b = substr($0, 8); next }
+  /^locked/     { l = 1; next }
+  /^prunable/   { r = 1; next }
+  END           { flush() }
+')"
+
+say ""
+say "==> worktrees"
+WT_REMOVED=0
+WT_KEPT=0
+# Branch refs that this run releases (by pruning a stale record or removing a
+# worktree). Step 3 must treat them as free even under --dry-run, or the dry
+# run would predict a different outcome than the real thing.
+FREED_REFS=""
+while IFS="$(printf '\t')" read -r wt_path wt_ref wt_locked wt_prunable; do
+  [ -n "$wt_path" ] || continue
+  wt_branch="${wt_ref#refs/heads/}"
+  label="${wt_branch:-(detached)}"
+
+  if [ "$wt_path" = "$MAIN_WORKTREE" ]; then
+    continue
+  fi
+  if [ "$wt_prunable" -eq 1 ]; then
+    # Its directory is gone; step 1 removed (or would remove) the record.
+    [ -n "$wt_ref" ] && FREED_REFS="${FREED_REFS}${wt_ref}
+"
+    continue
+  fi
+  if [ "$wt_locked" -eq 1 ]; then
+    say "    keep   ${wt_path} [${label}] — locked"
+    WT_KEPT=$((WT_KEPT + 1)); continue
+  fi
+  case "$CWD" in
+    "$wt_path"|"$wt_path"/*)
+      say "    keep   ${wt_path} [${label}] — you are inside it"
+      WT_KEPT=$((WT_KEPT + 1)); continue ;;
+  esac
+  if [ -z "$wt_branch" ]; then
+    say "    keep   ${wt_path} — detached HEAD, cannot judge"
+    WT_KEPT=$((WT_KEPT + 1)); continue
+  fi
+  if [ "$wt_branch" = "$DEFAULT_BRANCH" ]; then
+    say "    keep   ${wt_path} [${label}] — holds the default branch"
+    WT_KEPT=$((WT_KEPT + 1)); continue
+  fi
+  if [ -d "$wt_path" ] && [ -n "$(git -C "$wt_path" status --porcelain 2>/dev/null)" ]; then
+    say "    keep   ${wt_path} [${label}] — has local changes"
+    WT_KEPT=$((WT_KEPT + 1)); continue
+  fi
+
+  if "${GIT[@]}" merge-base --is-ancestor "$wt_branch" "$DEFAULT_BRANCH" 2>/dev/null; then
+    reason="merged"
+  elif is_squash_merged "$wt_branch"; then
+    reason="squash-merged"
+  else
+    say "    keep   ${wt_path} [${label}] — not on ${DEFAULT_BRANCH} yet"
+    WT_KEPT=$((WT_KEPT + 1)); continue
+  fi
+
+  say "    remove ${wt_path} [${label}] — ${reason}"
+  run "${GIT[@]}" worktree remove "$wt_path"
+  FREED_REFS="${FREED_REFS}${wt_ref}
+"
+  WT_REMOVED=$((WT_REMOVED + 1))
+done <<< "$WORKTREES"
+[ "$WT_REMOVED" -eq 0 ] && [ "$WT_KEPT" -eq 0 ] && say "    no extra worktrees"
+
+# --- step 3: delete local branches whose work has landed -------------------
+# Re-read the worktree list, minus the refs this run freed, so the branch
+# verdicts match whether or not step 2 actually executed.
+CHECKED_OUT="$("${GIT[@]}" worktree list --porcelain | awk '/^branch /{print substr($0, 8)}')"
+if [ -n "$FREED_REFS" ]; then
+  CHECKED_OUT="$(printf '%s\n' "$CHECKED_OUT" \
+    | grep -vxF -f <(printf '%s\n' "$FREED_REFS" | grep -v '^$') || true)"
+fi
+
+say ""
+say "==> local branches"
+BR_DELETED=0
+BR_KEPT=0
+while IFS= read -r branch; do
+  [ -n "$branch" ] || continue
+  [ "$branch" = "$DEFAULT_BRANCH" ] && continue
+
+  # Exact line match: a substring test would let branch "feat" be shadowed
+  # by a worktree holding "feat-a".
+  if printf '%s\n' "$CHECKED_OUT" | grep -qxF "refs/heads/${branch}"; then
+    say "    keep   ${branch} — checked out in a worktree"
+    BR_KEPT=$((BR_KEPT + 1)); continue
+  fi
+
+  sha="$("${GIT[@]}" rev-parse --short "$branch")"
+  if "${GIT[@]}" merge-base --is-ancestor "$branch" "$DEFAULT_BRANCH" 2>/dev/null; then
+    say "    delete ${branch} (${sha}) — merged"
+    run "${GIT[@]}" branch -d "$branch"
+    BR_DELETED=$((BR_DELETED + 1))
+  elif is_squash_merged "$branch"; then
+    # -D is required: a squash merge leaves no ancestry for git to see.
+    say "    delete ${branch} (${sha}) — squash-merged; restore with: git branch ${branch} ${sha}"
+    run "${GIT[@]}" branch -D "$branch"
+    BR_DELETED=$((BR_DELETED + 1))
+  else
+    say "    keep   ${branch} (${sha}) — not on ${DEFAULT_BRANCH} yet"
+    BR_KEPT=$((BR_KEPT + 1))
+  fi
+done <<< "$("${GIT[@]}" for-each-ref --format='%(refname:short)' refs/heads)"
+
+say ""
+say "summary: ${WT_REMOVED} worktree(s) removed, ${WT_KEPT} kept; ${BR_DELETED} branch(es) deleted, ${BR_KEPT} kept"
+[ "$DRY_RUN" -eq 1 ] && say "         (dry run — nothing was actually deleted)"
+exit 0
