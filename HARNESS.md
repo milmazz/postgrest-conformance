@@ -630,11 +630,37 @@ silently), not skipped.
 
 - **`exit_code`**, **`dump_contains`**, **`stderr_contains`**,
   **`dump_reparse_stable`** — used only by `kind: cli` cases (the `config`
-  area's `--dump-config`/startup-validation cases): the process's exit code
-  (an integer, or the literal string `"nonzero"` meaning "any non-zero
-  code"), substrings the dumped config output or stderr must contain, and
-  whether re-feeding the dumped config and re-dumping it produces
-  byte-identical output. These do not apply to HTTP cases.
+  area's CLI invocations): the process's exit code (an integer, or the
+  literal string `"nonzero"` meaning "any non-zero code"), substrings the
+  dumped config output or stderr must contain, and whether re-feeding the
+  dumped config and re-dumping it produces byte-identical output. These do
+  not apply to HTTP cases.
+
+  The CLI set is **not** all `--dump-config`. `request.flag` takes three
+  values — `--dump-config` (36 cases), `--ready` (4) and `--example` (1) —
+  plus case 1719, whose `flag` is a positional config path. The first two
+  groups differ in kind, and an implementer must treat them differently:
+
+  - **`--dump-config` and the config-path case are startup validation.** The
+    process parses configuration and exits; it never listens and never
+    reaches Postgres.
+  - **`--ready` (cases 1745–1748) is a health-check client.** It builds
+    `http://<admin-server-host>:<admin-server-port>/ready` and performs a
+    real outbound TCP connection. It still never reaches Postgres (`CLI.hs`
+    dispatches to `PostgREST.Client.ready` before any app-state
+    initialisation), so it needs no database — but it does depend on the
+    host's network stack.
+
+  > **Environmental precondition for case 1746.** 1746 asserts
+  > `connection refused to http://localhost:1/ready`, which requires that
+  > nothing listens on `localhost:1` **and** that the connect be actively
+  > *refused* rather than filtered or dropped. On a host whose firewall
+  > DROPs traffic to low ports, the connect instead hangs until the runner's
+  > 30-second CLI timeout and the case fails with a timeout rather than a
+  > mismatch. If you see exactly that failure, check the host's egress
+  > filtering before suspecting the assertion. Cases 1747 and 1748 are
+  > decided before any packet leaves the process (invalid URL, and special
+  > hostname respectively), so neither depends on the network.
 
 - **`status_text`** (defined in `case.schema.json` but **not implemented by
   the reference assertion code**) — the expected HTTP reason phrase. bier's

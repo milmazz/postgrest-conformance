@@ -11,7 +11,12 @@ expect:
   exit_code: nonzero
   stderr_contains: "ERROR: Admin server is not running. Please check admin-server-port config."
 notes: >
-  `--ready` with no admin-server-port configured (empty = unset, the
-  documented default) exits 1 before any connection attempt. Mirrors
+  `--ready` with no admin-server-port configured exits 1 on stderr before any
+  connection attempt: Client.hs tests the `Nothing` branch first, ahead of the
+  special-hostname check and ahead of building any URL. The empty string
+  mirrors upstream's explicit disable rather than proving a coercion — the
+  case does not discriminate `PGRST_ADMIN_SERVER_PORT: ""` from omitting the
+  key, because `coerceInt ""` is `Nothing` exactly as an absent key is
+  (Config.hs#L486); case 1723 is the one that pins that coercion. Mirrors
   test_cli.py:test_cli_ready_flag_fail_when_no_admin_server.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L395
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L404

@@ -13,8 +13,11 @@ expect:
   stderr_contains: "ERROR: invalid url - http://localhost:-1/ready"
 notes: >
   admin-server-port accepts -1 at config-parse time; `--ready` then builds
-  http://localhost:-1/ready, which http-client rejects as an invalid URL —
-  a distinct error flavor from 1746's connection-refused (same it-block,
-  second invocation at #L374). Mirrors the second half of
-  test_cli.py:test_cli_ready_flag_fail_with_http_exception.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L351
+  http://localhost:-1/ready, which http-client rejects as an
+  InvalidUrlException before any connection attempt — a distinct error flavor
+  from 1746's connection-refused, and reached through a different
+  handleHttpException branch. Both flavors live in one upstream it-block;
+  this case anchors the second invocation's assertion, 1746 the first.
+  PGRST_SERVER_HOST is pinned for the same reason as in 1746. Mirrors the
+  second half of test_cli.py:test_cli_ready_flag_fail_with_http_exception.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L377

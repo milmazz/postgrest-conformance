@@ -16,9 +16,17 @@ notes: >
   with the connection-refused message naming the full /ready URL.
   PGRST_SERVER_HOST must be set: admin-server-host defaults to server-host,
   whose own default "!4" is a special hostname that would divert to the
-  case-1748 error instead. Port 1 stands in for upstream's freeport() — a
-  fixed port the suite can assert on, chosen because binding it needs root
-  so nothing plausibly listens there (connect to an unbound port refuses
-  regardless of privilege). Mirrors the first half of
+  case-1748 error instead. Port 1 stands in for upstream's freeport() —
+  a case must name a fixed port to assert the URL, and port 1 is in the
+  reserved range no service binds in practice (on most hosts binding it also
+  needs privilege, though container runtimes that set
+  net.ipv4.ip_unprivileged_port_start=0 do allow it — nothing binds it
+  either way). PRECONDITION: the connect must be actively REFUSED, not
+  filtered; on a host that DROPs traffic to low ports this case times out
+  instead of failing the match (see HARNESS.md section 4). The assertion is
+  robust to name resolution: handleHttpException renders the URL from
+  `getUri req`, not from the resolved address, and maps every
+  HttpExceptionRequest — refused, reset, DNS failure, timeout — to this same
+  text. Mirrors the first half of
   test_cli.py:test_cli_ready_flag_fail_with_http_exception.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L351
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L367
