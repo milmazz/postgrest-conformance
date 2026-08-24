@@ -1,14 +1,16 @@
 # Conformance case index
 
-Cross-reference of the **762** conformance cases under [`cases/`](cases/).
+Cross-reference of the **801** conformance cases under [`cases/`](cases/).
 Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-23**
-at the current 762-case state: 762 files, 762 distinct integer ids, 0 schema
+at the current 801-case state: 801 files, 801 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2093** of them — carries the
-single ref `v16.0`, matching `PIN` (an earlier revision said 2088; the same
-scan at the prior state returns 2090, so that figure was a miscount — the
-+3 to 2093 is the headers fix pass's new anchors, and zero refs are stale
-either way). The state verified includes the
+URL across `spec/` (18 files) and `cases/` — **2149** of them — carries the
+single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
+state; the +56 is the spread/aggregates pass — 39 new `source:` anchors, one
+per case, plus 17 in `spec/select.yaml`. Further back, an earlier revision
+said 2088; the same scan at that state returns 2090, so that figure was a
+miscount. Zero refs are stale at any of these states.) The state verified
+includes the
 **2026-08-22 mutations citation-audit fix pass** (cases **1360, 1368, 1373**:
 PGRST205 messages re-qualified to the request's active schema
 `mutations.…`, anchors moved onto `Error.hs#L255` — now committed at
@@ -16,7 +18,10 @@ PGRST205 messages re-qualified to the request's active schema
 case **1573** gains `config: {server-trace-header: ""}` pinning upstream's
 `configServerTraceHeader = Nothing` context, `spec/headers.yaml` gains the
 matching CONFIG CONTEXT note; no `source:` anchor moved — see
-[`COVERAGE.md`](COVERAGE.md) → *Review status*). The tree's
+[`COVERAGE.md`](COVERAGE.md) → *Review status*) **and the 2026-08-23
+spread/aggregates pass** (cases **11100–11138**: the two spread to-many
+contexts, aggregates on spreads, and select's first overflow band). The
+tree's
 implementation-anchored `source:` count stands at **60** (with 2
 docs-anchored: 1279, 1682); the "53" figures quoted in the pass narratives
 below are historical snapshots of earlier states.
@@ -967,7 +972,7 @@ sub-features present per area (second segment, as on disk):
 
 ## Case file shapes
 
-Most cases are HTTP request/response (**724**). The **config** area additionally
+Most cases are HTTP request/response (**763**). The **config** area additionally
 uses a **CLI** shape (`request.kind: cli`, `request.flag: "--dump-config"`)
 asserting on `expect.exit_code`, `expect.dump_contains`,
 `expect.dump_reparse_stable`, and `expect.stderr_contains` rather than an HTTP
@@ -1015,14 +1020,18 @@ ids listed in `@variant_case_ids`
 1654, 1677, 1678, 1680, 1682, 1703, 1758, 1763, 1764) plus every `kind: cli`
 case. On any other HTTP case the `config:` block is **inert** — it documents the
 upstream configuration the assertion depends on, but the case still runs against
-a shared instance. Mechanically, **61** HTTP cases carry a non-empty `config:`
+a shared instance. Mechanically, **66** HTTP cases carry a non-empty `config:`
 outside `@variant_case_ids` (re-derived on disk this pass against the harness's
-live 18-id list), now out of **724** HTTP cases (762 − 38 CLI); most simply
-restate what the shared instance already provides. The 61st is **1573**
-(added 2026-08-23 by the headers citation-audit fix pass), and it is **not**
-one of the restaters: its `server-trace-header: ""` must *clear* the shared
-headers instance's `X-Request-Id` for `headers_no_blank` to hold, so it
-belongs on the diverging list below. This repo's oracle runner honours it via
+live 18-id list), now out of **763** HTTP cases (801 − 38 CLI); most simply
+restate what the shared instance already provides. The five most recent are
+**11115–11119**, and none of them restates: each needs
+`db-aggregates-enabled: true`, and the shared instance leaves aggregates
+disabled — which is precisely what **11120**/**11121** pin, expecting the
+PGRST123 400 for the same requests without the block. Before them the 61st
+was **1573** (added 2026-08-23 by the headers citation-audit fix pass),
+likewise not a restater: its `server-trace-header: ""` must *clear* the
+shared headers instance's `X-Request-Id` for `headers_no_blank` to hold, so
+it belongs on the diverging list below. This repo's oracle runner honours it via
 dynamic config overlay (`tools/oracle/internal/route/route.go` → `Route`,
 which spins a variant instance for any unsatisfied `config:` entry regardless
 of the id list), and `HARNESS.md` §2.3's variant table plus route.go's
@@ -1131,19 +1140,22 @@ deferral; `case.schema.json` itself has no `pending` field. (Earlier revisions o
 this file claimed 6 such cases, listing 1509, 1513 and 1514 as well — those three
 only *mention* `status_text` in `notes:` or in an expected `hint:` string and
 carry no `expect.status_text` key, so they run normally. Re-verified at the
-**762**-case state: still exactly three.)
+**801**-case state: still exactly three.)
 
 **13** cases use the HTTP `HEAD` method (1020, 1272, 1274, 1275, 1277, 1284,
 1425, 1681, 1756, 1760, 1761, 1762, 1771) and **every one expects a 2xx** —
-re-derived mechanically at the 762-case state. No case in the tree issues a HEAD
+re-derived mechanically at the 801-case state. No case in the tree issues a HEAD
 request that errors, which is the tree's only *request-shape* blind spot; see
 [`COVERAGE.md`](COVERAGE.md) → *Known gaps → errors*. **The count has now
-not moved in nine re-syncs while the tree grew by 86 cases.** This pass is the
-first with a structural excuse: fourteen of its sixteen new cases are mutations,
-and a HEAD on a mutation is not a shape upstream asserts anywhere. Full method
-distribution at **762**: GET **511**, POST **114**, CLI **38**, PATCH **35**,
-DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 762). **PATCH
-27 → 35 is the largest single-pass growth that method has had.**
+not moved in ten re-syncs while the tree grew by 125 cases.** The last two
+passes each have a structural excuse: fourteen of the mutations pass's sixteen
+new cases are mutations, and a HEAD on a mutation is not a shape upstream
+asserts anywhere; every one of this pass's thirty-nine transcribes a `get`
+it-block, so there was no HEAD in reach to transcribe. Full method
+distribution at **801**: GET **550**, POST **114**, CLI **38**, PATCH **35**,
+DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 801). **GET
+511 → 550 is the largest single-pass growth any method has had; the previous
+holder was PATCH's 27 → 35.**
 
 ## Looking up a case
 

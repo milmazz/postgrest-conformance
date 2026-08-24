@@ -743,17 +743,17 @@ authoritative for *routing which schema/instance a case needs* (§2), but the
 `feature:` prefix, not a case's numeric id, is the authoritative area
 assignment if the two ever look inconsistent.
 
-> **Four areas overflow into a 5-digit band** once their primary 50-wide band
-> filled: `operators` (10200+), `mutations` (11400+), `auth` (11800+),
-> `content_negotiation` (12400+). These sort *lexically* right after
-> unrelated 4-digit ids, so `ls cases/ | sort -n` (numeric sort), never a
-> plain `ls`, is required to read ids in area order.
+> **Five areas overflow into a 5-digit band** once their primary 50-wide band
+> filled: `operators` (10200+), `select` (11100+), `mutations` (11400+),
+> `auth` (11800+), `content_negotiation` (12400+). These sort *lexically*
+> right after unrelated 4-digit ids, so `ls cases/ | sort -n` (numeric
+> sort), never a plain `ls`, is required to read ids in area order.
 
 | Area | Id band(s) | Cases | `schema:` label(s) used |
 |---|---|---:|---|
 | url_grammar | 1000–1035 | 36 | `test`, `multi`, `unicode`, `ordering` |
 | operators | 1050–1099, 10200–10236 | 87 | `operators` |
-| select | 1100–1149 | 50 | `test` |
+| select | 1100–1149, 11100–11138 | 89 | `test` |
 | filters | 1150–1199 | 50 | `test` |
 | ordering | 1200–1232 | 33 | `ordering`, `test`, `mutations` |
 | pagination | 1250–1288 | 39 | `pagination` |
@@ -769,7 +769,7 @@ assignment if the two ever look inconsistent.
 | observability | 1750–1771 | 22 | `observability` |
 | domain_representations | 1800–1836 | 37 | `domain_representations`, `test` |
 
-**Total: 762 cases across 17 areas** (36+87+50+50+33+39+32+65+44+69+27+35+52+39+45+22+37 = 762).
+**Total: 801 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+45+22+37 = 801).
 
 Recover a case's area directly from its own file, no index lookup needed:
 

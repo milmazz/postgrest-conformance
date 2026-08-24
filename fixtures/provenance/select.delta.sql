@@ -4,13 +4,15 @@
 --     test.process_categories, test.processes, test.process_costs,
 --     test.supervisors, test.process_supervisor, test.factory_buildings,
 --     test.budget_categories, test.budget_expenses — DDL + seeds mirrored
---     byte-faithfully from upstream test/spec/fixtures/schema.sql
---     #L3588-L3599, #L3713-L3744, #L3815-L3822 and data.sql#L855-L941,
---     including the deliberately absent budget_expenses id 4 and
---     process_costs id 7 (cases 11100-11121);
+--     from upstream test/spec/fixtures/schema.sql #L3588-L3599,
+--     #L3713-L3744, #L3815-L3822 and data.sql #L855-L913 + #L935-L941
+--     (the seeds byte-faithfully, the DDL structurally — see the note
+--     above the CREATE TABLEs in ../02_base.sql), including the
+--     deliberately absent budget_expenses id 4 and process_costs id 7
+--     (cases 11100-11121);
 -- (2) the many-to-many pair — test.operators (with its jsonb status
 --     column) and the test.process_operator junction — from schema.sql
---     #L3803-L3813 and data.sql#L913-L933 (11 junction rows), enabling the
---     m2m spread context cases 11122-11138.
+--     #L3803-L3813 and data.sql #L915-L933 (11 junction rows), enabling
+--     the m2m spread context cases 11122-11138.
 -- No GRANTs either time — the test base's anon role is the connection
 -- user. Empty until the next delta.

@@ -16,10 +16,13 @@ expect:
     - {"factory":"Factory D"}
 notes: >
   An empty spread `...processes()` contributes no keys at all — same
-  result as an empty embed, one row per parent, no order= (upstream
-  asserts physical order). Anchor deviates from the file-header
-  convention: the transcribed get is the it-block's third (L624); the
-  first (L604) needs the absent actors/films pair and the second (L611)
-  is the grandchild_entities flavor, both traced in select.yaml
+  result as an empty embed, one row per parent. Assumes: physical row
+  order of test.factories. Upstream issues this get with no `order=`, so
+  the case transcribes it that way; the assertion holds because
+  test.factories is a four-row never-mutated heap inserted in id order,
+  well under the synchronize_seqscans threshold. Transcribes the THIRD
+  get of the it-block at L603 (the get at L624); the first (L604) needs
+  the absent actors/films pair and the second (L611) is the
+  grandchild_entities flavor, both traced in select.yaml
   (SpreadQueriesSpec.hs:603).
 source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603

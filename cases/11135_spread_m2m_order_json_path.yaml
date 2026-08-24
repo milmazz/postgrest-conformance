@@ -20,9 +20,9 @@ expect:
     - {"process":"Process YY","id":[],"name":[],"status":[]}
 notes: >
   Spread ordering columns may be JSON paths with nulls handling
-  (operators.order=status->afk.asc.nullsfirst,status->id.desc). Anchor
-  deviates from the file-header convention: L563 is the second get inside
-  the it-block at L551; only it demonstrates the JSON-path flavor — the
-  one-to-many twin (factory_buildings, L302) stays traced-only in
-  select.yaml (SpreadQueriesSpec.hs:563).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L563
+  (operators.order=status->afk.asc.nullsfirst,status->id.desc). Transcribes
+  the SECOND get of the it-block at L551 (the get at L563) — the only one
+  demonstrating the JSON-path flavor; the block's first get is case 11134.
+  The one-to-many twin (factory_buildings, L302) stays traced-only in
+  select.yaml (SpreadQueriesSpec.hs:551).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L551

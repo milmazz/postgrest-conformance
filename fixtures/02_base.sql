@@ -813,11 +813,19 @@ CREATE TABLE test.organizations (
 );
 
 -- factories family: spread to-many embeds + aggregates on spreads
--- (select.delta.sql, folded 2026-08-23; upstream test/spec/fixtures/
--- schema.sql — factories/process_categories/processes/process_costs/
--- supervisors/process_supervisor at #L3713-L3744, factory_buildings at
--- #L3815, budget_categories/budget_expenses at #L3588-L3599; DDL mirrored
--- byte-faithfully apart from test.-qualification).
+-- (select.delta.sql, folded 2026-08-23 in two passes; upstream
+-- test/spec/fixtures/schema.sql — factories/process_categories/processes/
+-- process_costs/supervisors/process_supervisor at #L3713-L3744,
+-- factory_buildings at #L3815, budget_categories/budget_expenses at
+-- #L3588-L3599, and from the second fold operators/process_operator at
+-- #L3803-L3813).
+--
+-- Mirrored structurally, not byte-for-byte: column names, types, order,
+-- constraints and NULL-ability are exact, but every statement is
+-- test.-qualified and its keywords uppercased (upstream writes them lower
+-- case throughout), and budget_categories/budget_expenses additionally
+-- normalize upstream's leading-comma column layout to trailing commas.
+-- The SEEDS below are the byte-faithful half.
 CREATE TABLE test.factories (
   id int PRIMARY KEY,
   name text
@@ -2028,9 +2036,12 @@ INSERT INTO test.organizations (id, name, referee, auditor, manager_id) VALUES
   (6, 'Oscorp',      3,    4,    6);
 
 -- test.factories family (select.delta.sql, folded 2026-08-23; seeds mirror
--- upstream test/spec/fixtures/data.sql — budget #L855-L867, factories
--- #L869-L927, factory_buildings #L935-L941 — byte-faithfully, including
--- the deliberately absent budget_expenses id 4 and process_costs id 7).
+-- upstream test/spec/fixtures/data.sql byte-faithfully — budget
+-- #L855-L867, factories through process_supervisor #L869-L913,
+-- operators + process_operator #L915-L933 (the second fold),
+-- factory_buildings #L935-L941 — including the deliberately absent
+-- budget_expenses id 4 and process_costs id 7, and upstream's stray space
+-- in the factory_buildings id 5 row).
 INSERT INTO test.factories VALUES (1, 'Factory A');
 INSERT INTO test.factories VALUES (2, 'Factory B');
 INSERT INTO test.factories VALUES (3, 'Factory C');
