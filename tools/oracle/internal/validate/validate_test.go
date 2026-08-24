@@ -55,9 +55,37 @@ const validIndex = `# Index
 Total: 2 cases
 `
 
+// validHarness mirrors HARNESS.md's shape rather than INDEX.md's: the area
+// table lives under a numbered section, spells its row
+// "| Area | Id band(s) | Cases |" (band and count swapped relative to
+// INDEX.md), and is preceded by the admonition naming the areas that
+// overflowed into a 5-digit band.
+//
+// The §2 table exists to prove the parse is scoped: its rows are shaped so
+// that reading them as area rows would raise a "ghost" finding.
+const validHarness = "# Harness\n" + `
+## 2. Server configuration
+
+| Key | Value | Notes |
+|---|---|---|
+| ghost | 200-249 | 7 |
+
+## 7. Areas
+
+> **Zero areas overflow into a 5-digit band** once their primary 50-wide
+> band filled: none so far.
+
+| Area | Id band(s) | Cases | ` + "`schema:`" + ` label(s) used |
+|---|---|---:|---|
+| demo | 100-149 | 2 | ` + "`test`" + ` |
+
+**Total: 2 cases across 1 areas**
+`
+
 // miniTree writes a minimal healthy suite tree (real case.schema.json, a
-// PIN pinned to v16.0, two demo cases, and a matching INDEX.md) into a temp
-// dir and returns its path. Callers mutate it to break specific invariants.
+// PIN pinned to v16.0, two demo cases, and matching INDEX.md and HARNESS.md
+// area tables) into a temp dir and returns its path. Callers mutate it to
+// break specific invariants.
 func miniTree(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
@@ -68,6 +96,7 @@ func miniTree(t *testing.T) string {
 	write(t, root, "case.schema.json", string(schema))
 	write(t, root, "PIN", "postgrest: v16.0\n")
 	write(t, root, "INDEX.md", validIndex)
+	write(t, root, "HARNESS.md", validHarness)
 	write(t, root, "cases/0100_demo_basic.yaml", validCase)
 	write(t, root, "cases/0101_demo_select.yaml", validCase2)
 	return root
@@ -349,9 +378,205 @@ func TestIndexOverflowBandsAndBoldMarkupAccepted(t *testing.T) {
 
 Total: **3 cases**
 `)
+	write(t, root, "HARNESS.md", harnessWith(overflowDemo))
 	res := mustTree(t, root)
 	if len(res.Findings) != 0 {
 		t.Fatalf("want no findings, got: %v", res.Findings)
+	}
+}
+
+// overflowDemo is validHarness's §7 rewritten for a demo area that has
+// spilled into a 5-digit band: one overflow area, named by the note.
+const overflowDemo = `> **One areas overflow into a 5-digit band** once their primary 50-wide
+> band filled: ` + "`demo`" + ` (11800+).
+
+| Area | Id band(s) | Cases | ` + "`schema:`" + ` label(s) used |
+|---|---|---:|---|
+| demo | 100-149, 11800-11849 | 3 | ` + "`test`" + ` |
+
+**Total: 3 cases across 1 areas**
+`
+
+// harnessWith returns validHarness with everything after the "## 7. Areas"
+// heading replaced by body, so a test can vary just the area section.
+func harnessWith(body string) string {
+	const heading = "## 7. Areas\n\n"
+	return validHarness[:strings.Index(validHarness, heading)+len(heading)] + body
+}
+
+func TestHarnessCountMismatchIsReported(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "HARNESS.md", strings.Replace(validHarness, "| demo | 100-149 | 2 |", "| demo | 100-149 | 3 |", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "claims 3 cases, 2 found on disk") {
+		t.Fatalf("count-mismatch finding not found: %v", res.Findings)
+	}
+	// INDEX.md still agrees with disk: the two tables are checked
+	// independently, so breaking one must not implicate the other.
+	if hasFinding(res, "INDEX.md") {
+		t.Fatalf("INDEX.md is unchanged and should be clean: %v", res.Findings)
+	}
+}
+
+func TestHarnessAreaTableIsCheckedIndependentlyOfIndex(t *testing.T) {
+	root := miniTree(t)
+	// The 762 -> 801 pass's actual failure mode: INDEX.md refreshed,
+	// HARNESS.md left behind. Nothing caught it while only INDEX.md was
+	// parsed.
+	write(t, root, "cases/0102_demo_third.yaml", strings.Replace(validCase2, "id: 101", "id: 102", 1))
+	write(t, root, "INDEX.md", strings.NewReplacer(
+		"| demo | 2     | 100-149 |", "| demo | 3     | 100-149 |",
+		"Total: 2 cases", "Total: 3 cases",
+	).Replace(validIndex))
+	res := mustTree(t, root)
+	if hasFinding(res, "INDEX.md") {
+		t.Fatalf("INDEX.md was updated and should be clean: %v", res.Findings)
+	}
+	if !hasFinding(res, "HARNESS.md", "claims 2 cases, 3 found on disk") {
+		t.Fatalf("stale-HARNESS finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessTotalBreakdownIsChecked(t *testing.T) {
+	root := miniTree(t)
+	// A breakdown whose addends do not reach its own stated total.
+	write(t, root, "HARNESS.md", strings.Replace(validHarness,
+		"**Total: 2 cases across 1 areas**",
+		"**Total: 2 cases across 1 areas** (1+2 = 2)", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "breakdown adds up to 3, not the 2 it states") {
+		t.Fatalf("breakdown-arithmetic finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessTotalBreakdownDisagreeingWithDiskIsReported(t *testing.T) {
+	root := miniTree(t)
+	// Internally consistent arithmetic, wrong answer for the tree on disk.
+	write(t, root, "HARNESS.md", strings.Replace(validHarness,
+		"**Total: 2 cases across 1 areas**",
+		"**Total: 2 cases across 1 areas** (2+3 = 5)", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "breakdown claims 5 cases, 2 found on disk") {
+		t.Fatalf("breakdown-vs-disk finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessAreaCountInTotalLineIsChecked(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "HARNESS.md", strings.Replace(validHarness, "across 1 areas", "across 4 areas", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "claims 4 areas, 1 found on disk") {
+		t.Fatalf("area-count finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessOverflowNoteCountIsChecked(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "cases/11800_demo_overflow.yaml", strings.Replace(validCase2, "id: 101", "id: 11800", 1))
+	write(t, root, "INDEX.md", strings.NewReplacer(
+		"| demo | 2     | 100-149 |", "| demo | 3     | 100-149, 11800-11849 |",
+		"Total: 2 cases", "Total: 3 cases",
+	).Replace(validIndex))
+	// The table gained an overflow band; the note still counts zero — the
+	// "Four areas overflow" drift, in miniature.
+	write(t, root, "HARNESS.md", harnessWith(strings.Replace(overflowDemo,
+		"**One areas overflow into a 5-digit band**", "**Zero areas overflow into a 5-digit band**", 1)))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", `overflow note says "zero" areas`, "the table shows 1 (one)") {
+		t.Fatalf("overflow-count finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessOverflowNoteMissingAreaIsReported(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "cases/11800_demo_overflow.yaml", strings.Replace(validCase2, "id: 101", "id: 11800", 1))
+	write(t, root, "INDEX.md", strings.NewReplacer(
+		"| demo | 2     | 100-149 |", "| demo | 3     | 100-149, 11800-11849 |",
+		"Total: 2 cases", "Total: 3 cases",
+	).Replace(validIndex))
+	write(t, root, "HARNESS.md", harnessWith(strings.Replace(overflowDemo,
+		"`demo` (11800+)", "`other` (11800+)", 1)))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", `does not name area "demo"`, "5-digit band 11800+") {
+		t.Fatalf("unnamed-overflow-area finding not found: %v", res.Findings)
+	}
+	if !hasFinding(res, "HARNESS.md", `names area "other"`, "declares no 5-digit band") {
+		t.Fatalf("phantom-overflow-area finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessOverflowNoteWrongBandIsReported(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "cases/11800_demo_overflow.yaml", strings.Replace(validCase2, "id: 101", "id: 11800", 1))
+	write(t, root, "INDEX.md", strings.NewReplacer(
+		"| demo | 2     | 100-149 |", "| demo | 3     | 100-149, 11800-11849 |",
+		"Total: 2 cases", "Total: 3 cases",
+	).Replace(validIndex))
+	write(t, root, "HARNESS.md", harnessWith(strings.Replace(overflowDemo,
+		"`demo` (11800+)", "`demo` (12400+)", 1)))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", `gives area "demo" the band 12400+`, "declares 11800+") {
+		t.Fatalf("wrong-band finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessMissingOverflowNoteIsReported(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "HARNESS.md", strings.Replace(validHarness,
+		"> **Zero areas overflow into a 5-digit band** once their primary 50-wide\n> band filled: none so far.\n", "", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "could not find the", "areas overflow into a 5-digit band") {
+		t.Fatalf("missing-note finding not found: %v", res.Findings)
+	}
+}
+
+func TestHarnessMissingAreaSectionIsReported(t *testing.T) {
+	root := miniTree(t)
+	write(t, root, "HARNESS.md", strings.Replace(validHarness, "## 7. Areas", "## 7. Regions", 1))
+	res := mustTree(t, root)
+	if !hasFinding(res, "HARNESS.md", "could not find the area-table section") {
+		t.Fatalf("missing-section finding not found: %v", res.Findings)
+	}
+	// The section is the whole check; a missing one must not also cascade
+	// into per-area or total findings.
+	if len(res.Findings) != 1 {
+		t.Fatalf("want exactly 1 finding, got: %v", res.Findings)
+	}
+}
+
+func TestHarnessBandParentheticalIsNotReadAsBound(t *testing.T) {
+	root := miniTree(t)
+	// HARNESS.md annotates mutations' band "11400-11405, 11407-11415 (no
+	// 11406)". The parenthetical's digits are commentary on the range, not
+	// bounds: reading them as bounds drops the range entirely and reports
+	// every id in it as out-of-band.
+	write(t, root, "cases/11407_demo_gap.yaml", strings.Replace(validCase2, "id: 101", "id: 11407", 1))
+	write(t, root, "INDEX.md", strings.NewReplacer(
+		"| demo | 2     | 100-149 |", "| demo | 3     | 100-149, 11407-11415 |",
+		"Total: 2 cases", "Total: 3 cases",
+	).Replace(validIndex))
+	write(t, root, "HARNESS.md", harnessWith(`> **One areas overflow into a 5-digit band** once their primary 50-wide
+> band filled: `+"`demo`"+` (11407+).
+
+| Area | Id band(s) | Cases | `+"`schema:`"+` label(s) used |
+|---|---|---:|---|
+| demo | 100-149, 11407-11415 (no 11406) | 3 | `+"`test`"+` |
+
+**Total: 3 cases across 1 areas**
+`))
+	res := mustTree(t, root)
+	if len(res.Findings) != 0 {
+		t.Fatalf("want no findings, got: %v", res.Findings)
+	}
+}
+
+func TestMissingHarnessIsHardError(t *testing.T) {
+	root := miniTree(t)
+	if err := os.Remove(filepath.Join(root, "HARNESS.md")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Tree(root); err == nil {
+		t.Fatal("want a hard error for missing HARNESS.md, got nil")
 	}
 }
 

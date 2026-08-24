@@ -5,8 +5,9 @@
 // case.schema.json (draft 2020-12), loads through the runner's own strict
 // loader (internal/cases), has a globally-unique id matching its filename
 // prefix, and cites a raw.githubusercontent.com source pinned to the tag
-// in PIN; for the tree as a whole it checks INDEX.md's "Area <-> id band
-// <-> fixture fragment" table against what is on disk.
+// in PIN; for the tree as a whole it checks the "Area <-> id band <->
+// fixture fragment" tables in INDEX.md and HARNESS.md §7 against what is
+// on disk.
 //
 // YAML dialect note (inherited from the validate.py transition, and still
 // load-bearing for suite consumers on other parsers): yaml.v3 parses
@@ -133,23 +134,45 @@ func Tree(root string) (Result, error) {
 		areaIDs[c.Area][c.ID] = true
 	}
 
-	indexFindings, err := checkIndex(filepath.Join(root, "INDEX.md"), areaIDs, len(seen))
+	tableFindings, err := checkAreaTables(root, areaIDs, len(seen))
 	if err != nil {
 		return res, err
 	}
-	res.Findings = append(res.Findings, indexFindings...)
+	res.Findings = append(res.Findings, tableFindings...)
 
 	return res, nil
 }
 
 var (
-	rowRe   = regexp.MustCompile(`(?m)^\|([^|]+)\|([^|]+)\|([^|]+)\|`)
-	areaRe  = regexp.MustCompile(`^[A-Za-z_]+$`)
-	countRe = regexp.MustCompile(`^\d+$`)
-	numRe   = regexp.MustCompile(`\d+`)
-	pieceRe = regexp.MustCompile(`[,+]`)
-	totalRe = regexp.MustCompile(`(?m)^Total:\s*\**(\d+)\s*cases\**`)
+	rowRe        = regexp.MustCompile(`(?m)^\|([^|]+)\|([^|]+)\|([^|]+)\|`)
+	areaRe       = regexp.MustCompile(`^[A-Za-z_]+$`)
+	countRe      = regexp.MustCompile(`^\d+$`)
+	numRe        = regexp.MustCompile(`\d+`)
+	pieceRe      = regexp.MustCompile(`[,+]`)
+	bandNoteRe   = regexp.MustCompile(`\([^)]*\)`)
+	totalLineRe  = regexp.MustCompile(`(?m)^\*{0,2}Total:.*$`)
+	totalCasesRe = regexp.MustCompile(`\**(\d+)\**\s*cases`)
+	totalAreasRe = regexp.MustCompile(`\**(\d+)\**\s*areas`)
+	breakdownRe  = regexp.MustCompile(`\(\s*((?:\d+\s*\+\s*)+\d+)\s*=\s*(\d+)\s*\)`)
+	headingRe    = regexp.MustCompile(`(?m)^## `)
+
+	harnessSectionRe = regexp.MustCompile(`(?m)^## 7\. Areas\s*$`)
+	overflowNoteRe   = regexp.MustCompile(`(?m)^> \*\*([A-Za-z]+) areas overflow into a 5-digit band\*\*`)
+	overflowAreaRe   = regexp.MustCompile("`([A-Za-z_]+)` \\((\\d{5})\\+\\)")
 )
+
+// numberWords spells the small integers the way HARNESS.md's overflow note
+// does ("Four areas overflow ..."). Only the range a 17-area tree can
+// plausibly reach is covered; a count outside it reports as a mismatch
+// rather than silently passing.
+var numberWords = []string{
+	"zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+	"nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+	"sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+}
+
+// overflowBand is the first id of the 5-digit band an area overflows into.
+const overflowBand = 10000
 
 type idRange struct{ lo, hi int }
 
@@ -170,12 +193,51 @@ type areaClaim struct {
 	ranges []idRange
 }
 
-// checkIndex checks INDEX.md's "Area <-> id band <-> fixture fragment"
-// table — per-area case count and band membership, plus the closing
-// "Total: N cases" line — against the ids observed on disk. It is a direct
-// port of validate.py's INDEX.md section, findings text included.
-func checkIndex(indexPath string, areaIDs map[string]map[int]bool, totalOnDisk int) ([]string, error) {
-	b, err := os.ReadFile(indexPath)
+// areaTable describes one document's "area <-> id band <-> case count"
+// table. Both documents lead each row with the area name but order the
+// other two cells differently: INDEX.md spells the row
+// "| Area | Cases | Id band |", HARNESS.md §7 spells it
+// "| Area | Id band(s) | Cases |".
+//
+// Both are checked because both are contracts carrying per-area counts,
+// and they diverge silently otherwise: the 762 -> 801 pass refreshed
+// INDEX.md's table and missed HARNESS.md's, which nothing caught because
+// only INDEX.md was ever parsed — even though HARNESS.md §7 is the table
+// declared authoritative for routing which schema an id needs.
+type areaTable struct {
+	doc       string         // file name, as it appears in finding text
+	section   *regexp.Regexp // if set, parse only this section, not the whole file
+	countCell int            // 1-based index into a row's first three cells
+	bandCell  int
+}
+
+var areaTables = []areaTable{
+	{doc: "INDEX.md", countCell: 2, bandCell: 3},
+	{doc: "HARNESS.md", section: harnessSectionRe, countCell: 3, bandCell: 2},
+}
+
+// checkAreaTables checks every document's area table against the ids
+// observed on disk, in the order declared above.
+func checkAreaTables(root string, areaIDs map[string]map[int]bool, totalOnDisk int) ([]string, error) {
+	var findings []string
+	for _, tbl := range areaTables {
+		f, err := checkAreaTable(tbl, filepath.Join(root, tbl.doc), areaIDs, totalOnDisk)
+		if err != nil {
+			return nil, err
+		}
+		findings = append(findings, f...)
+	}
+	return findings, nil
+}
+
+// checkAreaTable checks one document's "Area <-> id band <-> fixture
+// fragment" table — per-area case count and band membership, plus the
+// closing "Total: N cases" line and, where the document spells one out,
+// the arithmetic breakdown beside it — against the ids observed on disk.
+// The INDEX.md half is a direct port of validate.py's INDEX.md section,
+// findings text included.
+func checkAreaTable(tbl areaTable, path string, areaIDs map[string]map[int]bool, totalOnDisk int) ([]string, error) {
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -183,19 +245,31 @@ func checkIndex(indexPath string, areaIDs map[string]map[int]bool, totalOnDisk i
 
 	var findings []string
 
-	// Parse every 3+-column markdown table row "| area | count | band(s) |",
-	// ignoring header/separator rows and rows of other tables in the file
-	// (their first two cells aren't a bare word + a bare integer).
-	indexAreas := map[string]areaClaim{}
+	if tbl.section != nil {
+		section, ok := sliceSection(text, tbl.section)
+		if !ok {
+			return []string{fmt.Sprintf(
+				"%s: could not find the area-table section (%s)", tbl.doc, tbl.section)}, nil
+		}
+		text = section
+	}
+
+	// Parse every 3+-column markdown table row, ignoring header/separator
+	// rows and rows of other tables in the same span (their area and count
+	// cells aren't a bare word and a bare integer).
+	declared := map[string]areaClaim{}
 	for _, m := range rowRe.FindAllStringSubmatch(text, -1) {
-		areaCell := strings.ReplaceAll(strings.TrimSpace(m[1]), "**", "")
-		countCell := strings.ReplaceAll(strings.TrimSpace(m[2]), "**", "")
-		bandCell := strings.ReplaceAll(strings.TrimSpace(m[3]), "**", "")
+		areaCell := cellText(m[1])
+		countCell := cellText(m[tbl.countCell])
+		bandCell := cellText(m[tbl.bandCell])
 		if !areaRe.MatchString(areaCell) || !countRe.MatchString(countCell) {
 			continue
 		}
+		// A band cell may annotate a range with a parenthetical
+		// ("11407-11415 (no 11406)"); its digits are commentary on the
+		// range, not part of it, so they must not be read as bounds.
 		var ranges []idRange
-		for _, piece := range pieceRe.Split(bandCell, -1) {
+		for _, piece := range pieceRe.Split(bandNoteRe.ReplaceAllString(bandCell, ""), -1) {
 			nums := numRe.FindAllString(piece, -1)
 			switch len(nums) {
 			case 2:
@@ -209,25 +283,26 @@ func checkIndex(indexPath string, areaIDs map[string]map[int]bool, totalOnDisk i
 		}
 		if len(ranges) > 0 {
 			count, _ := strconv.Atoi(countCell)
-			indexAreas[areaCell] = areaClaim{count: count, ranges: ranges}
+			declared[areaCell] = areaClaim{count: count, ranges: ranges}
 		}
 	}
 
-	if len(indexAreas) == 0 {
-		findings = append(findings, "INDEX.md: could not parse the Area <-> id band table (0 rows matched)")
+	if len(declared) == 0 {
+		findings = append(findings, fmt.Sprintf(
+			"%s: could not parse the Area <-> id band table (0 rows matched)", tbl.doc))
 	}
 
 	for _, area := range sortedKeys(areaIDs) {
 		ids := areaIDs[area]
-		claim, ok := indexAreas[area]
+		claim, ok := declared[area]
 		if !ok {
 			findings = append(findings, fmt.Sprintf(
-				"INDEX.md: no id-band table row for area %q (%d cases on disk)", area, len(ids)))
+				"%s: no id-band table row for area %q (%d cases on disk)", tbl.doc, area, len(ids)))
 			continue
 		}
 		if len(ids) != claim.count {
 			findings = append(findings, fmt.Sprintf(
-				"INDEX.md: area %q claims %d cases, %d found on disk", area, claim.count, len(ids)))
+				"%s: area %q claims %d cases, %d found on disk", tbl.doc, area, claim.count, len(ids)))
 		}
 		var outOfBand []int
 		for id := range ids {
@@ -247,34 +322,180 @@ func checkIndex(indexPath string, areaIDs map[string]map[int]bool, totalOnDisk i
 				outOfBand = outOfBand[:10]
 			}
 			findings = append(findings, fmt.Sprintf(
-				"INDEX.md: area %q has ids outside its declared band(s) %v: %v", area, claim.ranges, outOfBand))
+				"%s: area %q has ids outside its declared band(s) %v: %v", tbl.doc, area, claim.ranges, outOfBand))
 		}
 	}
 
-	for _, area := range sortedKeys(indexAreas) {
+	for _, area := range sortedKeys(declared) {
 		if _, ok := areaIDs[area]; !ok {
 			findings = append(findings, fmt.Sprintf(
-				"INDEX.md: area %q is listed in the table but no case on disk has that feature: prefix", area))
+				"%s: area %q is listed in the table but no case on disk has that feature: prefix", tbl.doc, area))
 		}
 	}
 
 	declaredTotal := 0
-	for _, claim := range indexAreas {
+	for _, claim := range declared {
 		declaredTotal += claim.count
 	}
 	if declaredTotal != totalOnDisk {
 		findings = append(findings, fmt.Sprintf(
-			"INDEX.md: area counts in the table sum to %d, %d cases found on disk", declaredTotal, totalOnDisk))
+			"%s: area counts in the table sum to %d, %d cases found on disk", tbl.doc, declaredTotal, totalOnDisk))
 	}
 
-	if m := totalRe.FindStringSubmatch(text); m == nil {
-		findings = append(findings, "INDEX.md: could not find the 'Total: N cases' summary line")
-	} else if n, _ := strconv.Atoi(m[1]); n != totalOnDisk {
-		findings = append(findings, fmt.Sprintf(
-			"INDEX.md: 'Total:' line claims %d cases, %d found on disk", n, totalOnDisk))
+	findings = append(findings, checkTotalLine(tbl, text, len(areaIDs), totalOnDisk)...)
+
+	if tbl.doc == "HARNESS.md" {
+		findings = append(findings, checkOverflowNote(tbl, text, declared)...)
 	}
 
 	return findings, nil
+}
+
+// checkTotalLine checks the document's "Total: N cases" summary — the case
+// count, the area count where the line states one, and the arithmetic
+// breakdown where it spells one out ("(36+87+... = 762)"). A breakdown
+// whose addends do not sum to its own stated total is reported separately
+// from one that sums correctly to the wrong number, because the two mean
+// different mistakes.
+func checkTotalLine(tbl areaTable, text string, areasOnDisk, totalOnDisk int) []string {
+	var findings []string
+
+	line := totalLineRe.FindString(text)
+	if line == "" {
+		return []string{fmt.Sprintf("%s: could not find the 'Total: N cases' summary line", tbl.doc)}
+	}
+
+	if m := totalCasesRe.FindStringSubmatch(line); m == nil {
+		findings = append(findings, fmt.Sprintf(
+			"%s: 'Total:' line does not state a case count: %q", tbl.doc, oneLine(line)))
+	} else if n, _ := strconv.Atoi(m[1]); n != totalOnDisk {
+		findings = append(findings, fmt.Sprintf(
+			"%s: 'Total:' line claims %d cases, %d found on disk", tbl.doc, n, totalOnDisk))
+	}
+
+	if m := totalAreasRe.FindStringSubmatch(line); m != nil {
+		if n, _ := strconv.Atoi(m[1]); n != areasOnDisk {
+			findings = append(findings, fmt.Sprintf(
+				"%s: 'Total:' line claims %d areas, %d found on disk", tbl.doc, n, areasOnDisk))
+		}
+	}
+
+	if m := breakdownRe.FindStringSubmatch(line); m != nil {
+		sum := 0
+		for _, addend := range numRe.FindAllString(m[1], -1) {
+			n, _ := strconv.Atoi(addend)
+			sum += n
+		}
+		stated, _ := strconv.Atoi(m[2])
+		switch {
+		case sum != stated:
+			findings = append(findings, fmt.Sprintf(
+				"%s: 'Total:' line breakdown adds up to %d, not the %d it states", tbl.doc, sum, stated))
+		case stated != totalOnDisk:
+			findings = append(findings, fmt.Sprintf(
+				"%s: 'Total:' line breakdown claims %d cases, %d found on disk", tbl.doc, stated, totalOnDisk))
+		}
+	}
+
+	return findings
+}
+
+// checkOverflowNote checks HARNESS.md §7's admonition naming the areas that
+// spilled past their primary 50-wide band into a 5-digit one. It is prose,
+// but it is the prose an implementer reads to know a 5-digit id is not a
+// typo, and it drifts exactly when the table it sits above does: the note
+// still said "Four areas" after select became the fifth.
+func checkOverflowNote(tbl areaTable, text string, declared map[string]areaClaim) []string {
+	loc := overflowNoteRe.FindStringSubmatchIndex(text)
+	if loc == nil {
+		return []string{fmt.Sprintf(
+			"%s: could not find the '<N> areas overflow into a 5-digit band' note", tbl.doc)}
+	}
+
+	// Everything the note claims lives in its own blockquote.
+	note := text[loc[0]:]
+	if end := strings.Index(note, "\n\n"); end != -1 {
+		note = note[:end]
+	}
+
+	// What the table itself says overflowed: the lowest 5-digit band start
+	// of every area that declares one.
+	wantAreas := map[string]int{}
+	for area, claim := range declared {
+		for _, r := range claim.ranges {
+			if r.lo < overflowBand {
+				continue
+			}
+			if lo, ok := wantAreas[area]; !ok || r.lo < lo {
+				wantAreas[area] = r.lo
+			}
+		}
+	}
+
+	var findings []string
+
+	word := strings.ToLower(text[loc[2]:loc[3]])
+	if want := numberWord(len(wantAreas)); word != want {
+		findings = append(findings, fmt.Sprintf(
+			"%s: overflow note says %q areas overflow into a 5-digit band, the table shows %d (%s)",
+			tbl.doc, word, len(wantAreas), want))
+	}
+
+	gotAreas := map[string]int{}
+	for _, m := range overflowAreaRe.FindAllStringSubmatch(note, -1) {
+		band, _ := strconv.Atoi(m[2])
+		gotAreas[m[1]] = band
+	}
+	for _, area := range sortedKeys(wantAreas) {
+		band, ok := gotAreas[area]
+		if !ok {
+			findings = append(findings, fmt.Sprintf(
+				"%s: overflow note does not name area %q, whose table row declares the 5-digit band %d+",
+				tbl.doc, area, wantAreas[area]))
+		} else if band != wantAreas[area] {
+			findings = append(findings, fmt.Sprintf(
+				"%s: overflow note gives area %q the band %d+, its table row declares %d+",
+				tbl.doc, area, band, wantAreas[area]))
+		}
+	}
+	for _, area := range sortedKeys(gotAreas) {
+		if _, ok := wantAreas[area]; !ok {
+			findings = append(findings, fmt.Sprintf(
+				"%s: overflow note names area %q, whose table row declares no 5-digit band", tbl.doc, area))
+		}
+	}
+
+	return findings
+}
+
+// numberWord spells n the way HARNESS.md's prose does, falling back to the
+// digits for counts past the spelled-out range.
+func numberWord(n int) string {
+	if n >= 0 && n < len(numberWords) {
+		return numberWords[n]
+	}
+	return strconv.Itoa(n)
+}
+
+// cellText normalizes one markdown table cell: trimmed, with the bold
+// markers the tables use to highlight recently-changed rows removed.
+func cellText(cell string) string {
+	return strings.ReplaceAll(strings.TrimSpace(cell), "**", "")
+}
+
+// sliceSection returns the part of text between the heading matching start
+// and the next "## " heading (or the end of the document), so a document
+// with several markdown tables can have just one of them parsed.
+func sliceSection(text string, start *regexp.Regexp) (string, bool) {
+	loc := start.FindStringIndex(text)
+	if loc == nil {
+		return "", false
+	}
+	rest := text[loc[1]:]
+	if end := headingRe.FindStringIndex(rest); end != nil {
+		return rest[:end[0]], true
+	}
+	return rest, true
 }
 
 // sortedKeys returns the map's keys sorted, so findings print in a
