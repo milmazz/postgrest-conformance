@@ -6,8 +6,9 @@
 // loader (internal/cases), has a globally-unique id matching its filename
 // prefix, and cites a raw.githubusercontent.com source pinned to the tag
 // in PIN; for the tree as a whole it checks the "Area <-> id band <->
-// fixture fragment" tables in INDEX.md and HARNESS.md §7 against what is
-// on disk.
+// fixture fragment" tables in INDEX.md and HARNESS.md §7, and the CLI-set
+// claims those two documents plus COVERAGE.md and spec/README.md state in
+// running prose (see clishape.go), against what is on disk.
 //
 // YAML dialect note (inherited from the validate.py transition, and still
 // load-bearing for suite consumers on other parsers): yaml.v3 parses
@@ -87,6 +88,7 @@ func Tree(root string) (Result, error) {
 
 	seen := map[int]string{}             // id -> path
 	areaIDs := map[string]map[int]bool{} // area (feature: prefix) -> ids on disk
+	cli := cliFacts{ids: map[int]bool{}, flags: map[string]int{}}
 
 	for _, path := range files {
 		res.CasesChecked++
@@ -132,6 +134,11 @@ func Tree(root string) (Result, error) {
 			areaIDs[c.Area] = map[int]bool{}
 		}
 		areaIDs[c.Area][c.ID] = true
+
+		if c.Request.Kind == "cli" {
+			cli.ids[c.ID] = true
+			cli.flags[c.Request.Flag]++
+		}
 	}
 
 	tableFindings, err := checkAreaTables(root, areaIDs, len(seen))
@@ -139,6 +146,12 @@ func Tree(root string) (Result, error) {
 		return res, err
 	}
 	res.Findings = append(res.Findings, tableFindings...)
+
+	cliFindings, err := checkCLIShape(root, cli)
+	if err != nil {
+		return res, err
+	}
+	res.Findings = append(res.Findings, cliFindings...)
 
 	return res, nil
 }
