@@ -23,7 +23,8 @@
 # follow-up 19 (adopting filters.yaml's declare-the-range convention) —
 # opened 2026-08-23 by the spread-to-many/aggregates-on-spreads pass
 # (11100-11121) and extended the same day by the many-to-many spread pass
-# (11122-11138); 11139+ within the range is free.
+# (11122-11138), then by the nested-empty-projection pass (11139-11140);
+# 11141+ within the range is free.
 #
 # Convention for `source_url`: raw.githubusercontent.com line anchors, pinned to
 # the v16.0 tag, matching the form mandated by spec/case.schema.json (the lint
@@ -584,8 +585,61 @@ entries:
     note: >-
       11138 transcribes the it-block's factories get (L624); the
       actors/films get (L604) needs a still-absent fixture pair and the
-      grandchild_entities get (L611) is traced, not cased.
+      grandchild_entities get (L611) is traced, not cased. This claim is
+      about the LITERALLY empty parens only — for a projection that is
+      non-empty as written but resolves to nothing, see
+      select.spread_nested_empty_spread (11140) and its 400 counterpart
+      select.spread_nested_empty_embed_error (11139).
     cases: [11138]
+
+  - entry_id: select.spread_nested_empty_spread
+    claim: >
+      A spread whose projection is non-empty as written but resolves to no
+      columns — its entries are themselves empty spreads — contributes no
+      keys and yields one row per parent, the same result as the literally
+      empty `...relation()`. `relSelectToSpread` splices a nested spread's
+      own (here empty) field list into the parent spread's projection.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L718
+    source_line: 718
+    note: >-
+      Deviates from this file's it-line convention: no upstream it-block
+      reaches this shape, so the anchor is the Plan.hs branch that produces
+      it. The nearest governing upstream construct is the `empty spreads
+      embeds` context (SpreadQueriesSpec.hs:602, `it` at :603), whose
+      second get (L611,
+      `...child_entities(parent_name:name,...entities())`) exercises the
+      same nested-empty-spread splice but keeps a real column, so its outer
+      spread never reaches an empty projection, and is to-one rather than
+      to-many. 11140's body was read off a live run of the pinned v16.0
+      binary; the case notes record that provenance. The distinction is not
+      cosmetic: an implementation that makes its to-many spread a
+      one-row-per-parent aggregate subquery only by virtue of the aggregate
+      calls in that projection degenerates into a plain lateral join here
+      (milmazz/bier#154).
+    cases: [11140]
+
+  - entry_id: select.spread_nested_empty_embed_error
+    claim: >
+      An empty EMBED nested inside a spread (`...processes(process_costs())`)
+      is not the same as an empty spread: it is a 400 `42703 column
+      <parent>_<relation>_<depth>.<embed> does not exist`. The `JsonEmbed`
+      branch of `relSelectToSpread` emits one projection field named after
+      the embed unconditionally, never consulting the `rsEmptyEmbed` flag
+      computed for the non-spread path, so the SQL selects a column the
+      subquery does not project.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L716
+    source_line: 716
+    note: >-
+      Deviates from this file's it-line convention for the same reason as
+      select.spread_nested_empty_spread: the `empty spreads embeds` context
+      (SpreadQueriesSpec.hs:603) has three gets and none nests an empty
+      embed inside a spread. Independent of cardinality (to-one
+      `...child_entities(entities())` and junction
+      `...process_supervisor(supervisors())` give the same error with their
+      own alias) and of whether the spread also projects real columns
+      (`...processes(id,process_costs())` is the same 400). Contrast 11109,
+      the same nesting with a non-empty `process_costs(cost)` (200).
+    cases: [11139]
 
   - entry_id: select.spread_drop_junction
     claim: >
@@ -792,6 +846,24 @@ gaps:
     nested-relationship spreads (AggregateFunctionsSpec.hs#L167-L295
     beyond the four cased blocks) are traced in the entry notes.
   - >
+    CLOSED 2026-08-29 (issue #25): a spread whose projection is non-empty as
+    written but resolves to no columns was indistinguishable in this tree
+    from the literally-empty `...relation()` of 11138, because nothing cased
+    it. Now cased both ways — 11140 (nested empty SPREAD, 200, contributes
+    nothing) and 11139 (nested empty EMBED, 400 42703) — against the
+    Plan.hs branches that produce them (L718 and L716). Recorded here
+    because the outcome contradicts the issue's own prediction: the issue
+    expected `/factories?select=name,...processes(process_costs())` to be a
+    200 contributing nothing, and a live run of the pinned v16.0 binary
+    makes it a 400. Consumers that "fixed" this shape to a 200 diverge from
+    the reference. The two remaining flavors of the same distinction are
+    traced, not cased: the to-one
+    `/grandchild_entities?select=name,...child_entities(...entities())`
+    (200) and `...child_entities(entities())` (400), and the junction
+    `/processes?select=name,...process_supervisor(supervisors())` (400) —
+    all three verified live and reported in the 11139/11140 notes; they add
+    cardinality coverage, not a new rule.
+  - >
     JSON path negative array indexes (data->>-1::int) are traced at
     JsonOperatorSpec.hs#L283 but not given a separate case; covered indirectly
     by the array-index entry.
@@ -895,7 +967,7 @@ gaps:
     the fixture argument that justified the ordering-area gap no longer applies
     to it. What is left is a genuine authoring gap, not an ownership one: it
     belongs here, beside 11118 (the other `...processes(count())` aggregate over
-    process_supervisor), and the band has room at 11139+. Its it-block also
+    process_supervisor), and the band has room at 11141+. Its it-block also
     carries a second `get` at #L174 aliasing the aggregate (`cost_sum:`), so
     the block is worth two cases, not one. Deferred only because this pass
     stopped at the two SpreadQueriesSpec contexts it set out to close.

@@ -784,7 +784,7 @@ assignment if the two ever look inconsistent.
 |---|---|---:|---|
 | url_grammar | 1000–1035 | 36 | `test`, `multi`, `unicode`, `ordering` |
 | operators | 1050–1099, 10200–10236 | 87 | `operators` |
-| select | 1100–1149, 11100–11138 | 89 | `test` |
+| select | 1100–1149, 11100–11140 | 91 | `test` |
 | filters | 1150–1199 | 50 | `test` |
 | ordering | 1200–1232 | 33 | `ordering`, `test`, `mutations` |
 | pagination | 1250–1288 | 39 | `pagination` |
@@ -800,7 +800,7 @@ assignment if the two ever look inconsistent.
 | observability | 1750–1771 | 22 | `observability` |
 | domain_representations | 1800–1836 | 37 | `domain_representations`, `test` |
 
-**Total: 806 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+50+22+37 = 806).
+**Total: 808 cases across 17 areas** (36+87+91+50+33+39+32+65+44+69+27+35+52+39+50+22+37 = 808).
 
 Recover a case's area directly from its own file, no index lookup needed:
 

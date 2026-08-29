@@ -1,10 +1,10 @@
 # Conformance case index
 
-Cross-reference of the **806** conformance cases under [`cases/`](cases/).
+Cross-reference of the **808** conformance cases under [`cases/`](cases/).
 Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-29**
-at the current 806-case state: 806 files, 806 distinct integer ids, 0 schema
+at the current 808-case state: 808 files, 808 distinct integer ids, 0 schema
 violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2172** of them — carries the
+URL across `spec/` (18 files) and `cases/` — **2176** of them — carries the
 single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
 state and 2149 right after the spread/aggregates passes — +56: 39 new
 `source:` anchors, one per case, plus 17 in `spec/select.yaml`. The PR #18
@@ -21,7 +21,7 @@ comments into a machine-readable `cli.ready_flag.messages:` map — five
 flavors carrying a `source:` and a `message_source:` each, plus one
 `exit_source:`. Further back, an earlier revision said 2088; the
 same scan at that state returns 2090, so that figure was a miscount. From
-2165 the `db-aggregates-enabled` in-db pass added 7 to reach **2172**: case
+2165 the `db-aggregates-enabled` in-db pass added 7 to reach **2172**, and the select nested-empty-projection pass added 4 to reach **2176**: case
 1749's own `source:` plus the three corroborating URLs in its `notes:` (the
 `no-defaults.config` file value, the `db_config.sql` role setting and the
 `no-defaults-with-db.config` golden — the three that make the assertion
@@ -89,13 +89,13 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > **Non-contiguous bands.** **Six** areas do not occupy a single contiguous
 > range and regenerating this file must preserve that rather than collapsing it:
 >
-> - **select** (new 2026-08-23) uses **11100–11138** on top of its full primary
+> - **select** (new 2026-08-23) uses **11100–11140** on top of its full primary
 >   band **1100–1149** (all 50 primary ids are in use). Unlike every earlier
 >   overflow, this one is **declared**: `spec/select.yaml` claims the closed
->   range **[11100..11199]** (follow-up 19's convention), so 11139–11199 are
+>   range **[11100..11199]** (follow-up 19's convention), so 11141–11199 are
 >   reserved for select and **only** ids past 11199 are up for future band
 >   grabs. `11100` sorts immediately after `1110` in a *lexical* listing, so
->   these 39 interleave with select's **own** 1110–1119 block — the only
+>   these 41 interleave with select's **own** 1110–1119 block — the only
 >   self-interleaving band in the tree, chosen so the collision stays inside
 >   one area.
 > - **auth** uses **11800–11818** on top of its full primary band **1450–1499**
@@ -187,7 +187,7 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > at the moment it opened it,** which is the outcome follow-up 19 asked for.
 > `spec/filters.yaml` *declares* `[10600..10799]` as its area's closed
 > overflow range (and has used none of it); `spec/select.yaml` declares
-> **[11100..11199]** and has used 11100–11121 of it; `spec/operators.yaml`
+> **[11100..11199]** and has used 11100–11140 of it; `spec/operators.yaml`
 > declares nothing — its band exists only as the ids on disk;
 > `spec/mutations.yaml` likewise declares nothing and chose 11400+, which
 > lands numerically *between* operators' and auth's ranges;
@@ -225,7 +225,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 |------|------:|---------|------------------|-----------------------|
 | url_grammar | 36 | 1000–1035 | `fixtures/provenance/url_grammar.sql` + `fixtures/provenance/url_grammar.delta.sql` (case 1029's `test.pgrst_reserved_chars` and case 1035's `test."Server Today"`, both folded) | `test` (18), `multi` (14), `unicode` (3), `ordering` (1) |
 | operators | 87 | 1050–1099, 10200–10236 | `fixtures/provenance/operators.sql` + `fixtures/provenance/operators.delta.sql` (`test.items_with_different_col_types`, `test.tsearch_to_tsvector`, the `test.tsvector_not_null`/`tsvector_not_empty` domains and the `test.text_search_vector(test.tsearch_to_tsvector)` computed field, all folded) | `operators` (87) |
-| **select** | **89** | **1100–1149, 11100–11138** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (**folded twice, both 2026-08-23**: the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — enabling the spread-to-many/aggregates-on-spreads cases 11100–11121; then the operators + process_operator m2m pair, enabling 11122–11138) | `test` (89) |
+| **select** | **91** | **1100–1149, 11100–11140** | `fixtures/provenance/select.sql` + `fixtures/provenance/select.delta.sql` (**folded twice, both 2026-08-23**: the nine-table factories family — factories, process_categories, processes, process_costs, supervisors, process_supervisor, factory_buildings, budget_categories, budget_expenses — enabling the spread-to-many/aggregates-on-spreads cases 11100–11121; then the operators + process_operator m2m pair, enabling 11122–11138. The 2026-08-29 nested-empty-projection pair **11139–11140** needed **no** fixture change — it reuses the factories/processes/process_costs chain of the first fold) | `test` (91) |
 | filters | 50 | 1150–1199 | `fixtures/provenance/filters.sql` | `test` (50) |
 | ordering | 33 | 1200–1232 | `fixtures/provenance/ordering.sql` | `ordering` (30), `test` (2), `mutations` (1) |
 | pagination | 39 | 1250–1288 | `fixtures/provenance/pagination.sql` (**no delta** — the v16.0 re-sync added eleven cases and zero fixture objects) | `pagination` (39) |
@@ -241,7 +241,7 @@ generator inputs); at runtime all areas load from the single numbered chain
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **806 cases**, **17 areas**, **17 fixture fragments**
+Total: **808 cases**, **17 areas**, **17 fixture fragments**
 (plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
 currently **comment-only**: stripping comment and blank lines leaves zero
 lines in every one. Each carries a `-- Folded into … on <date> …` provenance
@@ -596,7 +596,7 @@ sub-features present per area (second segment, as on disk):
 |------|---------|--------------|
 | url_grammar | 1000–1035 | method (incl. the OPTIONS `Allow` matrix on a table 1019, a VOLATILE routine 1031, a STABLE routine 1032 and the root path 1033), path (incl. OPTIONS on an unknown relation -> 404, 1034), percent-encoding (incl. `%20` in both a relation and a column name, 1035), profile, reserved-params (`limit` **and** `offset` forbidden on PUT, 1016/1030), reserved-characters |
 | operators | 1050–1099, 10200–10236 | eq (incl. whole-range and whole-array equality), neq (incl. the null-propagating array form), lt/lte/gt/gte, in (incl. the **empty set** `in.()` / `not.in.()` / whitespace-only / blank-element-400 group), is, like/ilike, match/imatch, fts/plfts/wfts/phfts (incl. the `(language)` modifier on all four, the **automatic `to_tsvector()` coercion** against text/jsonb/domain/recursive-domain/computed-field targets, and the tsquery `&`/`\|`/`!` and websearch `and`/`or`/`-` operand grammars), cs/cd/ov, sl/sr/nxl/nxr/adj, isdistinct (incl. range and array operands, and its null-safe contrast with neq), not (incl. three more logic-tree shapes), quantifier (any/all, incl. `gte(all)`/`lte(all)`) |
-| **select** | **1100–1149, 11100–11138** | columns, alias, cast, alias-and-cast, json-path, composite, array, computed-column, computed-relationship, embed (incl. one-to-one, the v16 alias/legacy-target-name rules and the `table!fk` hint), spread, aggregate |
+| **select** | **1100–1149, 11100–11140** | columns, alias, cast, alias-and-cast, json-path, composite, array, computed-column, computed-relationship, embed (incl. one-to-one, the v16 alias/legacy-target-name rules and the `table!fk` hint), spread (incl. the three contributes-nothing spellings: literally-empty parens 11138, a nested empty **spread** 11140 → 200, and a nested empty **embed** 11139 → 400 42703), aggregate |
 | filters | 1150–1199 | horizontal, logical, not, json, quoting, embed |
 | ordering | 1200–1232 | direction, nulls (incl. alongside limits, 1229), json_path, computed_column, multi_column, composite, related (incl. computed relationships, 1227–1228), embed, mutation_representation (1230, `schema: mutations`), rpc (1231–1232), error |
 | pagination | 1250–1288 | limit_offset (incl. HEAD 1277 and the POST-`/rpc/`-with-query-params flavor 1281), range_header (incl. past-the-last-item with count 1278, open-ended non-zero offset 1279, the GET-`/rpc/` flavor 1280, the **method scoping** pair 1284/1285 and the **intersection-not-override** case 1287), count (incl. `count=planned` on an RPC yielding no total 1283, `Preference-Applied` echoed 1286, and `count=none` rejected under `handling=strict` 1288), embedded (**limit only** — `.offset` has no case; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → pagination*), content_range (1282, the empty-window envelope on an RPC) |
@@ -1083,7 +1083,7 @@ case. On any other HTTP case the `config:` block is **inert** — it documents t
 upstream configuration the assertion depends on, but the case still runs against
 a shared instance. Mechanically, **66** HTTP cases carry a non-empty `config:`
 outside `@variant_case_ids` (re-derived on disk this pass against the harness's
-live 18-id list), now out of **763** HTTP cases (806 − 43 CLI); most simply
+live 18-id list), now out of **765** HTTP cases (808 − 43 CLI); most simply
 restate what the shared instance already provides. The five most recent are
 **11115–11119**, and none of them restates: each needs
 `db-aggregates-enabled: true`, and the shared instance leaves aggregates
@@ -1201,11 +1201,11 @@ deferral; `case.schema.json` itself has no `pending` field. (Earlier revisions o
 this file claimed 6 such cases, listing 1509, 1513 and 1514 as well — those three
 only *mention* `status_text` in `notes:` or in an expected `hint:` string and
 carry no `expect.status_text` key, so they run normally. Re-verified at the
-**806**-case state: still exactly three.)
+**808**-case state: still exactly three.)
 
 **13** cases use the HTTP `HEAD` method (1020, 1272, 1274, 1275, 1277, 1284,
 1425, 1681, 1756, 1760, 1761, 1762, 1771) and **every one expects a 2xx** —
-re-derived mechanically at the 806-case state. No case in the tree issues a HEAD
+re-derived mechanically at the 808-case state. No case in the tree issues a HEAD
 request that errors, which is the tree's only *request-shape* blind spot; see
 [`COVERAGE.md`](COVERAGE.md) → *Known gaps → errors*. **The count has now
 not moved in eleven re-syncs while the tree grew by 129 cases.** The last three
@@ -1216,8 +1216,8 @@ transcribes a `get` it-block, so there was no HEAD in reach to transcribe; and
 all four of the 2026-08-24 `--ready` cases are `kind: cli`, which issues no HTTP
 request at all — as is the 2026-08-29 `db-aggregates-enabled` case **1749**.
 Full method
-distribution at **806**: GET **550**, POST **114**, CLI **43**, PATCH **35**,
-DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 806). **GET
+distribution at **808**: GET **552**, POST **114**, CLI **43**, PATCH **35**,
+DELETE **21**, PUT **18**, HEAD **13**, OPTIONS **12** (sums to 808). **GET
 511 → 550 is the largest single-pass growth any method has had; the previous
 holder was PATCH's 27 → 35.**
 
