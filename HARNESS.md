@@ -792,7 +792,7 @@ assignment if the two ever look inconsistent.
 | mutations | 1350–1399, 11400–11405, 11407–11415 (no 11406) | 65 | `mutations` |
 | rpc | 1400–1443 | 44 | `rpc`, `test` |
 | auth | 1450–1499, 11800–11818 | 69 | `auth` |
-| errors | 1500–1526 | 27 | `test` |
+| errors | 1500–1530 | 31 | `test` |
 | headers | 1550–1584 | 35 | `headers`, `test` |
 | content_negotiation | 1600–1649, 12400–12401 | 52 | `test` |
 | openapi | 1650–1688 | 39 | `test`, `openapi_no_comment` |
@@ -800,7 +800,7 @@ assignment if the two ever look inconsistent.
 | observability | 1750–1771 | 22 | `observability` |
 | domain_representations | 1800–1836 | 37 | `domain_representations`, `test` |
 
-**Total: 808 cases across 17 areas** (36+87+91+50+33+39+32+65+44+69+27+35+52+39+50+22+37 = 808).
+**Total: 812 cases across 17 areas** (36+87+91+50+33+39+32+65+44+69+31+35+52+39+50+22+37 = 812).
 
 Recover a case's area directly from its own file, no index lookup needed:
 

@@ -1,0 +1,62 @@
+id: 1527
+feature: errors/pgrst_code/no_rel_between_parent_hint
+request:
+  method: GET
+  path: /items?select=*,nonexistent(*)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "305"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'items' and 'nonexistent' in the schema cache"
+    details: "Searched for a foreign key relationship between 'items' and 'nonexistent' in the schema 'test', but no matches were found."
+    hint: "Perhaps you meant 'sites' instead of 'items'."
+notes: >
+  PGRST200's `hint` is `noRelBetweenHint` (Error.hs:276 -> :320), which has TWO
+  branches selected by `isJust findParent` (Error.hs:322): if the origin is a key
+  of the relationships map the hint suggests a near-miss CHILD (case 1530); if it
+  is not, the hint suggests a near-miss PARENT — "Perhaps you meant '<match>'
+  instead of '<origin>'." (Error.hs:324) — from
+  `suggestParent = Fuzzy.getOne fuzzySetOfParents parent` (Error.hs:329).
+  This case pins that second branch. `test.items` exists as a table (so the
+  request is not the PGRST205 table-not-found path, which is checked first) but
+  participates in no foreign key, so it is absent from `HM.keys allRels` and the
+  `else` branch runs.
+
+  Threshold: unlike PGRST205's `tableNotFoundHint`, which goes through
+  `getFuzzyHint`'s explicit 0.75 gate (Error.hs:400, case 1520), `suggestParent`
+  calls plain `Fuzzy.getOne`, whose minimum score is fuzzyset-0.2.4's default
+  0.33 — this hint is markedly more permissive than 1520's.
+
+  Why 'sites' wins: `Fuzzy.getOne` on a `defaultSet` (useLevenshtein = True)
+  ranks its candidates by the normalized edit-distance similarity
+  1 - levenshtein/max(len). Over EVERY relation name in the schema — a superset
+  of `fuzzySetOfParents` — 'sites' is the unique maximum below 1.0 at
+  0.6 (edit distance 2 over 5 characters); the next names are 'videogames',
+  'users', 'timestamps' and 'lines' at 0.4, and no other name reaches 0.5. So
+  'sites' (which does have relationships) is the best match in the fuzzy set as
+  well.
+
+  The set excludes the requested relation itself: `getWithMinScore` short-circuits
+  on an exact hit and returns it with score 1.0, so were `items` a key of
+  `allRels` the hint would have read "…'items' instead of 'items'". Case 1529
+  makes the same point about a THIRD relation.
+
+  Upstream has no it-block for this branch (`grep "Perhaps you meant '"
+  test/spec/` returns only the two suggestChild assertions at QuerySpec.hs:848
+  and :868). The cited line is the executable doctest
+  `>>> noRelBetweenHint "film" "directors" "api" rels`, whose expected value on
+  the next line (Error.hs:303) is
+  `Just "Perhaps you meant 'films' instead of 'film'."` — the same branch and the
+  same rendering, with "film" absent from the map's keys exactly as `items` is
+  here. Status/details/`Proxy-Status` are NoRelBetween's own (Error.hs:229, :257).
+  Fixture derivation: `test.items` (no foreign key on either side) and
+  `test.sites` (a foreign key to `big_projects`, and `jobs` references it back)
+  both come from fixtures/02_base.sql. Content-Length 305 was recounted against
+  the body above.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L302
