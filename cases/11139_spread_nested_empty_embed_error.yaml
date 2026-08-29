@@ -1,0 +1,45 @@
+id: 11139
+feature: select/spread/nested-empty-embed-error
+request:
+  method: GET
+  path: /factories?select=name,...processes(process_costs())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    code: "42703"
+    details: null
+    hint: null
+    message: "column factories_processes_1.process_costs does not exist"
+notes: >
+  An EMPTY EMBED nested inside a spread does not "contribute nothing" — it
+  is a 400. `generateSpreadSelectFields` (Plan.hs:704) folds every nested
+  relation into the spread's projection via `relSelectToSpread`, and its
+  `JsonEmbed` branch (L716) emits one `SpreadSelectField` named after the
+  embed unconditionally — it never consults the `rsEmptyEmbed` flag that
+  L693/L697 computes for the non-spread path. The generated SQL therefore
+  selects `"factories_processes_1"."process_costs"` from a subquery that
+  projects no such column, and PostgreSQL raises 42703. The alias is
+  PostgREST's deterministic `<parent>_<relation>_<depth>` aggregate alias:
+  stable across repeated runs, unaffected by `order=` and by the order of
+  the select list. The error does not depend on the spread being otherwise
+  empty (`...processes(id,process_costs())` is the same 400) nor on
+  cardinality — the to-one
+  `/grandchild_entities?select=name,...child_entities(entities())` and the
+  junction `/processes?select=name,...process_supervisor(supervisors())`
+  give the same message with their own aliases. Contrast 11109, the same
+  nesting with a NON-empty `process_costs(cost)` (200), and 11140, the same
+  contributes-nothing intent spelled as a nested empty SPREAD (200).
+  EXTRAPOLATION beyond upstream's own coverage: SpreadQueriesSpec.hs's
+  `empty spreads embeds` context (L602, `it` at L603) has three gets and
+  none nests an empty embed inside a spread — L611's
+  `...child_entities(parent_name:name,...entities())` nests an empty
+  *spread*, which is the other branch (L718, cased as 11140). With no
+  it-block to transcribe, this case anchors the Plan.hs line that produces
+  the behavior, and its body was read off a live run of the pinned v16.0
+  binary against this suite's fixtures rather than off an upstream
+  assertion.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L716

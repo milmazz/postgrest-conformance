@@ -1,0 +1,43 @@
+id: 11140
+feature: select/spread/nested-empty-spread
+request:
+  method: GET
+  path: /factories?select=name,...processes(...process_costs())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    - {"name":"Factory A"}
+    - {"name":"Factory B"}
+    - {"name":"Factory C"}
+    - {"name":"Factory D"}
+notes: >
+  A spread whose projection is NON-EMPTY as written but resolves to no
+  columns — its one entry is itself an empty spread — contributes no keys
+  and yields one row per parent, the same answer as the literally-empty
+  `...processes()` of 11138. The two spellings are not interchangeable for
+  an implementer: 11138 is decidable at the parser (empty parens), this one
+  only once the children are built. `relSelectToSpread` splices a nested
+  spread's own field list into the parent's (Plan.hs:718-719) and an empty
+  nested spread's list is `[]`, so the outer to-many spread ends up with an
+  empty projection. An implementation whose to-many spread is a one-row-per-
+  parent aggregate subquery only *by virtue of* the aggregate calls in that
+  projection degenerates here into a plain lateral join and returns one row
+  per child (milmazz/bier#154: 9 rows for these 4 factories, while every
+  other case in the suite passed). Assumes: physical row order of
+  test.factories — the same four-row never-mutated heap 11138 relies on, and
+  like 11138 this case is issued without `order=`. EXTRAPOLATION beyond
+  upstream's own coverage: the nested-empty-spread mechanism is exercised by
+  the second get of the `empty spreads embeds` it-block
+  (SpreadQueriesSpec.hs:603, get at L611,
+  `...child_entities(parent_name:name,...entities())`), but that get keeps
+  the real column `parent_name:name`, so its outer spread never reaches an
+  empty projection, and its spread is to-one rather than to-many. No
+  upstream it-block reaches this shape, so the case anchors the Plan.hs
+  branch that produces it and its body was read off a live run of the pinned
+  v16.0 binary. Contrast 11139, the same contributes-nothing intent spelled
+  as a nested empty EMBED, which is a 400 instead.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L718
