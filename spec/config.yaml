@@ -22,6 +22,12 @@
 
 area: config
 version: v16.0
+# Id band: 1700-1749, FULLY ALLOCATED as of case 1749 (2026-08-29). 1750 is
+# observability's first id, so this area has no headroom left: the next config
+# case must open AND declare a closed overflow range right here, per the
+# declare-at-open precedent recorded in INDEX.md. Ranges already in use
+# elsewhere: 10200-10236, [10600..10799], [11100..11199], 11400-11415,
+# 11800-11818, 12400-12401.
 
 # ===========================================================================
 # Sources & precedence
@@ -75,6 +81,15 @@ precedence:
     - server_timing_enabled
     - url_use_legacy_target_names
   reloadable_prefix_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config/Database.hs#L41
+  # Membership of this list is not decorative: a key that is IN it and is not
+  # read from the role settings is a silent bug, indistinguishable from correct
+  # behavior on every other case. The three keys below are the ones a case
+  # actually drives through `ALTER ROLE ... SET pgrst.*`; the rest are recorded
+  # by the list above only.
+  reloadable_keys_cased:
+    db_aggregates_enabled: 1749  # the FIRST list entry (#L47)
+    db_max_rows: 1724
+    db_schemas: 1724
   # QUIRK: the list carries `jwt_cache_max_lifetime`, which matches no parser
   # key; there is no `jwt_cache_max_entries` entry, so the
   # `pgrst.jwt_cache_max_entries` role setting in db_config.sql is silently
@@ -187,6 +202,15 @@ keys:
     type: bool
     source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L276
     default_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/defaults.config#L6
+    # RELOADABLE: `db_aggregates_enabled` is the first entry of dbSettingsNames,
+    # so with db-config=true an `ALTER ROLE ... SET pgrst.db_aggregates_enabled`
+    # beats the config file. Case 1749 pins it with upstream's own values —
+    # file `true`, role setting `false`, dumped `false` — so neither the file
+    # nor the parser default can satisfy the assertion.
+    reloadable: true
+    reloadable_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config/Database.hs#L47
+    db_setting_fixture_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/db_config.sql#L6
+    db_setting_golden_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/no-defaults-with-db.config#L8
 
   db-plan-enabled:
     default: false

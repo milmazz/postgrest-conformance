@@ -1,0 +1,37 @@
+id: 1749
+feature: config/sources/db-role-settings-aggregates-enabled
+request:
+  kind: cli
+  flag: "--dump-config"
+schema: config
+config:
+  env:
+    PGRST_DB_CONFIG: "true"
+    PGUSER: db_config_authenticator
+  preconditions_sql:
+    - "CREATE ROLE db_config_authenticator LOGIN NOINHERIT"
+    - "ALTER ROLE db_config_authenticator SET pgrst.db_aggregates_enabled = 'false'"
+  file:
+    db-aggregates-enabled: true
+expect:
+  exit_code: 0
+  dump_contains:
+    - 'db-aggregates-enabled = false'
+notes: >
+  db-aggregates-enabled is RELOADABLE: `db_aggregates_enabled` is the first
+  entry of `dbSettingsNames` (the source anchor), so with db-config=true the
+  role's `pgrst.db_aggregates_enabled` reaches `overrideFromDbOrEnvironment`
+  and beats the config file. The values are upstream's and are chosen so the
+  assertion cannot be satisfied by the file or by the parser default: the file
+  says `true`
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/no-defaults.config#L2),
+  the role setting says `false`
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/db_config.sql#L6),
+  and the golden dump says `false`
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/no-defaults-with-db.config#L8).
+  Mirrors test_cli.py:test_expected_config_from_db_settings, parametrized over
+  db_config_authenticator and other_authenticator — both set this key to
+  'false' (db_config.sql#L6 and #L64), so the second parametrization asserts
+  the same thing and only the first is cased. Companion of 1724, which pins two
+  other reloadable keys (db-max-rows, db-schemas) from the same fixture block.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config/Database.hs#L47

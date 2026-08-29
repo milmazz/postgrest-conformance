@@ -10,8 +10,8 @@ which `api` is the parent counted through its sub-pages).
 A docs page with no covering case (and not explicitly scoped out below) is
 flagged **GAP**.
 
-Pinned target: **PostgREST v16.0**. Total cases: **805** across 17 areas
-(counted on disk at the 2026-08-24 `--ready` CLI pass — see the
+Pinned target: **PostgREST v16.0**. Total cases: **806** across 17 areas
+(counted on disk at the 2026-08-29 `db-aggregates-enabled` in-db pass — see the
 newest refresh box below; the docs-page enumeration underneath was counted
 at 762 and every mapping row still names files that exist). The page set is unchanged from
 the previous pass — `references.html` lists 12 entries (11 pages plus
@@ -23,6 +23,46 @@ re-enumerated; the API sub-page order on the live site is Tables and Views,
 Functions as RPC, Schemas, Computed Fields, Domain Representations, Pagination and
 Count, Resource Embedding, Resource Representation, Media Type Handlers, Aggregate
 Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Grammar.
+
+> **Refresh, 2026-08-29 (`db-aggregates-enabled` in-db pass).** One case,
+> **1749**, closes the config band (1700–1748 → **1700–1749**, the last free
+> id; config 49 → **50**, tree 805 → **806**) and closes issue #24. Three cases
+> already drive the in-database config source (`ALTER ROLE … SET pgrst.*`) —
+> 1724, 1725, 1744 — but none of them used `db-aggregates-enabled`, so the tree
+> recorded that the key exists and is PGRST123-gated (11120/11121) without ever
+> recording that it is **reloadable**. It is not an arbitrary pick: it is the
+> **first** entry of upstream's `dbSettingsNames`
+> (`Config/Database.hs#L47`), and an implementation that omits it from its
+> settable-key list is invisible to every other case — exactly how bier shipped
+> the bug (milmazz/bier#146). The case transcribes
+> `test_cli.py::test_expected_config_from_db_settings` and takes upstream's own
+> three values, which make the assertion undeniable: the config file says
+> `true` (`no-defaults.config#L2`), the role setting says `false`
+> (`db_config.sql#L6`), and the golden dump says **`false`**
+> (`no-defaults-with-db.config#L8`) — so neither the file nor the parser
+> default (also `false`) can satisfy it by accident. Confirmed against the
+> pinned binary before the case was written: the same config file alone dumps
+> `db-aggregates-enabled = true`. Upstream's second parametrization
+> (`other_authenticator`, `db_config.sql#L64`) sets the same key to the same
+> value, so it asserts nothing new and is deliberately **not** cased. The model
+> gains a `precedence.reloadable_keys_cased` map (which of the 25 reloadable
+> names a case actually drives — three: `db_aggregates_enabled`, `db_max_rows`,
+> `db_schemas`) and a `reloadable:` block on the
+> `db-aggregates-enabled` key. **No fixture change** — the case's own
+> `preconditions_sql` builds `db_config_authenticator`, which is what
+> `case.schema.json` has that field for. Both machine-checked area tables
+> (INDEX.md, HARNESS.md §7) and all six machine-checked CLI-set claims carry
+> the new numbers (CLI 42 → **43**, `--dump-config` 36 → **37**, `config:`
+> blocks 126 → **127**, raw-URL corpus 2165 → **2172**), as do the three Go
+> corpus pins (`cases_test.go`, `xcheck_test.go`, `validate_test.go`: 805 →
+> **806**, plus `cases_test.go`'s CLI pin 42 → **43**). This pass also
+> corrected a claim the new case made conspicuous: HARNESS.md §4 and
+> `spec/README.md` both said the CLI set "never reaches Postgres", which has
+> been false since the db-config cases landed — the `preconditions_sql` cases
+> read their dump back out of the database. Verification: `oracle validate`
+> clean over 806; `oracle run -db conf_config -areas config` against the pinned
+> binary **config 50/50, TOTAL 50/50**; `go test ./...` green across all 12
+> packages.
 
 > **Refresh, 2026-08-24 (`--ready` CLI pass).** Four cases, **1745–1748**,
 > extend the config band (1700–1744 → **1700–1748**, 1749 free; config 45 →
@@ -416,12 +456,12 @@ Its findings are itemized under **Known gaps → content_negotiation**.
 | Docs page (`references/...`) | Covering case ids | Notes |
 |------------------------------|-------------------|-------|
 | `auth` (Authentication) | 1450–1499 + 11800–11818 (auth) | JWT validation/claims, HS256 (incl. binary/base64 secret) and RS256 (JWK and JWKS), roles, role-claim-key JSON Path, anonymous, audience, pre-request, GUC claims, login-token minting, clock-skew errors. Partial — see **Known gaps**. |
-| `cli` (CLI) | 1705–1741 + 1744, **1745–1748 (new 2026-08-24)** (all 42 `request.kind: cli` cases) | `--dump-config`, `--example`, validation, env/file/db precedence, coercion, unknown-key tolerance (1739), aliases, and — **new 2026-08-24** — the `--ready` health-check flag's four pre-connection/connection failure flavors: no admin-server-port (**1745**), connection refused (**1746**), the port `-1` invalid-URL (**1747**) and the special-hostname rejection (**1748**), covering four of the six exit paths of `PostgREST.Client` — the module the HPC coverage measurement found at 0%. Driven in-process by `Bier.CliCase`. Note 1742/1743 sit inside the band but are HTTP, so the CLI set is not contiguous. **Partial** — the `--ready` success and not-ready paths need a running (respectively degraded) admin server the CLI case shape cannot express; see `spec/config.yaml` gaps. |
+| `cli` (CLI) | 1705–1741 + 1744, **1745–1748 (new 2026-08-24)**, **1749 (new 2026-08-29)** (all 43 `request.kind: cli` cases) | `--dump-config`, `--example`, validation, env/file/db precedence, coercion, unknown-key tolerance (1739), aliases, — **new 2026-08-24** — the `--ready` health-check flag's four pre-connection/connection failure flavors: no admin-server-port (**1745**), connection refused (**1746**), the port `-1` invalid-URL (**1747**) and the special-hostname rejection (**1748**), covering four of the six exit paths of `PostgREST.Client` — the module the HPC coverage measurement found at 0% — and, **new 2026-08-29**, **1749**, which drives `db-aggregates-enabled` (the *first* entry of `dbSettingsNames`) through the in-database source. Driven in-process by `Bier.CliCase`. Note 1742/1743 sit inside the band but are HTTP, so the CLI set is not contiguous. **Partial** — the `--ready` success and not-ready paths need a running (respectively degraded) admin server the CLI case shape cannot express; see `spec/config.yaml` gaps. |
 | `transactions` (Transactions) | 1387–1392, **11405** (safe-update/delete, max-affected), 1713, 1722 (db-tx-end validation + enum mapping), 1759 (transaction timing), 1523 (a trigger cascade aborted by the statement-depth limit) | Tx-scoped GUCs, safe-update/safe-delete (rollback on missing WHERE), db-tx-end, and the `max-affected` rollback on an **UPDATE** (11405) alongside the existing DELETE flavors. Partial — no explicit characteristics/isolation-level case. **A live dependency on this page's subject is now load-bearing for the mutations band and should be read here**: **ten** of the seventeen new mutations cases target relations the loader does *not* isolate into real tables (11402, 11403, 11408–11415), so nine of them write through auto-updatable view mirrors onto the shared `test.*` tables and are contained only by the conformance server's `db_tx_end: :rollback` (`test/support/conformance_server.ex:194`); the tenth, 11409, expects a 405 and never reaches the database. See **Known gaps → mutations**. |
 | `connection_pool` (Connection Pool) | — (OUT OF SCOPE) | Pool sizing/acquisition behavior is operational and not observable as deterministic black-box HTTP. See **Scope decisions**. |
 | `schema_cache` (Schema Cache) | — (DEFERRED) | Schema-cache reload (`NOTIFY pgrst, 'reload schema'` / SIGUSR1) needs a reload-signal harness. See **Scope decisions**. |
 | `errors` (Errors) | **1500–1526 (errors)**, 1432–1434, 1441, 1443 (rpc errors), 1002, 1024, 1185 (not-found / invalid path), 1455–1464 + 11809–11814 (auth JWT errors), 1288 (PGRST122 under `handling=strict`), **1393, 1395, 1398, 1399, 11401, 11405, 11409** (mutation errors) | SQLSTATE→HTTP mapping (incl. the two 5xx paths 1523/1524), PGRST error codes, the PGRST205 fuzzy hint (1520/1521), RAISE PGRST full control, RAISE PT custom status, 4xx/5xx envelopes and their byte-exact key order (1525), `Proxy-Status` (1506, 1515–1516, 1519, and its documented *absence* on the inline 416, 1526), client-error-verbosity=minimal (1517, 1518, 1522), **PGRST128** (1441), the closest-proc **PGRST202** envelope with its upstream-asserted `Content-Length` (1443), and — new this pass — the write-path envelopes: **PGRST102** on an empty request body (**1398**), **PGRST105** on a PUT whose filters do not name all and only the pk columns (**11409**, a **405** rather than a 400), **PGRST114** on a PUT carrying `offset` (**1399**), **PGRST124** on an UPDATE exceeding `max-affected` (**11405**) and the raw-SQLSTATE **409 / `23505`** unique-violation path (**11401**, which asserts the SQLSTATE as the envelope `code` rather than a PGRST code). **Still Partial** — the two residual RPC preference legs (PGRST122/PGRST124 on `/rpc/*`) are uncased (see **Known gaps → headers**), and no case in the tree issues a HEAD request that errors (see **Known gaps → errors**). **PGRST127** on an aggregate inside a to-many spread (**11119**, the tree's only assertion of that code — the `aggregate_functions` row owns its modelling). (An earlier version of this row said PGRST127 appears nowhere in the tree; case 11119 closed that on 2026-08-23, and the stale clause survived that pass's fold until the 2026-08-24 `--ready` pass caught it.) |
-| `configuration` (Configuration) | 1700–1748 (config) | Sources (env/file/db-role-settings, incl. `db-config = false` disabling the in-db source, 1744), aliases, validation, coercion (incl. `coerceBool` from numeric/text strings, 1740–1741), unknown-key tolerance (1739), precedence, app-settings, CORS keys (1702–1704, 1742–1743), plus the v16 keys `client-error-verbosity` (1731–1732), `server-reuseport` (1735), `url-use-legacy-target-names` (1736), `admin-server-unix-socket` (1737–1738). **Partial** — the page's *In-Database Configuration* section documents `db-pre-config` as the recommended mechanism and its *App Settings* section documents `current_setting('app.settings.*')`; neither has a case. See **Known gaps → config**. |
+| `configuration` (Configuration) | 1700–1749 (config) | Sources (env/file/db-role-settings, incl. `db-config = false` disabling the in-db source, 1744, and **1749**, `db-aggregates-enabled` — the first entry of `dbSettingsNames` — set through `ALTER ROLE … SET pgrst.*`), aliases, validation, coercion (incl. `coerceBool` from numeric/text strings, 1740–1741), unknown-key tolerance (1739), precedence, app-settings, CORS keys (1702–1704, 1742–1743), plus the v16 keys `client-error-verbosity` (1731–1732), `server-reuseport` (1735), `url-use-legacy-target-names` (1736), `admin-server-unix-socket` (1737–1738). **Partial** — the page's *In-Database Configuration* section documents `db-pre-config` as the recommended mechanism and its *App Settings* section documents `current_setting('app.settings.*')`; neither has a case. See **Known gaps → config**. |
 | `observability` (Observability) | **1750–1771** (observability, **22** cases), 1497 (JWT-cache Server-Timing), 1625–1628, 1643 (execution plan), 1506/1515/1516/1519/1526/1002 (Proxy-Status, present and absent) | The live page has three top-level sections — **Logs** (SQL Query Logs, Database Logs), **Metrics** (Schema Cache / Connection Pool / JWT Cache / GHC Runtime), **Traces** (Server Version Header, Trace Header, Proxy-Status Header, Server-Timing Header, Content-Length Header, Execution plan). Covered: Server-Timing, Trace header, log-level→status signal, execution plan, Proxy-Status, and — **new this pass** — the **Server Version Header** (1771, `HEAD /` asserting the `Server: postgrest/…` prefix, which closes a gap this file listed last pass). **1770 is not a second copy of 1750**: 1750 uses the loose upstream-style presence regex (any separator, any number of decimals, mirroring `matchServerTimingHasTiming`), while 1770 pins the **exact wire render** in the doctest form — `\A` / `\z`-anchored, `", "` separators, exactly one fractional digit per metric, all five metrics in the fixed order (`Response/Performance.hs#L29`). **Partial** — the whole **Metrics** section and the whole **Logs** section have no case, and three further legs are uncovered; see **Known gaps → observability**. |
 | `admin_server` (Admin Server) | 1717 (admin-port = server-port fatal), 1737 (`admin-server-unix-socket` dump), 1738 (admin socket-mode validation) | Config-surface validation via the CLI harness; `/live` and `/ready` covered by ExUnit (`test/bier/admin_server_test.exs`). Partial — `/metrics` and `/schema_cache` have no case. |
 | `http_server` (HTTP Server) | — (OUT OF SCOPE, new page in v16) | The page documents exactly one behavior: Warp's graceful shutdown on `SIGTERM`. See **Scope decisions**. |
@@ -505,7 +545,7 @@ old claim and what replaced it.
   described the band as 1705–1730 with 15 passing cases and a per-case
   `pending_reason` taxonomy (`:cli_parity`, `:unmodeled_key`, `:db_config`).
   Neither half survives contact with the tree: the CLI set is now
-  **1705–1741 plus 1744–1748 (42 cases)**, and **no spec case carries `pending` or
+  **1705–1741 plus 1744–1749 (43 cases)**, and **no spec case carries `pending` or
   `pending_reason`** — those are not properties of `case.schema.json`; they were
   harness-side tags. The harness's only remaining deferral is `:status_text`
   (`test/conformance/conformance_test.exs`), which excludes the **3** cases that
@@ -955,7 +995,7 @@ ordering audit found a **named docs section** with a worked example
 **worked example on the same page** — `&actors.limit=10&actors.offset=2` — whose
 two halves have 1 case and 0 cases respectively. `url_grammar` makes it a third
 time, and the errors pass a fourth: the tree's **13 HEAD cases all expect 2xx**,
-so a HEAD that errors is untested across **805** cases. The observability pass
+so a HEAD that errors is untested across **806** cases. The observability pass
 added the thirteenth (**1771**, `HEAD /` for the `Server:` header) without closing
 it — the same pattern the pagination pass showed with the twelfth. **The operators
 pass added 37 cases and not one HEAD, the rpc pass three more, the mutations pass
@@ -2576,19 +2616,22 @@ Two missing-coverage findings, **0 citation defects**.
 
   Closing any of these is a harness decision (per-`config` instance booting, or
   `@variant_case_ids` entries) behind the human harness gate, not a spec edit.
-  **126** of the **805** cases carry a `config:` key (122 non-empty), spread over
-  seven areas: config 49, auth 33, observability 21, select 15, openapi 4,
+  **127** of the **806** cases carry a `config:` key (123 non-empty), spread over
+  seven areas: config 50, auth 33, observability 21, select 15, openapi 4,
   errors 3, headers 1
-  (that breakdown counts the key's *presence* and sums to 126; the four empty
-  `config: {}` blocks are all in the config area, so its non-empty count is 45).
-  **The count held still for five consecutive passes, then moved three times
-  across 2026-08-23/24** — none of them by a re-sync. First the headers
+  (that breakdown counts the key's *presence* and sums to 127; the four empty
+  `config: {}` blocks are all in the config area, so its non-empty count is 46).
+  **The count held still for five consecutive passes, then moved four times
+  across 2026-08-23/24/29** — none of them by a re-sync. First the headers
   citation-audit fix pass gave case **1573** a `server-trace-header: ""` block;
   then the spread/aggregates pass added **11115–11119**, five
   `db-aggregates-enabled: true` cases, taking select 10 → 15; then the
   `--ready` pass added **1745–1748**, four `kind: cli` cases pinning
   `PGRST_ADMIN_SERVER_PORT` (and, for 1746–1748, `PGRST_SERVER_HOST`), taking
-  config 45 → 49 and the total 122 → 126. Before those,
+  config 45 → 49 and the total 122 → 126; then, on 2026-08-29, the
+  `db-aggregates-enabled` in-db pass added **1749**, whose block carries
+  `env` + `file` + `preconditions_sql` together, taking config 49 → 50 and the
+  total 126 → **127**. Before those,
   none of the operators re-sync's 37 new cases, none of the rpc re-sync's 3,
   none of the mutations re-sync's 17, none of the representations re-sync's 8
   and none of the domain_representations re-sync's 16 declared a `config:`
@@ -2596,8 +2639,10 @@ Two missing-coverage findings, **0 citation defects**.
   therefore grew by six —
   **66** HTTP cases now carry a non-empty `config:` outside
   `@variant_case_ids` (re-derived on disk this pass against the harness's live
-  18-id list), now out of **763** HTTP cases (805 − 42 CLI; the `--ready` cases
-  are all CLI, so they move the numerator not at all and leave 66 standing). **Corrected rather
+  18-id list), now out of **763** HTTP cases (806 − 43 CLI; the `--ready` cases
+  and 1749 are all CLI, so they move the numerator not at all and leave 66
+  standing — and the denominator not at all either, each adding one to both
+  sides). **Corrected rather
   than carried:** an earlier revision printed that denominator as **702**,
   which was the 740-case tree's figure (740 − 38) reprinted at 746; it should
   have read 708 then. **That the two movements both came from case *authoring*
@@ -3885,9 +3930,13 @@ verification handoff: 762 files / 762 distinct ids / `{'v16.0': 762}` source tag
   (**1350–1399 + 11400–11405 + 11407–11415**), whose *internal* gap at **11406**
   is deliberate in a way none of the others is: it marks a case that was written
   and then deleted as redundant with representations case **1332**, not a
-  sub-feature boundary. Do not close it up. Separately, the *config band* 1700–1748 is
+  sub-feature boundary. Do not close it up. Separately, the *config band* 1700–1749 is
   contiguous but **mixes shapes**: 1742/1743 are HTTP cases embedded in an
   otherwise CLI run of ids (see `conformance/INDEX.md` → *Case file shapes*).
+  It is also, as of 2026-08-29, **fully allocated** — case **1749** took the last
+  id before `observability` starts at 1750, making `config` the first area to
+  exhaust its primary band with no successor range declared. The next config
+  case must open (and declare) an overflow band.
   The **filters** primary band 1150–1199 is **fully allocated**;
   `spec/filters.yaml` declares `[10600..10799]` as the area's closed overflow
   range for future cases. **ordering** (1200–1232), **url_grammar** (1000–1035)

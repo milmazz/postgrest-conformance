@@ -505,17 +505,21 @@ Two request shapes are supported:
   mint and send a signed token (32 cases do; case 11809 instead spells out a
   literal `Authorization` header, because it needs a token signed with a secret
   the harness does not know).
-- **CLI** (config CLI behavior, 42 cases — all of them in `config`,
-  ids **1705–1741 plus 1744–1748**; the band is *not* contiguous, because
+- **CLI** (config CLI behavior, 43 cases — all of them in `config`,
+  ids **1705–1741 plus 1744–1749**; the band is *not* contiguous, because
   1742/1743 are HTTP CORS cases sitting inside it): `request.kind: cli` with
-  `request.flag` one of `"--dump-config"` (36 cases), `"--ready"` (4:
+  `request.flag` one of `"--dump-config"` (37 cases), `"--ready"` (4:
   1745–1748) or `"--example"` (1: 1727) — plus case 1719, whose `flag` is a
   positional config path rather than a flag. Asserts on `expect.exit_code`,
   `expect.dump_contains`, `expect.dump_reparse_stable`, and
   `expect.stderr_contains`. Note that only the `--dump-config` group is
   *startup* behavior: `--ready` health-checks an already-running server over
-  HTTP (and, like the rest of the CLI set, never reaches Postgres). See
-  [`HARNESS.md`](../HARNESS.md) §4 for case 1746's network precondition.
+  HTTP and never reaches Postgres. Most of the CLI set never reaches Postgres
+  either; the exception is the `config.preconditions_sql` cases (1724, 1725,
+  1744, 1749), which set up `pgrst.*` role settings and — for the three that
+  run with `PGRST_DB_CONFIG=true` — dump a config read back out of the
+  database. See [`HARNESS.md`](../HARNESS.md) §4 for case 1746's network
+  precondition.
 
 Response assertions include `status`/`status_text`/`exit_code`, exact or pattern
 header matches (`headers`, `headers_match`, `headers_present`, `headers_absent`,
