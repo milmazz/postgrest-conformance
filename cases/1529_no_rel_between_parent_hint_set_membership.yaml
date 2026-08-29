@@ -1,0 +1,51 @@
+id: 1529
+feature: errors/pgrst_code/no_rel_between_parent_hint_set
+request:
+  method: GET
+  path: /menagerie_empty?select=*,nonexistent(*)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "338"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'menagerie_empty' and 'nonexistent' in the schema cache"
+    details: "Searched for a foreign key relationship between 'menagerie_empty' and 'nonexistent' in the schema 'test', but no matches were found."
+    hint: "Perhaps you meant 'managers' instead of 'menagerie_empty'."
+notes: >
+  Pins WHERE the parent suggestion comes from. `fuzzySetOfParents` is built from
+  the keys of the relationships map — `Fuzzy.fromList [qiName (fst p) | p <- HM.keys
+  allRels, snd p == schema]` (the cited line, Error.hs:327) — so only relations
+  that participate in at least one relationship can ever be suggested. That is a
+  narrower set than the one PGRST205's `tableNotFoundHint` searches, which is the
+  schema's whole table index `SchemaCache.dbTablesFuzzyIndex` (Error.hs:387, case
+  1520).
+
+  The fixture makes the difference observable. Ranked by the normalized
+  edit-distance similarity 1 - levenshtein/max(len) that `Fuzzy.getOne` uses,
+  the nearest relation name in `test` to "menagerie_empty" is `menagerie` at 0.6
+  — well above the 0.33 minimum, and closer than the `managers` that is actually
+  suggested (0.4). `menagerie` is nonetheless not offered, because it appears on
+  neither side of a foreign key and so is not a key of `allRels`; `managers` is
+  (`organizations.manager_id` references it). A hint naming the SECOND-closest
+  name in the schema is therefore direct evidence of the membership rule, in a
+  way case 1527 (where the closest name is the requested relation itself) cannot
+  be.
+
+  Everything else matches 1527: same branch (`isJust findParent` is False,
+  Error.hs:322), same rendering (Error.hs:324), same 0.33 default threshold.
+  Upstream asserts this branch nowhere in `test/spec/`; the doctest at
+  Error.hs:302-303 is the only executable statement of it.
+
+  Fixture derivation: `test.menagerie`, `test.menagerie_empty` (both foreign-key
+  free) and `test.managers` are all defined in fixtures/02_base.sql. The
+  `menagerie`/`menagerie_empty` pair is the consolidated-fixture name collision
+  INDEX.md documents for pagination cases 1258/1264/1266/1268; here the two
+  names' near-identity is the point rather than a hazard, and the request is
+  aimed at `menagerie_empty` so that `menagerie` is the excluded near neighbour.
+  Content-Length 338 was recounted against the body above.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L327

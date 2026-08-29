@@ -1,0 +1,43 @@
+id: 1528
+feature: errors/pgrst_code/no_rel_between_parent_no_hint
+request:
+  method: GET
+  path: /only_pk?select=*,nonexistent(*)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "266"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'only_pk' and 'nonexistent' in the schema cache"
+    details: "Searched for a foreign key relationship between 'only_pk' and 'nonexistent' in the schema 'test', but no matches were found."
+    hint: null
+notes: >
+  The negative half of case 1527: when `Fuzzy.getOne fuzzySetOfParents parent`
+  (Error.hs:329) finds nothing at or above fuzzyset-0.2.4's default 0.33 minimum
+  score it returns Nothing, `noRelBetweenHint` is Nothing and the envelope's
+  `hint` is null. `details`, `message`, status and `Proxy-Status` are unchanged
+  from 1527 — only `hint` moves.
+
+  This case is chosen so the null is NOT explained by "nothing in the schema
+  resembles the name". Two relations in `test` are comfortably above the
+  threshold by the normalized edit-distance similarity 1 - levenshtein/max(len)
+  that `Fuzzy.getOne` ranks by — `no_pk` at 0.5714 and `simple_pk` at 0.4444 —
+  but NEITHER participates in any foreign key, so neither is among
+  `HM.keys allRels` and neither is in `fuzzySetOfParents` (Error.hs:327). Of the
+  names that ARE in that set, the closest to "only_pk" is `process_operator` at
+  0.1875, barely half the threshold, so the fuzzy search comes back empty.
+
+  Mirrors the doctest `>>> noRelBetweenHint "noclosealternative" "roles" "api"
+  rels` (cited line), whose expected value on the next line (Error.hs:312) is
+  `Nothing`: the parent is absent from the map's keys AND no key is close enough.
+  Upstream asserts this branch nowhere in `test/spec/`.
+
+  Fixture derivation: `test.only_pk`, `test.no_pk` and `test.simple_pk` are all
+  defined in fixtures/02_base.sql and none of the three appears on either side of
+  a foreign key. Content-Length 266 was recounted against the body above.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L311

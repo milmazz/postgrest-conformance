@@ -476,6 +476,56 @@ table_not_found_hint:
   docs_contradiction_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/errors.rst#L495
 
 # ---------------------------------------------------------------------------
+# PGRST200 "did you mean" hint (fuzzy relationship suggestion)
+# ---------------------------------------------------------------------------
+no_rel_between_hint:
+  # NoRelBetween's `hint` is a SECOND, independent fuzzy suggester with a
+  # different candidate set, a different threshold and two branches. Do not
+  # confuse it with table_not_found_hint above: that one searches every table in
+  # the schema at >= 0.75; this one searches only relations that participate in a
+  # relationship, at the fuzzyset default of 0.33.
+  when: "an embed names a target with no relationship to its origin (PGRST200, HTTP 400)"
+  # `noRelBetweenHint parent child schema allRels` branches on whether `parent`
+  # (the ORIGIN of the embed) is a key of the relationships map.
+  branch_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L322
+  hint_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L276
+  branches:
+    - branch: parent_not_found
+      condition: "the origin is NOT a key of allRels (it has no relationship of its own)"
+      hint_format: "Perhaps you meant '<best_match>' instead of '<origin>'"
+      candidates: "qiName of every relationships-map key in the active schema — i.e. only relations that participate in a relationship, NOT every table"
+      min_similarity: 0.33
+      why_min: >
+        suggestParent calls Fuzzy.getOne, whose minimum score is fuzzyset-0.2.4's
+        default 0.33. It does NOT go through getFuzzyHint, so the 0.75 gate that
+        governs PGRST205/PGRST202 does not apply here.
+      absent_when: "no candidate scores >= 0.33 -> hint is null"
+      render_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L324
+      set_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L327
+      lookup_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L329
+      # Upstream has no it-block for this branch: `grep "Perhaps you meant '"
+      # test/spec/` returns only the two parent_found assertions in QuerySpec.hs.
+      # The doctests in Error.hs are its only executable statement.
+      doctest_positive_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L302
+      doctest_negative_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L311
+    - branch: parent_found
+      condition: "the origin IS a key of allRels; the embed target is the near miss"
+      hint_format: "Perhaps you meant '<best_match>' instead of '<target>'"
+      candidates: "qiName of the foreign table of each of the origin's own relationships"
+      min_similarity: 0.33
+      exact_match_suppressed: >
+        suggestChild keeps only candidates scoring strictly below 1.0, so a target
+        that IS one of the origin's relations produces no suggestion at all — that
+        is the "problem is with the embed hint" case (case 1124).
+      render_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L323
+      set_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L328
+      lookup_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L331
+      test_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L845
+  # Unlike TableNotFound, NoRelBetween always carries a non-null `details`.
+  details_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L257
+  status_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L229
+
+# ---------------------------------------------------------------------------
 # Conformance case index (this area's band is 1500..1549)
 # ---------------------------------------------------------------------------
 coverage:
@@ -494,6 +544,8 @@ coverage:
     - { rule: "PGRSTxxx envelope + Proxy-Status",         case_ids: [1515, 1516] }
     - { rule: "Proxy-Status carries a PT/custom code",    case_ids: [1506, 1519] }
     - { rule: "PGRST205 fuzzy hint (>=0.75 / below)",     case_ids: [1520, 1521] }
+    - { rule: "PGRST200 fuzzy PARENT hint (>=0.33 / below / candidate set)", case_ids: [1527, 1528, 1529] }
+    - { rule: "PGRST200 fuzzy CHILD hint (the other branch)", case_ids: [1530] }
     - { rule: "envelope key EMISSION order is alphabetical (byte-exact)", case_ids: [1525] }
     - { rule: "inline 416 error body carries NO Proxy-Status",            case_ids: [1526] }
   client_error_verbosity:

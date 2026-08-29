@@ -1,0 +1,47 @@
+id: 1530
+feature: errors/pgrst_code/no_rel_between_child_hint
+request:
+  method: GET
+  path: /clients?select=*,project(*)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "306"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'clients' and 'project' in the schema cache"
+    details: "Searched for a foreign key relationship between 'clients' and 'project' in the schema 'test', but no matches were found."
+    hint: "Perhaps you meant 'projects' instead of 'project'."
+notes: >
+  The contrasting branch to 1527/1528/1529, and the reason those three need a
+  relationship-free origin to reach the parent path at all. `noRelBetweenHint`
+  branches on `isJust findParent` (Error.hs:322): `test.clients` IS a key of the
+  relationships map (`projects.client_id` references it), so the `then` branch
+  runs and the suggestion is drawn from `fuzzySetOfChildren` — the foreign tables
+  of THAT origin's relationships (Error.hs:328) — rendered as "Perhaps you meant
+  '<match>' instead of '<child>'." with the CHILD, not the origin, in the second
+  slot (Error.hs:323).
+
+  `clients` has exactly one relationship in `test` (verified by embedding each of
+  the schema's 89 relations from `/clients`: only `projects` resolves), so
+  `fuzzySetOfChildren` is the singleton {"projects"} and `Fuzzy.get` scores
+  "project" against it at 0.875 — above the 0.33 default and strictly below 1.0,
+  which is what `headMay [snd k | k <- …, fst k < 1.0]` requires (Error.hs:331;
+  the < 1.0 guard is why an embed hint naming a relation that DOES exist yields
+  no suggestion at all — case 1124).
+
+  Mirrors the cited it-block "cannot request partitions as children from a
+  partitioned table", which asserts the same rendering on the same branch
+  (`{"hint":"Perhaps you meant 'car_model_sales' instead of
+  'car_model_sales_202101'."}`, QuerySpec.hs:848) with `code`/`message`/`details`
+  in the same shape. Instantiated here on `clients`/`project` because this
+  fixture set carries no partitioned tables: fixtures/02_base.sql defines
+  `test.car_models` as a plain compound-PK table for the headers area and has no
+  `car_model_sales` (nor its `car_model_sales_202101` partition) at all, so the
+  upstream URL is not runnable here. Content-Length 306 was recounted against the
+  body above.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L845
