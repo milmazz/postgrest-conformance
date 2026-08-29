@@ -162,6 +162,13 @@ jobs:
     if: needs.drift.outputs.stale == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # The job's own `result` is NOT usable as the verdict: the suite step
+    # below is `continue-on-error`, so the job succeeds even when cases
+    # diverge. Publish the real case tally instead — reporting a green job as
+    # "no drift" would be the exact failure this workflow exists to prevent.
+    outputs:
+      tally: ${{ steps.run.outputs.tally }}
+      failing: ${{ steps.run.outputs.failing }}
     env:
       PGHOST: localhost
       PGPORT: "6432"
@@ -192,7 +199,12 @@ jobs:
           # someone re-pins. Recording the digest in the log gives the re-pin
           # step a value to copy into bin.sha256 rather than re-deriving it.
           curl -fsSL -o "/tmp/$asset" "$url"
-          sha256sum "/tmp/$asset" | tee /tmp/candidate.sha256
+          # Written inside the workspace, not /tmp: upload-artifact rejects
+          # paths outside GITHUB_WORKSPACE, and this digest is the value the
+          # re-pin step copies into bin.sha256 — losing it silently would
+          # send whoever re-pins back to re-deriving it by hand.
+          mkdir -p out
+          sha256sum "/tmp/$asset" | tee out/candidate.sha256
           mkdir -p /tmp/candidate && tar -xJf "/tmp/$asset" -C /tmp/candidate
           chmod +x /tmp/candidate/postgrest
           /tmp/candidate/postgrest --version
@@ -202,7 +214,18 @@ jobs:
         continue-on-error: true # divergence is the signal, not a build failure
         run: |
           cd tools/oracle
-          go run ./cmd/oracle run -bin /tmp/candidate/postgrest -report candidate-report.json
+          set +e
+          go run ./cmd/oracle run -bin /tmp/candidate/postgrest \
+            -report candidate-report.json 2>&1 | tee run.log
+          # Explicitly the ORACLE's status, not tee's — a pipeline reports its
+          # last command, so reading $? here would always say 0.
+          rc=${PIPESTATUS[0]}
+          set -e
+          tally=$(grep -oE '^TOTAL [0-9]+/[0-9]+' run.log | tail -1)
+          failing=$(grep -oE '^case [0-9]+' run.log | awk '{print $2}' | paste -sd, -)
+          echo "tally=${tally:-unknown}"            >> "$GITHUB_OUTPUT"
+          echo "failing=${failing:-none}"           >> "$GITHUB_OUTPUT"
+          echo "oracle exit=$rc tally=$tally failing=$failing"
 
       # A failure here is ambiguous on its own: issue #22 (the suite is not
       # idempotent against an unreloaded fixture DB — case 1305) can produce
@@ -222,7 +245,8 @@ jobs:
           name: candidate-report
           path: |
             tools/oracle/candidate-report*.json
-            /tmp/candidate.sha256
+            tools/oracle/run.log
+            out/candidate.sha256
           if-no-files-found: ignore
 
   # ---------------------------------------------------------------------
@@ -252,7 +276,9 @@ jobs:
           cited=0
           for f in $(cd /tmp/upstream && find test/spec -name '*.hs'); do
             base=$(basename "$f")
-            if grep -rq "$base" cases/ spec/ 2>/dev/null; then
+            # -F: filenames contain dots, which would otherwise be regex
+            # wildcards and count near-miss files as cited.
+            if grep -rqF "$base" cases/ spec/ 2>/dev/null; then
               cited=$((cited + 1))
             else
               echo "uncited: $f" >> out/uncited-spec-files.txt
@@ -276,7 +302,17 @@ jobs:
     # `always()` so a red behavioral-drift job — which is a *finding*, not an
     # infrastructure failure — still produces the tracking issue. Without it
     # the single most important outcome would silently skip the report.
-    if: always() && needs.drift.outputs.stale == 'true' && inputs.open_issue != false
+    #
+    # The `open_issue` guard is deliberately written as an event check rather
+    # than `inputs.open_issue != false`. On a `schedule` run the `inputs`
+    # context is unpopulated, and GitHub casts across types to a number when
+    # comparing: null -> 0 and false -> 0, so `inputs.open_issue != false`
+    # evaluates FALSE and the report is skipped on exactly the runs that
+    # matter. The scheduled run always reports; only an explicit dispatch can
+    # opt out.
+    if: >-
+      always() && needs.drift.outputs.stale == 'true'
+      && (github.event_name != 'workflow_dispatch' || inputs.open_issue)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -289,7 +325,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PINNED: ${{ needs.drift.outputs.pinned }}
           CANDIDATE: ${{ needs.drift.outputs.candidate }}
-          DRIFT_RESULT: ${{ needs.behavioral-drift.result }}
+          TALLY: ${{ needs.behavioral-drift.outputs.tally }}
+          FAILING: ${{ needs.behavioral-drift.outputs.failing }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="conformance re-sync: $PINNED -> $CANDIDATE"
@@ -301,7 +338,8 @@ jobs:
             echo "| Pinned | \`$PINNED\` |"
             echo "| Upstream candidate | \`$CANDIDATE\` |"
             echo "| Cases on disk | $(ls cases/*.yaml | wc -l) |"
-            echo "| Suite vs candidate binary | **$DRIFT_RESULT** |"
+            echo "| Suite vs candidate binary | **${TALLY:-not run}** |"
+            echo "| Diverging cases | ${FAILING:-none} |"
             echo "| HPC coverage | not re-measured (see skill reference) |"
             echo "| Full logs | $RUN_URL |"
             echo
@@ -337,8 +375,12 @@ jobs:
 
           # Update the existing open issue for this pin pair rather than
           # stacking a duplicate every week the pin stays stale.
-          existing=$(gh issue list --state open --search "$title in:title" \
-                       --json number --jq '.[0].number // empty')
+          # Match by exact title equality in jq rather than through GitHub's
+          # search index: the title contains "->", which the search syntax
+          # does not treat as a literal, and a near-miss would stack a
+          # duplicate issue every week the pin stays stale.
+          existing=$(gh issue list --state open --limit 100 --json number,title \
+                       --jq "[.[] | select(.title == \"$title\")] | .[0].number // empty")
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body-file body.md
             echo "commented on #$existing"
