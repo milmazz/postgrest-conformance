@@ -637,13 +637,18 @@ silently), not skipped.
   not apply to HTTP cases.
 
   The CLI set is **not** all `--dump-config`. `request.flag` takes three
-  values — `--dump-config` (36 cases), `--ready` (4) and `--example` (1) —
+  values — `--dump-config` (37 cases), `--ready` (4) and `--example` (1) —
   plus case 1719, whose `flag` is a positional config path. The first two
   groups differ in kind, and an implementer must treat them differently:
 
   - **`--dump-config` and the config-path case are startup validation.** The
-    process parses configuration and exits; it never listens and never
-    reaches Postgres.
+    process parses configuration and exits; it never listens. It normally
+    never reaches Postgres either — the exception is the **db-config** cases
+    1724, 1725 and 1749, which carry `config.preconditions_sql` and run with
+    `PGRST_DB_CONFIG=true`, so the dump is produced *after* reading the
+    `pgrst.*` role settings out of the database. (Case 1744 carries the same
+    `preconditions_sql` but sets `PGRST_DB_CONFIG=false` precisely to pin
+    that the in-db source is then never consulted.)
   - **`--ready` (cases 1745–1748) is a health-check client.** It builds
     `http://<admin-server-host>:<admin-server-port>/ready` and performs a
     real outbound TCP connection. It still never reaches Postgres (`CLI.hs`
@@ -791,11 +796,11 @@ assignment if the two ever look inconsistent.
 | headers | 1550–1584 | 35 | `headers`, `test` |
 | content_negotiation | 1600–1649, 12400–12401 | 52 | `test` |
 | openapi | 1650–1688 | 39 | `test`, `openapi_no_comment` |
-| config | 1700–1748 | 49 | `config` |
+| config | 1700–1749 | 50 | `config` |
 | observability | 1750–1771 | 22 | `observability` |
 | domain_representations | 1800–1836 | 37 | `domain_representations`, `test` |
 
-**Total: 805 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+49+22+37 = 805).
+**Total: 806 cases across 17 areas** (36+87+89+50+33+39+32+65+44+69+27+35+52+39+50+22+37 = 806).
 
 Recover a case's area directly from its own file, no index lookup needed:
 

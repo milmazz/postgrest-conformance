@@ -1,6 +1,6 @@
 # postgrest-conformance
 
-A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16.0. Every case is machine-verified against real PostgREST v16.0 in CI: the internal runner under `tools/oracle/` executes all 805 cases against the pinned release binary on every push to `main` and on every pull request. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
+A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16.0. Every case is machine-verified against real PostgREST v16.0 in CI: the internal runner under `tools/oracle/` executes all 806 cases against the pinned release binary on every push to `main` and on every pull request. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
 
 **Derived from:** [milmazz/bier@6024c62](https://github.com/milmazz/bier/commit/6024c62)
 
@@ -8,7 +8,7 @@ A language-agnostic conformance suite for PostgreSQL-backed REST API servers, de
 
 | Path | Contents |
 |------|----------|
-| `cases/` | 805 YAML test cases, one per file, named by case ID |
+| `cases/` | 806 YAML test cases, one per file, named by case ID |
 | `spec/` | 16 area specification YAMLs (auth, filters, mutations, etc.) + `url_grammar.md` reference |
 | `fixtures/` | Database initialization SQL: a numbered chain (`01_roles.sql` … `07_analyze.sql`), developed and tested against PostgreSQL 17; PostGIS is required for `04_postgis.sql`. See `fixtures/README.md`. |
 | `HARNESS.md` | The implementer contract: server configuration, request execution, and assertion semantics needed to run `cases/` against your own server. |
