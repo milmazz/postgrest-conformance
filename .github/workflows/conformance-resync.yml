@@ -1,0 +1,315 @@
+name: conformance-resync
+# Weekly drift check against PostgREST upstream. Three cheap channels:
+# release drift (is PIN stale?), behavioral drift (do the cases still pass
+# against the *candidate* binary?), and the it-block census (how much of
+# upstream's test/spec do we cite?). On any drift it opens — or updates — a
+# single tracking issue carrying the gap report.
+#
+# Deliberately NOT here: the HPC implementation-coverage measurement. It needs
+# a from-source `stack build --enable-coverage` of PostgREST (GHC 9.10.3),
+# which is a 45-90+ minute build against a multi-GB tree, and the rig lives in
+# the gitignored scratch/ directory with host-specific paths. Running it on a
+# schedule would spend hours per week to re-derive numbers that move only when
+# the suite does. It stays a local/on-demand procedure — see
+# .claude/skills/conformance-resync/references/hpc-measurement.md — and the
+# gap report carries the last recorded figures labelled with the pin they were
+# measured at.
+on:
+  schedule:
+    # Mondays 06:00 UTC. Upstream cuts releases on no fixed cadence, so this
+    # is a "notice within a week" guarantee, not an attempt to catch a release
+    # promptly — nothing downstream is time-critical.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: "Upstream tag to test against (default: latest release)"
+        required: false
+        type: string
+      open_issue:
+        description: "Open/update the tracking issue"
+        required: false
+        default: true
+        type: boolean
+
+# Needs `issues: write` to file the tracking issue — the one job here that
+# writes anything. Everything else only reads the repo.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: conformance-resync
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Channel A: is the pin stale, and what shipped since?
+  # ---------------------------------------------------------------------
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      pinned: ${{ steps.pin.outputs.pinned }}
+      candidate: ${{ steps.pin.outputs.candidate }}
+      stale: ${{ steps.pin.outputs.stale }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - id: pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_CANDIDATE: ${{ inputs.candidate }}
+        run: |
+          pinned=$(grep '^postgrest:' PIN | awk '{print $2}')
+          candidate="${INPUT_CANDIDATE:-}"
+          if [ -z "$candidate" ]; then
+            candidate=$(gh api repos/PostgREST/postgrest/releases/latest --jq .tag_name)
+          fi
+          echo "pinned=$pinned"       >> "$GITHUB_OUTPUT"
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          [ "$pinned" = "$candidate" ] && stale=false || stale=true
+          echo "stale=$stale" >> "$GITHUB_OUTPUT"
+          echo "pinned=$pinned candidate=$candidate stale=$stale"
+
+      - name: Collect changelog delta
+        if: steps.pin.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PINNED: ${{ steps.pin.outputs.pinned }}
+          CANDIDATE: ${{ steps.pin.outputs.candidate }}
+        run: |
+          mkdir -p out
+          # Every release strictly newer than the pin, oldest first, so the
+          # report reads as a changelog rather than a reverse-chronological
+          # dump. `--paginate` because a long-neglected pin can span more
+          # than one page of releases.
+          gh api --paginate 'repos/PostgREST/postgrest/releases?per_page=100' \
+            --jq '.[] | "\(.tag_name)\t\(.published_at)\t\(.body)"' \
+            > out/all-releases.tsv
+          awk -F'\t' -v pin="$PINNED" '
+            $1 == pin { found = 1; exit }
+            { buf[NR] = $0 }
+            END { for (i = NR; i >= 1; i--) print buf[i] }
+          ' out/all-releases.tsv > out/changelog-delta.tsv
+          echo "releases since $PINNED:"
+          cut -f1 out/changelog-delta.tsv
+
+      - name: Diff upstream test/spec
+        if: steps.pin.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PINNED: ${{ steps.pin.outputs.pinned }}
+          CANDIDATE: ${{ steps.pin.outputs.candidate }}
+        run: |
+          # Which spec files upstream touched between the pin and the
+          # candidate — the shortlist of areas that may need new cases.
+          gh api "repos/PostgREST/postgrest/compare/$PINNED...$CANDIDATE" \
+            --jq '.files[]? | select(.filename | startswith("test/spec")) |
+                  "\(.status)\t\(.additions)+\t\(.deletions)-\t\(.filename)"' \
+            > out/spec-files-changed.tsv || true
+          cat out/spec-files-changed.tsv
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: drift
+          path: out/
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------
+  # Channel B: do the cases still hold against the candidate binary?
+  #
+  # Runs the existing suite against the NEW binary without re-pinning. That
+  # separation is the point: it answers "would a re-pin break anything?"
+  # before anyone edits PIN, so the tracking issue can name the exact cases a
+  # re-pin would have to deal with. `oracle run -bin` takes the binary path,
+  # so no PIN edit (and no bin.sha256 regeneration) is needed to find out.
+  # ---------------------------------------------------------------------
+  behavioral-drift:
+    needs: drift
+    if: needs.drift.outputs.stale == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PGHOST: localhost
+      PGPORT: "6432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      CANDIDATE: ${{ needs.drift.outputs.candidate }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version-file: tools/oracle/go.mod
+          cache-dependency-path: tools/oracle/go.sum
+
+      # Same reason oracle.yml can't use a `services:` container: the fixture
+      # Postgres needs pg-safeupdate compiled inside it, which `make db-up`
+      # does by exec-ing into a container it manages.
+      - name: Start PG 17 + PostGIS + pg-safeupdate
+        run: make -C tools/oracle db-up
+      - name: Load fixture chain
+        run: cd tools/oracle && go run ./cmd/oracle db-setup
+
+      - name: Download candidate binary
+        run: |
+          asset="postgrest-$CANDIDATE-linux-static-x86-64.tar.xz"
+          url="https://github.com/PostgREST/postgrest/releases/download/$CANDIDATE/$asset"
+          # No checksum verification is possible here: bin.sha256 pins the
+          # CURRENT release's digests, and the candidate's are unknown until
+          # someone re-pins. Recording the digest in the log gives the re-pin
+          # step a value to copy into bin.sha256 rather than re-deriving it.
+          curl -fsSL -o "/tmp/$asset" "$url"
+          sha256sum "/tmp/$asset" | tee /tmp/candidate.sha256
+          mkdir -p /tmp/candidate && tar -xJf "/tmp/$asset" -C /tmp/candidate
+          chmod +x /tmp/candidate/postgrest
+          /tmp/candidate/postgrest --version
+
+      - name: Run all cases against the candidate
+        id: run
+        continue-on-error: true # divergence is the signal, not a build failure
+        run: |
+          cd tools/oracle
+          go run ./cmd/oracle run -bin /tmp/candidate/postgrest -report candidate-report.json
+
+      # A failure here is ambiguous on its own: issue #22 (the suite is not
+      # idempotent against an unreloaded fixture DB — case 1305) can produce
+      # a red run that has nothing to do with upstream. Rebuild the DB and
+      # re-run so the report distinguishes real drift from that artifact.
+      - name: Re-run on a rebuilt DB to rule out issue #22
+        if: steps.run.outcome == 'failure'
+        run: |
+          cd tools/oracle
+          go run ./cmd/oracle db-teardown && go run ./cmd/oracle db-setup
+          go run ./cmd/oracle run -bin /tmp/candidate/postgrest \
+            -report candidate-report-rerun.json || true
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: candidate-report
+          path: |
+            tools/oracle/candidate-report*.json
+            /tmp/candidate.sha256
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------
+  # Channel C (cheap half): how much of upstream's test/spec do we cite?
+  # ---------------------------------------------------------------------
+  census:
+    needs: drift
+    if: needs.drift.outputs.stale == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Check out upstream test/spec at the candidate
+        env:
+          CANDIDATE: ${{ needs.drift.outputs.candidate }}
+        run: |
+          git clone --depth 1 --branch "$CANDIDATE" --filter=blob:none --sparse \
+            https://github.com/PostgREST/postgrest /tmp/upstream
+          cd /tmp/upstream && git sparse-checkout set test/spec
+      - name: Count it-blocks and citations
+        run: |
+          mkdir -p out
+          its=$(grep -rhoE '^\s*it "' /tmp/upstream/test/spec --include='*.hs' | wc -l)
+          # A file is "cited" when any case or spec-model source: anchor names
+          # it. Coarse by design — the precise per-it-block census is the
+          # local tool; this is the CI-cheap proxy that tracks the trend.
+          cited=0
+          for f in $(cd /tmp/upstream && find test/spec -name '*.hs'); do
+            base=$(basename "$f")
+            if grep -rq "$base" cases/ spec/ 2>/dev/null; then
+              cited=$((cited + 1))
+            else
+              echo "uncited: $f" >> out/uncited-spec-files.txt
+            fi
+          done
+          total=$(cd /tmp/upstream && find test/spec -name '*.hs' | wc -l)
+          printf 'it-blocks upstream: %s\nspec files: %s\nspec files cited: %s\n' \
+            "$its" "$total" "$cited" | tee out/census.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: census
+          path: out/
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------
+  # Assemble the gap report and file it.
+  # ---------------------------------------------------------------------
+  report:
+    needs: [drift, behavioral-drift, census]
+    # `always()` so a red behavioral-drift job — which is a *finding*, not an
+    # infrastructure failure — still produces the tracking issue. Without it
+    # the single most important outcome would silently skip the report.
+    if: always() && needs.drift.outputs.stale == 'true' && inputs.open_issue != false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with: { path: artifacts }
+
+      - name: Compose and file the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PINNED: ${{ needs.drift.outputs.pinned }}
+          CANDIDATE: ${{ needs.drift.outputs.candidate }}
+          DRIFT_RESULT: ${{ needs.behavioral-drift.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="conformance re-sync: $PINNED -> $CANDIDATE"
+          {
+            echo "## Re-sync summary"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Pinned | \`$PINNED\` |"
+            echo "| Upstream candidate | \`$CANDIDATE\` |"
+            echo "| Cases on disk | $(ls cases/*.yaml | wc -l) |"
+            echo "| Suite vs candidate binary | **$DRIFT_RESULT** |"
+            echo "| HPC coverage | not re-measured (see skill reference) |"
+            echo "| Full logs | $RUN_URL |"
+            echo
+            echo "### Releases since the pin"
+            echo '```'
+            cut -f1,2 artifacts/drift/changelog-delta.tsv 2>/dev/null || echo "(none collected)"
+            echo '```'
+            echo
+            echo "### Upstream test/spec files changed"
+            echo '```'
+            cat artifacts/drift/spec-files-changed.tsv 2>/dev/null || echo "(none)"
+            echo '```'
+            echo
+            echo "### Census"
+            echo '```'
+            cat artifacts/census/census.txt 2>/dev/null || echo "(not run)"
+            echo '```'
+            echo
+            echo "### Next step"
+            echo
+            echo "This issue is the input to the per-area agent dispatch. Before"
+            echo "dispatching, a human or agent must fill in Channels A/B/C per"
+            echo ".claude/skills/conformance-resync/references/gap-report-template.md —"
+            echo "in particular the **area** and **proposed id band** for every row,"
+            echo "which the dispatch splits on and cannot derive itself."
+          } > body.md
+
+          # Update the existing open issue for this pin pair rather than
+          # stacking a duplicate every week the pin stays stale.
+          existing=$(gh issue list --state open --search "$title in:title" \
+                       --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+            echo "commented on #$existing"
+          else
+            # The label is best-effort: this repo has no `conformance` label
+            # today, and `gh issue create --label` hard-fails on an unknown
+            # one. Losing the report over a missing label would be the worst
+            # possible trade, so fall back to an unlabelled issue.
+            gh issue create --title "$title" --body-file body.md --label conformance \
+              || gh issue create --title "$title" --body-file body.md
+            echo "opened new issue"
+          fi
