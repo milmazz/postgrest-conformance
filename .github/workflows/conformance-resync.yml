@@ -63,7 +63,21 @@ jobs:
           pinned=$(grep '^postgrest:' PIN | awk '{print $2}')
           candidate="${INPUT_CANDIDATE:-}"
           if [ -z "$candidate" ]; then
-            candidate=$(gh api repos/PostgREST/postgrest/releases/latest --jq .tag_name)
+            # NOT `releases/latest`: that endpoint is date-based, and upstream
+            # still ships back-branch releases (v14.17 was published after
+            # v16.0). It would hand a v14 tag to a v16-pinned tree and the
+            # whole run — binary download, suite comparison, gap report —
+            # would be measuring the wrong major line.
+            # The feed is newest-first, so the first match on the pinned
+            # major line is that line's newest release.
+            major=$(echo "$pinned" | sed -E 's/^v([0-9]+).*/\1/')
+            candidate=$(gh api --paginate 'repos/PostgREST/postgrest/releases?per_page=100' \
+              --jq '.[] | select(.prerelease == false) | .tag_name' \
+              | grep -E "^v${major}\." | head -1)
+          fi
+          if [ -z "$candidate" ]; then
+            echo "could not resolve a candidate release for $pinned" >&2
+            exit 1
           fi
           echo "pinned=$pinned"       >> "$GITHUB_OUTPUT"
           echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
@@ -79,20 +93,38 @@ jobs:
           CANDIDATE: ${{ steps.pin.outputs.candidate }}
         run: |
           mkdir -p out
-          # Every release strictly newer than the pin, oldest first, so the
-          # report reads as a changelog rather than a reverse-chronological
-          # dump. `--paginate` because a long-neglected pin can span more
-          # than one page of releases.
+          # Tag and date ONLY — deliberately not `.body`. Release bodies are
+          # multi-line markdown, which would break the one-record-per-line
+          # assumption every line-oriented step below depends on (the real
+          # feed renders as ~1570 lines for ~88 releases).
+          # `--paginate` because a long-neglected pin can span several pages.
           gh api --paginate 'repos/PostgREST/postgrest/releases?per_page=100' \
-            --jq '.[] | "\(.tag_name)\t\(.published_at)\t\(.body)"' \
-            > out/all-releases.tsv
+            --jq '.[] | "\(.tag_name)\t\(.published_at)"' > out/all-releases.tsv
+
+          # Walk newest-first until the pinned tag, then emit reversed so the
+          # delta reads oldest-first like a changelog.
+          #
+          # The grep is not cosmetic: upstream still ships back-branch
+          # releases (v14.17 was published AFTER v16.0), and "published later
+          # than the pin" would drag those in as false drift on every run.
+          # Only the pinned major line can be drift for this tree.
+          major=$(echo "$PINNED" | sed -E 's/^v([0-9]+).*/\1/')
           awk -F'\t' -v pin="$PINNED" '
-            $1 == pin { found = 1; exit }
-            { buf[NR] = $0 }
-            END { for (i = NR; i >= 1; i--) print buf[i] }
-          ' out/all-releases.tsv > out/changelog-delta.tsv
-          echo "releases since $PINNED:"
+            $1 == pin { exit }
+            { buf[++n] = $0 }
+            END { for (i = n; i >= 1; i--) print buf[i] }
+          ' out/all-releases.tsv | grep -E "^v${major}\." > out/changelog-delta.tsv || true
+
+          echo "releases on the v${major} line since $PINNED:"
           cut -f1 out/changelog-delta.tsv
+
+          # Bodies for just the delta tags, as markdown for the issue.
+          while IFS=$(printf '\t') read -r tag date; do
+            [ -n "$tag" ] || continue
+            printf '#### %s (%s)\n\n' "$tag" "$date"
+            gh api "repos/PostgREST/postgrest/releases/tags/$tag" --jq .body
+            printf '\n'
+          done < out/changelog-delta.tsv > out/changelog-bodies.md
 
       - name: Diff upstream test/spec
         if: steps.pin.outputs.stale == 'true'
@@ -277,6 +309,12 @@ jobs:
             echo '```'
             cut -f1,2 artifacts/drift/changelog-delta.tsv 2>/dev/null || echo "(none collected)"
             echo '```'
+            echo
+            echo "<details><summary>Changelog</summary>"
+            echo
+            cat artifacts/drift/changelog-bodies.md 2>/dev/null || echo "(not collected)"
+            echo
+            echo "</details>"
             echo
             echo "### Upstream test/spec files changed"
             echo '```'
