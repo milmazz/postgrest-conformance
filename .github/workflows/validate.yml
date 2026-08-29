@@ -22,6 +22,21 @@ jobs:
           # Explicit because the default cache lookup expects go.sum at the
           # repo root and would warn (and never cache) on every run.
           cache-dependency-path: tools/oracle/go.sum
+      # Nothing else in CI reads the prose files, so an unresolved merge
+      # conflict in COVERAGE.md, INDEX.md or HARNESS.md sails through every
+      # other gate green — `oracle validate` checks the corpus and the area
+      # tables, not the narrative around them. That is not hypothetical: it
+      # happened while stacking the re-sync PRs, and the markers were only
+      # caught by eye, one PR later.
+      - name: No unresolved conflict markers
+        run: |
+          if grep -rnE '^(<{7} |={7}$|>{7} )' \
+               --include='*.md' --include='*.yaml' --include='*.yml' \
+               --include='*.go' --include='*.json' --include='*.sql' .; then
+            echo "::error::unresolved merge conflict markers (listed above)"
+            exit 1
+          fi
+          echo "no conflict markers"
       - run: go run ./cmd/oracle validate
         working-directory: tools/oracle
       - run: go test ./internal/validate/ ./internal/cases/
