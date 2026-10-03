@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — re-pin to PostgREST v16.4
+## v16.4.0-suite.1
 
 **The pin moves v16.0 → v16.4, and 812 -> 824 cases.** Spans upstream v16.1,
 v16.2, v16.3 and v16.4. Closes #26, #33, #34 and #35 (the four scheduled
