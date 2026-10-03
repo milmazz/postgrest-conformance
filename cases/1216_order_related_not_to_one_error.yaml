@@ -17,4 +17,4 @@ expect:
 notes: >
   related order fails when the relation is not to-one (clients has many
   projects); 400 PGRST118.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L107
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L107

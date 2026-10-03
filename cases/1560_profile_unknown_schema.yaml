@@ -18,5 +18,5 @@ notes: >
   exposed schemas in exposure order. The headers.sql fixture exposes
   v1, v2, and the special-named schema (matching PostgREST's own fixture), so
   the hint lists all three verbatim. Mirrors the exact it-block at
-  MultipleSchemaSpec.hs:77-82.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L77
+  MultipleSchemaSpec.hs:73-77.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L73

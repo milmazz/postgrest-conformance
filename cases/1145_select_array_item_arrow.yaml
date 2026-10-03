@@ -13,7 +13,7 @@ expect:
     - {"a":1,"b":2,"c":1,"d":6}
     - {"a":11,"b":12,"c":11,"d":16}
 notes: >
-  "obtains an array item" (JsonOperatorSpec.hs:158, first request). Distinct
+  "obtains an array item" (JsonOperatorSpec.hs:184, first request). Distinct
   from case 1110 (select.json_array_index), which indexes into a *json* column:
   here `numbers` is int[] and `numbers_mult` is int[][], so PostgREST wraps the
   column as `to_jsonb(numbers)->0` before applying the path
@@ -23,4 +23,4 @@ notes: >
   {{11,12,13},{14,15,16},{17,18,19}}); verified live against bier_test. Upstream
   sends no `order=` and no case mutates test.arrays, so physical order (0 then
   1) is stable.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L158
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L184

@@ -8,4 +8,4 @@ schema: test
 expect:
   status: 406
 notes: "A singular GET that matches zero rows fails with 406 (cannot coerce to a single object). Mirrors SingularSpec 'fails for zero rows'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SingularSpec.hs#L19
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SingularSpec.hs#L18

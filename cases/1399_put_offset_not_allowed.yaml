@@ -13,6 +13,6 @@ expect:
   body_exact: { "message": "limit/offset querystring parameters are not allowed for PUT", "code": "PGRST114", "details": null, "hint": null }
 notes: >-
   The PGRST114 restriction covers `offset` as well as `limit` (case 1383): both
-  produce the identical envelope. Mirrors UpsertSpec.hs#L302-L307
+  produce the identical envelope. Mirrors UpsertSpec.hs#L394-L399
   ("fails if offset is specified").
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L303
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L395

@@ -13,9 +13,9 @@ expect:
     - { "text_search": "Fat cats ate rats" }
 notes: >
   The automatic to_tsvector() wrap is not specific to fts: it is keyed on the
-  operator being ANY FtsOperator (Plan.hs#L373 matches `Fts _ lang _`), so
+  operator being ANY FtsOperator (Plan.hs#L404 matches `Fts _ lang _`), so
   plfts on a text column compiles to
   `to_tsvector(text_search) @@ plainto_tsquery('The Fat Rats')`. Mirrors
   QuerySpec.hs context "text and json columns" -> it "finds matches with
   plainto_tsquery" (text_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L360
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L405

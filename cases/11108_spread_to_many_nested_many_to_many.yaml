@@ -18,4 +18,4 @@ notes: >
   A many-to-many spread (through the process_supervisor junction) nested
   inside a spread to-many yields an array of arrays
   (SpreadQueriesSpec.hs:195).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L195
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L195

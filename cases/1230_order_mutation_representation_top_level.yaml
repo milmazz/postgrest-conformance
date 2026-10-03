@@ -19,7 +19,7 @@ expect:
     - { "a": "1", "b": "1" }
 notes: >
   `order` is not read-only: it also orders the rows a mutation returns under
-  `Prefer: return=representation`. Mirrors UpdateSpec.hs:443 ("with ordering on
+  `Prefer: return=representation`. Mirrors UpdateSpec.hs:529 ("with ordering on
   top-level resource") byte-for-byte — same path, same body, same expected
   document. `a.desc` carries no nulls clause, so PostgreSQL's DESC default
   (NULLS FIRST) puts the NULL row first, which is exactly what upstream asserts
@@ -37,4 +37,4 @@ notes: >
   `db_tx_end: :rollback` and every mutation transaction is aborted after the
   response is computed, with no `Prefer: tx=commit` override path — and none of
   those cases sends `tx=commit` anyway.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L443
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L529

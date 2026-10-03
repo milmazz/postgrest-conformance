@@ -10,4 +10,4 @@ schema: auth
 expect:
   status: 200
 notes: "Lowercase 'bearer' scheme is accepted (so is 'Bearer')."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AuthSpec.hs#L234
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AuthSpec.hs#L258

@@ -12,5 +12,5 @@ expect:
   body_exact: [{"id":1,"always_true":true}]
 notes: >
   A computed column (SQL function always_true(test.items) returning boolean)
-  is selectable like a normal column (QuerySpec.hs:766).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L766
+  is selectable like a normal column (QuerySpec.hs:882).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L882

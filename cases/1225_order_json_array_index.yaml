@@ -16,4 +16,4 @@ notes: >
   (SqlFragment pgFmtField cfToJson branch + pgFmtJsonPath JIdx, which appends the
   ::int cast). Rows: id 0 = {1,2,3}, id 1 = {11,12,13}; desc on element 0 =>
   11 before 1.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L261
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L293

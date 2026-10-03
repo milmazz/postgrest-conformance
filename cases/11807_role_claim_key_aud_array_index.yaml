@@ -15,6 +15,6 @@ expect:
   status: 200
 notes: >-
   An array-valued `aud` satisfies the audience check when ANY element matches
-  (Auth/Jwt.hs#L76), and `$.aud[0]` then extracts that element as the role.
+  (Auth/Jwt.hs#L82), and `$.aud[0]` then extracts that element as the role.
   Upstream asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L179
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L179

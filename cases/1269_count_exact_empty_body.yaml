@@ -15,7 +15,7 @@ expect:
 notes: >
   count=exact over a filtered-out result returns [] with Content-Range '*/0',
   status 200 (window equals total of 0). Mirrors the it-block at
-  RangeSpec.hs:153 — inside the context "count with an empty body" at :152 —
-  whose request is at :154, whose 'Prefer: count=exact' header is at :155 and
-  whose asserted `"Content-Range" <:> "*/0"` is at :158.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L153
+  RangeSpec.hs:187 — inside the context "count with an empty body" at :186 —
+  whose request is at :188, whose 'Prefer: count=exact' header is at :191 and
+  whose asserted `"Content-Range" <:> "*/0"` is at :194.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L187

@@ -24,8 +24,8 @@ notes: >-
   when the transaction issues the role switch. Postgres raises SQLSTATE 22023
   (invalid_parameter_value), which PostgREST special-cases: 22023 is normally
   400, but a message starting with `role` and ending in `does not exist` maps to
-  401 (Error.hs#L561-L563, upstream issue #3601). The envelope is the plain
+  401 (Error.hs#L559-L562, upstream issue #3601). The envelope is the plain
   Postgres one -- code is the SQLSTATE, not a PGRST* code. Case 11808 reaches
   the same 401 through a `jwt-role-claim-key` pointing at an `aud` element;
   this case is the default `$.role` path with the exact body pinned.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L120
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L130

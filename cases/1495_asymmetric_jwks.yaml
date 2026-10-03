@@ -15,9 +15,9 @@ notes: >-
   New in v16.0: AsymmetricJwtSpec now runs the RS256 token against two
   jwt-secret shapes — a bare JWK (case 1467) and a JWK **Set**
   (`{"keys": [ ... ]}`), which parseSecret uses as-is
-  (Config.hs#L547-L551). Same token, same 200. The symbolic config value
+  (Config.hs#L594-L598). Same token, same 200. The symbolic config value
   `asymmetric_jwks_public_key` is the upstream `jwks` heredoc from
-  AsymmetricJwtSpec.hs#L19 wrapped as
+  AsymmetricJwtSpec.hs#L18 wrapped as
   `{"keys": [<the RS256 public JWK of case 1467>]}`; the harness resolves the
   symbolic name to the literal document so the case file stays declarative.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AsymmetricJwtSpec.hs#L37
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AsymmetricJwtSpec.hs#L39

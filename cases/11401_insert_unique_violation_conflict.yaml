@@ -12,11 +12,11 @@ expect:
     - { path: "$.code", equals: "23505" }
 notes: >-
   A violated UNIQUE constraint (not the primary key) is mapped to 409 Conflict
-  just like a duplicate pk (case 1356). Mirrors InsertSpec.hs#L320-L322
+  just like a duplicate pk (case 1356). Mirrors InsertSpec.hs#L379-L381
   ("attempting to insert a row with conflicting unique constraint",
   `post "/withUnique" { "uni":"nodup", "extra":"e2" }` -> 409), applied to
   `single_unique`, which the mutations area exposes with a UNIQUE constraint on
   `unique_key` and the seeded row (1, 'A'). Upstream asserts only the status;
-  the SQLSTATE is 23505 (unique_violation), the same code InsertSpec.hs#L317
+  the SQLSTATE is 23505 (unique_violation), the same code InsertSpec.hs#L375
   asserts for the pk flavor.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L322
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L381

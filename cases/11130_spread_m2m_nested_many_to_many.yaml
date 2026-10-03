@@ -18,4 +18,4 @@ expect:
 notes: >
   An m2m spread nested inside another m2m spread (two junctions deep)
   yields an array of arrays (SpreadQueriesSpec.hs:446).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L446
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L446

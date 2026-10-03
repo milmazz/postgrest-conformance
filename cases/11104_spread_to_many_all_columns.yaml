@@ -17,4 +17,4 @@ expect:
 notes: >
   `...processes(*)` spreads every child column as its own parallel array
   (SpreadQueriesSpec.hs:151).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L151
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L151

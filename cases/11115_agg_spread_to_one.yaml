@@ -18,5 +18,5 @@ expect:
 notes: >
   Aggregates apply to fields spread from a to-one embed; the plain spread
   field (budget_owner) joins the implicit GROUP BY. Requires
-  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:145).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L145
+  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:157).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L157

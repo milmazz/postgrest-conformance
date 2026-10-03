@@ -18,5 +18,5 @@ expect:
   body_exact: [{ "name": "Python", "rank": 19 }]
 notes: >
   PUT (single-row upsert by PK) returning representation emits the full
-  Server-Timing metric set. Mirrors ServerTimingSpec.hs:47-55.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L47
+  Server-Timing metric set. Mirrors ServerTimingSpec.hs:49-58.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L49

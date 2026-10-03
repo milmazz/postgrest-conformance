@@ -20,4 +20,4 @@ notes: >
   directly rather than routing the value through
   pgFmtUnknownLiteralForField. Mirrors AndOrParamsSpec.hs 'can handle array
   operators' (isdistinct assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L180
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L187

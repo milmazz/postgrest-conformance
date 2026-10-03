@@ -25,4 +25,4 @@ notes: >
   the absent actors/films pair and the second (L611) is the
   grandchild_entities flavor, both traced in select.yaml
   (SpreadQueriesSpec.hs:603).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L603

@@ -20,9 +20,9 @@ notes: >
   explicitly — "handling=lenient is ignored for timezone. Invalid time zones
   always return an error" (docs/references/api/preferences.rst#L65-L67) —
   because the preference parser no longer classifies any `timezone=` token as
-  invalid (src/library/PostgREST/ApiRequest/Preferences.hs#L161-L163), so
+  invalid (src/library/PostgREST/ApiRequest/Preferences.hs#L162-L165), so
   `handling` has nothing to suppress and PostgreSQL's 22023 reaches the
   client as a 400. Mirrors the exact it-block at
-  Preferences/TimezoneSpec.hs:51-57 ("should throw error with
+  Preferences/TimezoneSpec.hs:63-70 ("should throw error with
   handling=lenient").
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L51
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L63

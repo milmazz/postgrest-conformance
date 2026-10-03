@@ -22,17 +22,17 @@ notes: >
   RPC-specific rule, decided in callReadPlan before the routine runs:
   `failMaxAffectedRpcReturnsSingle (Just (PreferMaxAffected _), Just Strict) rout
   = if funcReturnsSingle rout then Left $ ApiRequestErr MaxAffectedRpcViolation`
-  (Plan.hs#L238). `funcReturnsSingle` is true for every non-set return type
-  (Routine.hs#L102-105), and `void` is a Single Scalar (funcReturnsVoid
-  Routine.hs#L122-124), so a void-returning routine trips it. Status 400
-  (Error.hs#L125), code PGRST128 (Error.hs#L172), message verbatim from
-  Error.hs#L198; the upstream envelope at MaxAffectedSpec.hs#L127 shows
+  (Plan.hs#L261). `funcReturnsSingle` is true for every non-set return type
+  (Routine.hs#L109-112), and `void` is a Single Scalar (funcReturnsVoid
+  Routine.hs#L129-131), so a void-returning routine trips it. Status 400
+  (Error.hs#L127), code PGRST128 (Error.hs#L174), message verbatim from
+  Error.hs#L200; the upstream envelope at MaxAffectedSpec.hs#L152 shows
   details/hint null. Distinct from PGRST124 (MaxAffectedViolationError,
-  Error.hs#L168), which the headers area covers as cases 1555/1556.
+  Error.hs#L170), which the headers area covers as cases 1555/1556.
   Deviation from upstream: upstream posts an empty body to
   /rpc/delete_items_returns_void, a fixture Bier's conformance DB does not have;
   this case uses the already-loaded void routine `ret_void` (the same routine as
   case 1409) with the JSON `{}` body shape that case 1409 already proves
   resolves. Neither substitution touches the rule under test — the check reads
   only the routine's return type and the Prefer header, never the arguments.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L122
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L146

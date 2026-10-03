@@ -31,4 +31,4 @@ notes: >
   users 1 and 3 are the only owners of task 1. The empty embed projection
   `tasks()` keeps the related array out of the body; row order is the users
   physical order.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L200
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L200

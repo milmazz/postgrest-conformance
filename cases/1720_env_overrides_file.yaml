@@ -16,5 +16,5 @@ expect:
   dump_contains:
     - 'db-max-rows = 999'
     - 'log-level = "debug"'
-notes: "overrideFromDbOrEnvironment checks env (and db settings) before the config file value, so the env wins. Source Config.hs#L467-L478."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L471
+notes: "overrideFromDbOrEnvironment checks env (and db settings) before the config file value, so the env wins. Source Config.hs#L512-L525."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config.hs#L518

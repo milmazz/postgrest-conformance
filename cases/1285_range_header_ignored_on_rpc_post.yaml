@@ -18,7 +18,7 @@ expect:
 notes: >
   A Range header on POST /rpc/<fn> is ignored, because getRanges only reads it
   for GET (`headerRange = if method == "GET" then rangeRequested hdrs else
-  allRange`, ApiRequest.hs:183). The call therefore returns the function's full
+  allRange`, ApiRequest.hs:208). The call therefore returns the function's full
   result set with Content-Range '0-14/*' instead of the 2-row window the header
   asks for. Contrast case 1280, where the same 'Range' header on a GET /rpc/
   read does select the window, and case 1281, where limit/offset query params
@@ -28,4 +28,4 @@ notes: >
   pagination.getitemrange(0,15) is `SELECT * FROM items WHERE id > 0 AND
   id <= 15`, yielding all 15 rows; `?order=id` fixes the row order, and
   pagination.items exposes only the `id` column.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest.hs#L183
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest.hs#L208

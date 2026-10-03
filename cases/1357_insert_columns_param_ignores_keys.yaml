@@ -13,5 +13,5 @@ schema: mutations
 expect:
   status: 201
   body_exact: [{ "id": 200, "body": "xxx", "owner": "postgrest_test_anonymous" }]
-notes: 'Single-object insert with ?columns=id,body: JSON keys not listed in ?columns (smth, other, fake_id) are ignored, not rejected. No ?select, so the full inserted row (including the defaulted owner) is returned. Mirrors InsertSpec.hs#L437-L439. Assumes: DELETE FROM test.articles WHERE id = 200;'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L437
+notes: 'Single-object insert with ?columns=id,body: JSON keys not listed in ?columns (smth, other, fake_id) are ignored, not rejected. No ?select, so the full inserted row (including the defaulted owner) is returned. Mirrors InsertSpec.hs#L522-L527. Assumes: DELETE FROM test.articles WHERE id = 200;'
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L522

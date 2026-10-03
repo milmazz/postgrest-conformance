@@ -23,10 +23,10 @@ notes: >-
   resolution=ignore-duplicates the conflict is resolved with DO NOTHING, so the
   conflicting rows are absent from the RETURNING set and only the newly
   inserted row is echoed — [{ "id": 3 }], not the whole payload. Verbatim mirror
-  of UpsertSpec.hs#L271-L278 ("succeeds if the table has only PK cols and no
+  of UpsertSpec.hs#L348-L358 ("succeeds if the table has only PK cols and no
   other cols", inside the ignore-duplicates context), including the
   Preference-Applied value; `only_pk` is seeded with ids 1 and 2 in the
   consolidated fixture, exactly as upstream. The status stays 201 because one
   row was created (contrast case 11404, where nothing is created and
   ignore-duplicates still answers 201 with []).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L275
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L354

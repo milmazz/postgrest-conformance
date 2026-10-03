@@ -27,9 +27,9 @@ notes: >-
   Documented as a first-class feature of Update ("Updates also support ...
   :ref:`resource_embedding`", docs/references/api/tables_views.rst#L604).
   Mirrors the first request of the it-block "without filters" under context
-  "embeds an O2O relationship after update" (UpdateSpec.hs#L577-L604): PATCH
+  "embeds an O2O relationship after update" (UpdateSpec.hs#L670-L699): PATCH
   /students?id=eq.1&select=name,students_info(address) with {"name":"Johnny
   Doe"}. The block's second request is the mirrored direction
   (/students_info?id=eq.1&select=address,students(name)); only the first is
   cased, the reverse direction adds no new rule.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L579
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L672

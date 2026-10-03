@@ -17,4 +17,4 @@ notes: >
   Transcribed VERBATIM from upstream including the stray trailing `)` in
   the select tree — upstream's own assertion carries it and v16.0 accepts
   it, so the case pins that tolerance too (SpreadQueriesSpec.hs:390).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L390
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L390

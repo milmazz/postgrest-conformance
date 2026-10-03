@@ -28,10 +28,10 @@ notes: >
   plain left join, so the `id=eq.2` filter on it neither drops child rows nor
   entity rows — it only empties the grandchild arrays that no longer match.
   Mirrors EmbedInnerJoinSpec "only affects the source table rows if his
-  direct embedding is an inner join" (v16.0 L174-L192) verbatim, request and
+  direct embedding is an inner join" (v16.0 L204-L222) verbatim, request and
   body.
 
   Fixture check against the consolidated bier_test: grandchild 2 hangs off
   child_entity 1 (entity 1); every other child keeps an empty array, and
   entities 3/4 own no children so the inner join removes them.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L174
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L204

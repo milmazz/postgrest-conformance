@@ -13,4 +13,4 @@ expect:
 notes: >
   A logic param ANDs with a traditional horizontal filter. Mirrors
   AndOrParamsSpec "can be combined with traditional filters".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L22
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L22

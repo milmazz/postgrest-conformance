@@ -24,7 +24,7 @@ set search_path = test, public;
 
 -- items: simple auto-incrementing integer pk. Used for plain INSERT/UPDATE/DELETE,
 -- empty-body PATCH, content-range and max-affected cases.
--- schema.sql:126
+-- schema.sql:128
 create table test.items (
   id serial primary key
 );
@@ -33,7 +33,7 @@ insert into test.items (id)
 
 -- no_pk: a table with NO primary key. Used for bulk insert with no Location,
 -- "succeeds with 201 but no location header", and PUT-no-pk error.
--- schema.sql:688
+-- schema.sql:690
 create table test.no_pk (
   a text,
   b text
@@ -41,7 +41,7 @@ create table test.no_pk (
 
 -- simple_pk: single text pk + extra column. Used for 409 duplicate pk and
 -- not-null violation (23502) and empty/invalid json body errors.
--- schema.sql:769
+-- schema.sql:771
 create table test.simple_pk (
   k text not null primary key,
   extra text not null
@@ -61,7 +61,7 @@ create table test.articles (
 -- complex_items: pk + name + a column whose name contains a separator,
 -- plus jsonb/array columns with defaults. Used for missing=default and
 -- select-shaping on DELETE.
--- schema.sql:555
+-- schema.sql:557
 create table test.complex_items (
   id bigint not null primary key,
   name text,
@@ -75,7 +75,7 @@ insert into test.complex_items (id, name, settings, arr_data) values
   (3, 'Three', '{"foo":{"int":1,"bar":"baz"}}', '{1,2,3}');
 
 -- tiobe_pls: single text pk + rank. The canonical UPSERT/PUT table.
--- schema.sql:1437
+-- schema.sql:1439
 -- Seed mirrors PostgREST's own data.sql exactly so the upsert/PUT statuses
 -- (201 = something inserted, 200 = all updates) match upstream:
 --   data.sql:403  INSERT INTO tiobe_pls VALUES ('Java', 1), ('C', 2), ('Python', 4);
@@ -95,7 +95,7 @@ insert into test.tiobe_pls (name, rank) values
   ('Python', 4);
 
 -- single_unique: integer UNIQUE (not the pk) for on_conflict=unique_key.
--- schema.sql:1442
+-- schema.sql:1444
 create table test.single_unique (
   unique_key integer unique not null,
   value text
@@ -103,7 +103,7 @@ create table test.single_unique (
 insert into test.single_unique (unique_key, value) values (1, 'A');
 
 -- compound_unique: composite UNIQUE for on_conflict=key1,key2.
--- schema.sql:1447
+-- schema.sql:1449
 create table test.compound_unique (
   key1 integer not null,
   key2 integer not null,
@@ -113,7 +113,7 @@ create table test.compound_unique (
 insert into test.compound_unique (key1, key2, value) values (1, 1, 'A');
 
 -- only_pk: a table whose only column is its pk. Upsert/PUT edge case.
--- schema.sql:693 ; seed matches data.sql:412  INSERT INTO only_pk VALUES (1), (2);
+-- schema.sql:695 ; seed matches data.sql:412  INSERT INTO only_pk VALUES (1), (2);
 -- https://github.com/PostgREST/postgrest/blob/v14.12/test/spec/fixtures/data.sql#L412
 create table test.only_pk (
   id integer not null primary key
@@ -122,7 +122,7 @@ insert into test.only_pk (id) values (1), (2);
 
 -- safe_update_items / safe_delete_items: tables used to exercise
 -- pg-safeupdate (full-table UPDATE/DELETE rejected without WHERE -> 21000).
--- schema.sql:2695, schema.sql:2701
+-- schema.sql:2697, schema.sql:2703
 create table test.safe_update_items (
   id integer not null primary key,
   name text not null

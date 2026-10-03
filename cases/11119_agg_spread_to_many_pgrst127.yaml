@@ -19,5 +19,5 @@ expect:
 notes: >
   Even with aggregates enabled, an aggregate inside a to-many spread is
   rejected with PGRST127 "Feature not implemented"
-  (AggregateFunctionsSpec.hs:298).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L298
+  (AggregateFunctionsSpec.hs:331).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L331

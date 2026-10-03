@@ -18,11 +18,11 @@ notes: >-
   An Accept value the media-type tokenizer cannot parse at all (no "/", here
   the bare word "undefined") is NOT rejected during parsing. decodeMediaType
   falls back to (mt', "", []) and the catch-all clause yields MTOther with the
-  whole original string (MediaType.hs#L156-L161), so the string is carried
+  whole original string (MediaType.hs#L165-L170), so the string is carried
   through negotiation unchanged and re-emitted verbatim in the PGRST107
   message. Mirrors CustomMediaSpec's "media type parser fails" context, it
   block "sends media type as is". Contrast case 1602, where the Accept parses
   fine (text/unknowntype) and is merely unavailable: both end at 406 / PGRST107
   but by different routes, and this case pins that the unparsable form is
   echoed rather than mangled or dropped.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/CustomMediaSpec.hs#L395
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/CustomMediaSpec.hs#L404

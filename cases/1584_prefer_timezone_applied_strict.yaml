@@ -23,8 +23,8 @@ notes: >
   `handling=strict, timezone=America/Los_Angeles`, so this case pins the
   multi-token echo bytes that 1553 cannot. Mirrors the exact it-block "should
   change timezone with handling=strict" at
-  Preferences/TimezoneSpec.hs:14-22, the sibling of 1553's it-block (L24-L32)
+  Preferences/TimezoneSpec.hs:14-24, the sibling of 1553's it-block (L28-L38)
   inside the same `context "test Prefer: timezone=America/Los_Angeles"` (L13).
   Body verified against a freshly loaded bier_test (`set time zone
   'America/Los_Angeles'` over `headers.timestamps`, 3 rows).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L14
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L14

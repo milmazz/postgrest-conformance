@@ -17,6 +17,6 @@ expect:
 notes: >
   The PGRST123 rejection also covers aggregates inside a to-one spread
   embed. Assumes: default db-aggregates-enabled=false
-  (AggregateFunctionsSpec.hs:334; the to-many spread flavor is asserted at
-  L345).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L334
+  (AggregateFunctionsSpec.hs:370; the to-many spread flavor is asserted at
+  L382).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L370

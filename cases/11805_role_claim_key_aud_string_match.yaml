@@ -17,6 +17,6 @@ notes: >-
   The `aud` claim may double as the role claim: with `jwt-aud` and
   `jwt-role-claim-key = $.aud` both set to `postgrest_test_author`, the audience
   check passes AND the role resolves to the same value -> 200. Audience
-  validation (Auth/Jwt.hs#L61) runs before role extraction
-  (Auth/Jwt.hs#L114). Upstream asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L171
+  validation (Auth/Jwt.hs#L67) runs before role extraction
+  (Auth/Jwt.hs#L121). Upstream asserts the status only.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L171

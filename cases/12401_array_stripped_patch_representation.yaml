@@ -25,4 +25,4 @@ notes: >-
   application/vnd.pgrst.array+json;nulls=stripped". Verified against the
   consolidated fixture DB, where test.organizations row 3 matches upstream's.
   Allocated from this area's overflow band because 1600..1649 is fully taken.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/NullsStripSpec.hs#L37
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/NullsStripSpec.hs#L39

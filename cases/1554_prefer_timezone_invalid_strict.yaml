@@ -20,15 +20,15 @@ notes: >
   ("Invalid preferences: timezone=Invalid/Timezone") and lenient silently
   dropped it. v16.0 removed that membership check
   (`fromHeaders` lost its TimezoneNames argument and `isTimezonePrefAccepted`,
-  src/library/PostgREST/ApiRequest/Preferences.hs#L129-L163), so every
+  src/library/PostgREST/ApiRequest/Preferences.hs#L129-L165), so every
   `timezone=<v>` is now accepted as a preference and handed to PostgreSQL,
-  which raises SQLSTATE 22023 — mapped to 400 by Error.hs#L561-L564
+  which raises SQLSTATE 22023 — mapped to 400 by Error.hs#L559-L563
   (invalid_parameter_value, and the message is not the "role ... does not
   exist" special case). The response is therefore an ordinary Postgres error
   envelope, not a PGRST122 one, and `handling` no longer affects the outcome
   (see cases 1580/1581 for the no-handling and lenient variants, and the
   docs' "handling=lenient is ignored for timezone" note). Mirrors the exact
-  it-block at Preferences/TimezoneSpec.hs:43-49 ("should throw error with
+  it-block at Preferences/TimezoneSpec.hs:53-60 ("should throw error with
   handling=strict"). Message text verified against a loaded bier_test
   (PostgreSQL 17).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L43
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L53

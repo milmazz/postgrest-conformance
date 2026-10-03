@@ -14,4 +14,4 @@ expect:
     - { "id": 3 }
     - { "id": 4 }
 notes: "Horizontal filters apply to the rows of a SETOF/table-valued proc result."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L303
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L369

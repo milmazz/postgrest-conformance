@@ -19,4 +19,4 @@ notes: >
   into a JSON array on the parent; a parent with no children gets an empty
   array (SpreadQueriesSpec.hs:93). The same it-block's second get (L104)
   asserts the aliased form.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L93
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L93

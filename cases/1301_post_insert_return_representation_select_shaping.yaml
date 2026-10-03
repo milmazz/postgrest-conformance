@@ -20,7 +20,7 @@ notes: >-
   return=representation honors &select (the body carries only name/client_id)
   and carries no Location header. The Location omission is NOT caused by the
   &select list: the SQL builder emits a location expression only when the
-  requested representation is exactly HeadersOnly (Statements.hs#L45-L52), so
+  requested representation is exactly HeadersOnly (Statements.hs#L63-L75), so
   return=representation never produces one regardless of the selected columns.
-  Mirrors InsertSpec.hs:116.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L116
+  Mirrors InsertSpec.hs:138.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L138

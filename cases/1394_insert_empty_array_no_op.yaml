@@ -12,4 +12,4 @@ expect:
   status: 201
   body_exact: []
 notes: "Empty array body inserts nothing; with return=rep -> 201 and []."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L239
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L289

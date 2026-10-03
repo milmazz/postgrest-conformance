@@ -28,7 +28,7 @@ expect:
 notes: >
   `order` applies to a function's result set, not only to a table/view read:
   `/rpc/<fn>?order=<col>` is accepted on the RPC surface and orders the returned
-  rows. Mirrors RangeSpec.hs:30 ("returns range Content-Range with range/*")
+  rows. Mirrors RangeSpec.hs:31 ("returns range Content-Range with range/*")
   byte-for-byte — same path, same expected document, same `Content-Range`
   header. The v16 docs state the same surface: `references/api/functions.rst`
   L290 ("A function that follows the rules for inlining will also inline
@@ -39,4 +39,4 @@ notes: >
   `test.getitemrange`, `RETURNS SETOF ordering.items`; `items` has ids 1..15 in
   the consolidated fixture DB, so the (0,15) window is the whole table and the
   count-less window is `0-14/*`.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L30
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L31

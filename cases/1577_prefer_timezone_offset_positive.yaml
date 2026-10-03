@@ -20,12 +20,12 @@ notes: >
   preference. Under v14.12 the preference had to be a member of
   pg_timezone_names (`isTimezonePrefAccepted`), which numeric offsets are
   not, so `timezone=+05:30` was dropped; v16.0 removed that check
-  (src/library/PostgREST/ApiRequest/Preferences.hs#L138, #L157, #L161-L163) and the
+  (src/library/PostgREST/ApiRequest/Preferences.hs#L138, #L158, #L162-L165) and the
   value goes straight to the session's TimeZone setting, so the offset is
   applied AND echoed in Preference-Applied. Note the sign: PostgreSQL reads a
   bare `+05:30` in POSIX style, so the rendered offset is `-05:30` — the
   wire bytes below are upstream's and were re-verified against a loaded
   bier_test (`SET LOCAL TIME ZONE '+05:30'` over headers.timestamps).
-  Mirrors the exact it-block at Preferences/TimezoneSpec.hs:60-68 ("should
+  Mirrors the exact it-block at Preferences/TimezoneSpec.hs:74-84 ("should
   change with positive offset").
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L60
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L74

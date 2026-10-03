@@ -22,8 +22,8 @@ notes: >
   filter resolves to exactly one node because target resolution becomes
   `fromMaybe relName relAlias == targetNodeName` (Plan.hs `matchTarget`,
   v16.0 L1027-L1030). Upstream demonstrates this with places/visits
-  (QuerySpec.hs:1699); this case reproduces the same shape on the fixture DB's
+  (QuerySpec.hs:1945); this case reproduces the same shape on the fixture DB's
   projects/tasks one-to-many, which exists in bier_test (places/visits do not).
   Under the legacy resolution both filters would collapse onto whichever node
   `find` hit first.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1699
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1945

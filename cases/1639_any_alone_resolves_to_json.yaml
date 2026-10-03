@@ -16,4 +16,4 @@ notes: >-
   "*/*, resolves to application/json for API endpoints and to
   application/openapi+json for the root endpoint". Contrast case 1645, which is
   the same Accept on the root path.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1203
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1361

@@ -7,5 +7,5 @@ request:
 schema: multi
 expect:
   status: 405
-notes: "PATCH on /rpc/<fn> is InvalidRpcMethod (405). Mirrors RpcSpec 'PATCH fails' (v16.0 it at L628, request at L629, 405 at L630)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L628
+notes: "PATCH on /rpc/<fn> is InvalidRpcMethod (405). Mirrors RpcSpec 'PATCH fails' (v16.4 it at L729, request at L730, 405 at L731)."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L729

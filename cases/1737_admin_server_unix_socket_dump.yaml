@@ -18,4 +18,4 @@ notes: >
   octal file mode (default "660", see case 1705). Golden:
   configs/no-defaults-env.yaml#L47-L48 -> configs/expected/no-defaults.config#L3-L4.
   Socket binding itself is not exercisable over HTTP.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/no-defaults.config#L3
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/expected/no-defaults.config#L3

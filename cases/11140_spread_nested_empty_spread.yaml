@@ -21,7 +21,7 @@ notes: >
   `...processes()` of 11138. The two spellings are not interchangeable for
   an implementer: 11138 is decidable at the parser (empty parens), this one
   only once the children are built. `relSelectToSpread` splices a nested
-  spread's own field list into the parent's (Plan.hs:718-719) and an empty
+  spread's own field list into the parent's (Plan.hs:771-772) and an empty
   nested spread's list is `[]`, so the outer to-many spread ends up with an
   empty projection. An implementation whose to-many spread is a one-row-per-
   parent aggregate subquery only *by virtue of* the aggregate calls in that
@@ -32,7 +32,7 @@ notes: >
   like 11138 this case is issued without `order=`. EXTRAPOLATION beyond
   upstream's own coverage: the nested-empty-spread mechanism is exercised by
   the second get of the `empty spreads embeds` it-block
-  (SpreadQueriesSpec.hs:603, get at L611,
+  (SpreadQueriesSpec.hs:603, get at L610,
   `...child_entities(parent_name:name,...entities())`), but that get keeps
   the real column `parent_name:name`, so its outer spread never reaches an
   empty projection, and its spread is to-one rather than to-many. No
@@ -40,4 +40,4 @@ notes: >
   branch that produces it and its body was read off a live run of the pinned
   v16.0 binary. Contrast 11139, the same contributes-nothing intent spelled
   as a nested empty EMBED, which is a 400 instead.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L718
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L771

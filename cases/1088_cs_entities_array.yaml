@@ -13,4 +13,4 @@ expect:
     - { "id": 2 }
     - { "id": 3 }
 notes: "cs -> `@>` contains, on integer[] (entities.arr). Mirrors AndOrParamsSpec.hs 'can handle array operators'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L172
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L179

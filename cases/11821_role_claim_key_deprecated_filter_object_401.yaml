@@ -1,0 +1,24 @@
+id: 11821
+feature: auth/role-claim-key/deprecated-filter-object-element-401
+request:
+  method: GET
+  path: /authors_only
+  headers: { Accept: application/json }
+  jwt:
+    sign_with: hs256_test_secret
+    payload:
+      realm_access: { "roles": [ { "obj_key": "obj_value" } ] }
+schema: auth
+config:
+  jwt-role-claim-key: '.realm_access.roles[?(@ == "string")]'
+expect:
+  status: 401
+notes: >-
+  The negative leg of the deprecated filter: an array element that is an
+  object is never equal to a string, so the filter selects nothing, no role
+  is extracted, and /authors_only (granted to postgrest_test_author only)
+  refuses the request with 401. Mirrors test_config.py:test_deprecated_role_claim_key
+  over the last deprecatedroleclaims entry, whose fixture comment reads
+  "fails because it compares an object with a string"; upstream asserts the
+  status only.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L262

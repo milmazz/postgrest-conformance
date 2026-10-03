@@ -17,11 +17,11 @@ notes: >
   New in v16.0. With the default `url-use-legacy-target-names = true`, filters,
   orders and limits may still address an aliased embed by its *relation* name
   (`tasks.` while the embed is aliased `the_tasks`), but the response now
-  carries a deprecation `Warning` header (QuerySpec.hs:1183, "filters, orders
+  carries a deprecation `Warning` header (QuerySpec.hs:1339, "filters, orders
   and limits aliased embeded entities using the target name"). The header value
   is `299 <product-version> "<msg> Update `<relName>` to `<alias>` in query
-  string filters, orders or limits."` (App.hs warningHeaders, v16.0 L264-L270);
+  string filters, orders or limits."` (App.hs warningHeaders, v16.0 L286-L293);
   upstream builds the version token as "PostgRESTv" <> prettyVersion, so the
   case matches it as an opaque token rather than pinning PostgREST's own
   version string.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1183
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1339

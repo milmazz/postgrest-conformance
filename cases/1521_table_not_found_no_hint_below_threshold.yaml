@@ -18,11 +18,11 @@ expect:
 notes: >
   The negative half of case 1520: when no table in the schema clears the 0.75
   similarity threshold, `getFuzzyHint` returns Nothing and the envelope's `hint`
-  is null (Error.hs:398-402). "projxxxx" differs from "projects" in four of
+  is null (Error.hs:401-405). "projxxxx" differs from "projects" in four of
   eight characters (0.5), so no suggestion is made even though the same schema
   produces one for "projectx". Mirrors ErrorSpec.hs "don't show hint when
   similarity score is less than 75%" (L97), which asserts this exact body and
   Content-Length 119 (L100-L103). Upstream exposes the same `test` schema, so
   the body is byte-identical; verified against a freshly loaded bier_test,
   where neither `test.projxxxx` nor any name within the threshold exists.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L97
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L105

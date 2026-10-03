@@ -16,4 +16,4 @@ notes: >
   gte(all) -> `id >= ALL('{4,3}')`. gte is a QuantOperator, so it accepts the
   any()/all() modifiers just like gt (case 1084). Mirrors QuerySpec.hs
   any/all quantifiers 'works with the gt/gte operator' (second assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1519
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1741

@@ -17,7 +17,7 @@ expect:
 notes: >
   test.infinite_recursion is a view defined over itself, so planning a read of
   it raises SQLSTATE 42P17. 42P17 has its own rule in the SQLSTATE map and maps
-  to HTTP 500 (Error.hs:588); the envelope is the raw PG ServerError, with the
+  to HTTP 500 (Error.hs:590); the envelope is the raw PG ServerError, with the
   SQLSTATE as code and no detail or hint. Note the relation resolves fine in the
   schema cache — this is an execution-time failure, not a PGRST205. Mirrors
   QuerySpec.hs "test infinite recursion error 42P17" / "return http status 500"
@@ -26,4 +26,4 @@ notes: >
   byte-identical to upstream's regardless of schema; reproduced on a freshly
   loaded bier_test (SQLSTATE 42P17, same message). Fixture objects come from
   fixtures/errors.delta.sql.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1680
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1925

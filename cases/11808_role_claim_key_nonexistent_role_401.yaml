@@ -15,10 +15,10 @@ expect:
   status: 401
 notes: >-
   The audience check passes (an array `aud` matches when ANY element matches,
-  Auth/Jwt.hs#L76) but `$.aud[1]` extracts `postgrest_test_invalid`, which is
+  Auth/Jwt.hs#L82) but `$.aud[1]` extracts `postgrest_test_invalid`, which is
   not a Postgres role. Switching to it fails inside the transaction with
   SQLSTATE 22023, which PostgREST special-cases to 401 when the message is
-  `role ... does not exist` (Error.hs#L561-L563, upstream issue #3601) — the
-  only SQLSTATE-driven 401 that is not 42501. Upstream (test_auth.py#L113)
+  `role ... does not exist` (Error.hs#L559-L562, upstream issue #3601) — the
+  only SQLSTATE-driven 401 that is not 42501. Upstream (test_config.py#L157)
   asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L183
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L183

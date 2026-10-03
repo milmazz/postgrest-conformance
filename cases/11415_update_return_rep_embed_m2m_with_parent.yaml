@@ -31,11 +31,11 @@ notes: >-
   through the users_tasks junction) AND a to-one parent nested inside it
   (project:projects(name)) over the updated rows. Mirrors the it-block "without
   filters" under context "embeds an M2M relationship plus parent after update"
-  (UpdateSpec.hs#L537-L556), asserting the same request, body, 200,
+  (UpdateSpec.hs#L629-L649), asserting the same request, body, 200,
   Content-Type json and Preference-Applied: return=representation. The junction
   rows are returned in task-id order, the same order the frozen read-side M2M
   cases assert (e.g. case 1117). The block's sibling "with filters" it-block
-  (#L558-L574, tasks.name=ilike.code* + tasks.project.name=like.*10, nulling one
+  (#L651-L668, tasks.name=ilike.code* + tasks.project.name=like.*10, nulling one
   nested parent) is left uncased: embed-level filtering is owned by the
   select/filters bands, not by this one.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L539
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L631

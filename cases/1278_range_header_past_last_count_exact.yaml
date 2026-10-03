@@ -23,10 +23,10 @@ notes: >
   count=exact, is a 416 PGRST103 OutOfBounds carrying Content-Range
   '*/<total>'. This is the Range-header route into OutOfBounds on a NON-empty
   collection; case 1257 covers the offset= query-param route and case 1266 the
-  Range-header route over an empty table. Mirrors RangeSpec.hs:478
+  Range-header route over an empty table. Mirrors RangeSpec.hs:586
   (rangeHdrsWithCount $ ByteRangeFromTo 100 199 = Range 100-199 plus
-  'Prefer: count=exact', SpecHelper.hs:192). The status/details come from
-  Error.hs:107/206 and the '*/15' Content-Range from Response.hs:76, which
+  'Prefer: count=exact', SpecHelper.hs:201). The status/details come from
+  Error.hs:110/206 and the '*/15' Content-Range from Response.hs:82, which
   replaces the body of an otherwise normal response when the status is 416.
   Verified against a freshly loaded bier_test: pagination.items has 15 rows.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L478
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L586

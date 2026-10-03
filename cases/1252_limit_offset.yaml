@@ -10,5 +10,5 @@ expect:
   headers:
     Content-Range: "2-4/*"
   body_exact: [{"id":3},{"id":4},{"id":5}]
-notes: "limit and offset on first level; lower bound = offset. Mirrors RangeSpec.hs:210."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L210
+notes: "limit and offset on first level; lower bound = offset. Mirrors RangeSpec.hs:259."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L259

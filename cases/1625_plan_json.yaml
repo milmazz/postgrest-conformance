@@ -12,4 +12,4 @@ expect:
   body_jsonpath:
     - { path: "$[0].Plan", exists: true }
 notes: 'Accept application/vnd.pgrst.plan+json returns the JSON EXPLAIN plan; the Content-Type defaults for=application/json and appends charset. Mirrors PlanSpec ''outputs the total cost for a single filter on a table''. Assumes: Requires db-plan-enabled = true; otherwise the plan media type does not resolve and negotiation returns 406 / PGRST107.'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/PlanSpec.hs#L34
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/PlanSpec.hs#L38

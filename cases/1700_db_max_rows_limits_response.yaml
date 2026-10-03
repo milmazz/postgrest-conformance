@@ -7,7 +7,7 @@ request:
 schema: config
 config:
   # Upstream overrides exactly one key for this describe-block
-  # (`baseCfg { configDbMaxRows = Just 2 }`, QueryLimitedSpec.hs#L14); nothing
+  # (`baseCfg { configDbMaxRows = Just 2 }`, QueryLimitedSpec.hs#L13); nothing
   # else is declared, so the declared config stays consistent with the `config`
   # profile label the harness sends as Accept-Profile.
   db-max-rows: 2
@@ -16,5 +16,5 @@ expect:
   headers:
     Content-Range: 0-1/*
   body_exact: [{ "id": 1 }, { "id": 2 }]
-notes: "With db-max-rows=2 the server caps results at 2 rows; total count is '*'. Mirrors QueryLimitedSpec.hs:16."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QueryLimitedSpec.hs#L16
+notes: "With db-max-rows=2 the server caps results at 2 rows; total count is '*'. Mirrors QueryLimitedSpec.hs:15."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QueryLimitedSpec.hs#L15

@@ -21,8 +21,8 @@ notes: >
   OBJECT (to-one) rather than a json array, so `clients=not.is.null` filters
   on a row aggregate, not on an aggregated array. `addNullEmbedFilters`
   rewrites the filter to a `CoercibleFilterNullEmbed False <relAggAlias>`
-  (Plan.hs#L972), rendered as `<agg> IS DISTINCT FROM NULL`
-  (SqlFragment.hs#L381) — the to-one analogue of `!inner`, keeping only
+  (Plan.hs#L1040), rendered as `<agg> IS DISTINCT FROM NULL`
+  (SqlFragment.hs#L425) — the to-one analogue of `!inner`, keeping only
   parents that HAVE a related row.
 
   Mirrors RelatedQueriesSpec "related conditions through null operator on
@@ -35,4 +35,4 @@ notes: >
   makes `clients` resolve unambiguously by relation name. The empty embed
   projection `clients()` keeps the related object out of the body; row order
   is the projects physical order.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L152
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L152

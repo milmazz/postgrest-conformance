@@ -19,4 +19,4 @@ notes: >
   `...processes(*)` on an m2m spread flattens all far-table columns as
   parallel arrays; junction columns do not appear
   (SpreadQueriesSpec.hs:398).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L398
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L398

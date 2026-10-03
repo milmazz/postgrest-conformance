@@ -13,4 +13,4 @@ expect:
   status: 200
   body_exact: "anothervalue"
 notes: "Multiple cookies parsed into request.cookies."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L906
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1019

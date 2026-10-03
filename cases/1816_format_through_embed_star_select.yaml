@@ -41,4 +41,4 @@ expect:
       },
     ]
 notes: "Star select inside a to-one embed expands to the embedded relation's columns and still applies each domain's representation cast. Mirrors QuerySpec.hs 'formats through join with star select' (v16.0 request carries the explicit &order=id)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1615
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1854

@@ -30,8 +30,8 @@ into the internal `ApiRequest`. The ordered steps are:
 5. `getRanges` — fold `Range` header + `limit`/`offset` params.
 6. `getPayload` — parse the request body.
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L76-L100`
-(<https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest.hs#L76>).
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L104-L129`
+(<https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest.hs#L104>).
 
 The step order is byte-for-byte the same as v14.12; only the file path and the
 line numbers moved (v14.12 had it at `src/PostgREST/ApiRequest.hs#L79-L103`).
@@ -54,7 +54,7 @@ So `/items` is a relation, `/rpc/fn` is a routine, and any path with more
 than one non-rpc segment (e.g. `/first/second/third`, `/invalid/nested/paths`)
 is `InvalidResourcePath`.
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L118-L128`.
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L147-L156`.
 
 ### 2.1 Root path `/`
 
@@ -63,11 +63,11 @@ Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L118-L128`.
 - With a configured `db-root-spec` routine, the root resolves to that routine.
 - Otherwise the root is `ResourceSchema` (serves the OpenAPI document).
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L120-L124`;
-`OpenAPIDisabled` status/code/message at `src/library/PostgREST/Error.hs#L124`
-(`HTTP.status404`), `#L170` (`"PGRST126"`), `#L196`
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L149-L153`;
+`OpenAPIDisabled` status/code/message at `src/library/PostgREST/Error.hs#L126`
+(`HTTP.status404`), `#L172` (`"PGRST126"`), `#L198`
 (`"Root endpoint metadata is disabled"`); behavior test
-`test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L17-L23`.
+`test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L15-L23`.
 
 ---
 
@@ -80,14 +80,14 @@ A unicode table reached via a fully percent-encoded path (e.g.
 (`موارد`) in the exposed unicode schema.
 
 Source (behavior test): postgrest v16.0
-`test/spec/Feature/Query/UnicodeSpec.hs#L18` (the read
+`test/spec/Feature/Query/UnicodeSpec.hs#L17` (the read
 `get "/%D9%85%D9%88%D8%A7%D8%B1%D8%AF"`), with the exposed schema set inline at
-`test/spec/Feature/Query/UnicodeSpec.hs#L15`
+`test/spec/Feature/Query/UnicodeSpec.hs#L14`
 (`baseCfg { configDbSchemas = fromList ["تست"] }`). In v14.12 the same config
 lived in a named `testUnicodeCfg` in `SpecHelper.hs`; v16 removed that helper
-and inlines the config per-spec, so `SpecHelper.hs#L181` is no longer a valid
+and inlines the config per-spec, so `SpecHelper.hs#L190` is no longer a valid
 anchor. Table DDL unchanged at `test/spec/fixtures/schema.sql#L10` (schema) and
-`#L187` (table).
+`#L189` (table).
 
 Docs: `docs/references/api/url_grammar.rst#L21-L36` ("Unicode support").
 
@@ -99,16 +99,16 @@ as `%20`, in the path segment, in `select`, and in a filter key alike. No `%22`
 quoting is involved — a space is **not** one of the reserved characters of
 §6.3, so the grammar never treats it as structure. The decoded segment is used
 verbatim as the relation name (`[table] -> Right $ ResourceRelation table`,
-`src/library/PostgREST/ApiRequest.hs#L126`, fed from `pathInfo req` at `#L78`),
+`src/library/PostgREST/ApiRequest.hs#L154`, fed from `pathInfo req` at `#L106`),
 and `HTTP.parseQueryReplacePlus True`
-(`src/library/PostgREST/ApiRequest/QueryParams.hs#L157`) decodes the query
+(`src/library/PostgREST/ApiRequest/QueryParams.hs#L197`) decodes the query
 string the same way, so `Just%20A%20Server%20Model` becomes the plain column
 name `Just A Server Model` on both sides of the request. The field parser
-accepts it unquoted: `pFieldName` (`#L359-L363`) is documented by the doctest
+accepts it unquoted: `pFieldName` (`#L404-L408`) is documented by the doctest
 `P.parse pFieldName "" "identifier with spaces"` -> `Right "identifier with
-spaces"` (`#L331-L332`). It does trim the ends — ` no leading or trailing
-spaces ` parses to `no leading or trailing spaces` (`#L354-L355`) — so only
-*edge* spaces need the `%22` quoting of §6.3 (`#L357-L358`).
+spaces"` (`#L376-L377`). It does trim the ends — ` no leading or trailing
+spaces ` parses to `no leading or trailing spaces` (`#L399-L400`) — so only
+*edge* spaces need the `%22` quoting of §6.3 (`#L402-L403`).
 
 ```
 GET /Server%20Today?select=Just%20A%20Server%20Model&Just%20A%20Server%20Model=like.*91*
@@ -121,11 +121,11 @@ This is a distinct rule from §6.3 (which is about identifiers/values carrying a
 Docs: `docs/references/api/url_grammar.rst#L38-L47` ("Table / Columns with
 spaces", label `.. _tabs-cols-w-spaces:`, example
 `/Order%20Items?Unit%20Price=lt.200`). Source (behavior test): postgrest v16.0
-`test/spec/Feature/Query/QuerySpec.hs#L1281` ("will select and filter a column
-that has spaces"; request at `#L1282`, four-row body at `#L1283-L1287`).
+`test/spec/Feature/Query/QuerySpec.hs#L1468` ("will select and filter a column
+that has spaces"; request at `#L1469`, four-row body at `#L1470-L1474`).
 Fixture `test."Server Today"` is added by this area's
 `spec/conformance/fixtures/url_grammar.delta.sql`, mirroring
-`test/spec/fixtures/schema.sql#L1816-L1819` and
+`test/spec/fixtures/schema.sql#L1818-L1821` and
 `test/spec/fixtures/data.sql#L562-L569`.
 
 ---
@@ -169,18 +169,18 @@ So `DELETE`/`PATCH`/`PUT` on `/rpc/fn` fail with `InvalidRpcMethod`
 
 Any other `(resource, method)` falls through to
 `Left (UnsupportedMethod method)` (`PGRST117`, **405**,
-`src/library/PostgREST/ApiRequest.hs#L151`). Two request shapes reach it: a
+`src/library/PostgREST/ApiRequest.hs#L176`). Two request shapes reach it: a
 mutating method on the schema root (`POST /`, `PUT /`, `PATCH /`, `DELETE /`),
 **or any method outside the seven matched verbs on a relation** (e.g.
 `TRACE /items`, `LINK /items`). Routines are the only resource that never
 reaches the fall-through: `ResourceRoutine` has its own catch-all clause
-(`(ResourceRoutine _, _) -> Left $ InvalidRpcMethod method`, `#L137`) which
+(`(ResourceRoutine _, _) -> Left $ InvalidRpcMethod method`, `#L165`) which
 swallows every unmatched method, whereas the `ResourceRelation` clauses at
-`#L139-L145` enumerate exactly HEAD/GET/POST/PUT/PATCH/DELETE/OPTIONS with no
+`#L166-L172` enumerate exactly HEAD/GET/POST/PUT/PATCH/DELETE/OPTIONS with no
 catch-all. See Gaps — upstream never asserts `PGRST117` black-box, so no case is
 emitted.
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L130-L151`
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L158-L176`
 (unchanged from v14.12 apart from the file move).
 
 ### 4.1 The three `*Info` actions and the `Allow` header
@@ -188,7 +188,7 @@ Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L130-L151`
 The `OPTIONS` rows above are the only actions that never touch the database.
 All three answer **200** with an empty body, `Content-Length: 0`,
 `Access-Control-Allow-Origin: *` and an `Allow` header
-(`src/library/PostgREST/Response.hs#L230-L233`, `respondInfo`). What `Allow`
+(`src/library/PostgREST/Response.hs#L237-L240`, `respondInfo`). What `Allow`
 contains depends on the resource:
 
 | Action            | `Allow`                                                  |
@@ -201,16 +201,16 @@ contains depends on the resource:
 the schema cache and a miss returns `TableNotFound` (**404**), so `OPTIONS` on
 an unknown table is a 404 even though the *path* parsed fine.
 
-Source: postgrest v16.0 `src/library/PostgREST/Response.hs#L210-L222`
-(relation, with the `TableNotFound` miss at `#L213` and the flag-driven
-`allowH` at `#L215-L222`), `#L224-L226` (routine, guarded on
-`pdVolatility proc == Volatile`), `#L228` (schema root).
+Source: postgrest v16.4 `src/library/PostgREST/Response.hs#L219-L231`
+(relation, with the `TableNotFound` miss at `#L222` and the flag-driven
+`allowH` at `#L224-L231`), `#L232-L234` (routine, guarded on
+`pdVolatility proc == Volatile`), `#L235` (schema root).
 
-Behavior tests: postgrest v16.0 `test/spec/Feature/OptionsSpec.hs#L15-L19`
-(writeable table, `Allow` at L18 and `Content-Length: 0` at L19),
-`#L21-L22` (unknown table -> 404), `#L83-L87` (volatile routine),
-`#L89-L93` (stable routine), `#L95-L99` (immutable routine, same header as
-stable) and `#L102-L106` (root). The file is byte-identical to v14.12 apart
+Behavior tests: postgrest v16.4 `test/spec/Feature/OptionsSpec.hs#L14-L18`
+(writeable table, `Allow` at L17 and `Content-Length: 0` at L18),
+`#L20-L21` (unknown table -> 404), `#L82-L86` (volatile routine),
+`#L88-L92` (stable routine), `#L94-L98` (immutable routine, same header as
+stable) and `#L101-L105` (root). The file is byte-identical to v14.12 apart
 from the `SpecWithConfig` harness change, which shifted every line by -1.
 
 ---
@@ -232,9 +232,9 @@ response carries `Content-Profile`:
 
 | profile header | result | `iNegotiatedByProfile` |
 |---|---|---|
-| present, in `db-schemas` | `Right (p, True)` (`#L160`) | **always `True`**, even on a single-schema instance |
-| present, not in `db-schemas` | `Left (UnacceptableSchema …)` (`#L159`) | — (406 `PGRST106`) |
-| absent | `Right (defaultSchema, length configDbSchemas /= 1)` (`#L161`) | `True` only when more than one schema is exposed |
+| present, in `db-schemas` | `Right (p, True)` (`#L185`) | **always `True`**, even on a single-schema instance |
+| present, not in `db-schemas` | `Left (UnacceptableSchema …)` (`#L184`) | — (406 `PGRST106`) |
+| absent | `Right (defaultSchema, length configDbSchemas /= 1)` (`#L186`) | `True` only when more than one schema is exposed |
 
 So the flag is *not* "more than one schema is exposed": that condition governs
 only the no-header branch. An accepted `Accept-Profile`/`Content-Profile`
@@ -245,18 +245,18 @@ when `iNegotiatedByProfile` is set (`profileHeader` returns `Nothing`
 otherwise) — i.e. on every request that carried an accepted profile header, and
 additionally on unprofiled requests to a multi-schema instance.
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L156-L173`
-(the `Just p` branch at `#L159-L160`, the `Nothing` branch at `#L161`);
-`Content-Profile` emission at `src/library/PostgREST/Response.hs#L258-L260`;
-behavior tests `test/spec/Feature/Query/MultipleSchemaSpec.hs#L24-L82`
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L180-L198`
+(the `Just p` branch at `#L183-L185`, the `Nothing` branch at `#L186`);
+`Content-Profile` emission at `src/library/PostgREST/Response.hs#L265-L267`;
+behavior tests `test/spec/Feature/Query/MultipleSchemaSpec.hs#L22-L77`
 (reads: default v1 at L24-L44, `Accept-Profile: v2` at L46-L66, unknown table
-per-schema at L68-L75, unknown profile at L77-L82) and `#L141-L159`
+per-schema at L68-L75, unknown profile at L77-L82) and `#L133-L152`
 (writes via `Content-Profile`: v2 insert at L141-L150, unknown profile at
 L152-L159).
 
 > v16 note: `MultipleSchemaSpec` now sets its own config inline
 > (`configDbSchemas = fromList ["v1", "v2", "SPECIAL \"@/\\#~_-"]`,
-> `#L21`) instead of pulling a named helper config, which shifted every
+> `#L18`) instead of pulling a named helper config, which shifted every
 > `it`-block in the file by +2 lines. The assertions themselves are identical
 > to v14.12.
 
@@ -275,10 +275,10 @@ A key is a filter iff it is neither reserved nor ends in a reserved-embeddable
 word. `select` defaults to `*` when absent.
 
 Source: postgrest v16.0
-`src/library/PostgREST/ApiRequest/QueryParams.hs#L167-L174`
-(`endingIn` at L167-L169, `isFilter` at L172, `reserved` at L173,
-`reservedEmbeddable` at L174); `select` default at `#L146`; the
-`offset` -> `limit` key rewrite at `#L152` and `#L176`.
+`src/library/PostgREST/ApiRequest/QueryParams.hs#L208-L216`
+(`endingIn` at L208-L210, `isFilter` at L214, `reserved` at L215,
+`reservedEmbeddable` at L216); `select` default at `#L186`; the
+`offset` -> `limit` key rewrite at `#L192` and `#L218`.
 
 The whole reserved-parameter block is byte-identical to v14.12 — only the file
 path and the line numbers moved (a constant **+8** offset; see §6.3 for what
@@ -290,8 +290,8 @@ The canonical form sorts params alphabetically by key and renders a missing
 value as `=` (empty). E.g. `a=1&c=3&b=2&d` canonicalizes to `a=1&b=2&c=3&d=`.
 
 Source (doctest): postgrest v16.0
-`src/library/PostgREST/ApiRequest/QueryParams.hs#L104-L107`; implementation at
-`#L161-L165`.
+`src/library/PostgREST/ApiRequest/QueryParams.hs#L143-L146`; implementation at
+`#L201-L206`.
 
 ### 6.2 `+` and percent decoding in the query string
 
@@ -300,8 +300,8 @@ in a value decodes to a space, and `%20` also decodes to a space. Both forms
 are equivalent in filter values.
 
 Source: postgrest v16.0
-`src/library/PostgREST/ApiRequest/QueryParams.hs#L157`; behavior tests using
-`%20` spaces in values `test/spec/Feature/Query/QuerySpec.hs#L203-L213`
+`src/library/PostgREST/ApiRequest/QueryParams.hs#L197`; behavior tests using
+`%20` spaces in values `test/spec/Feature/Query/QuerySpec.hs#L225-L237`
 (`plfts.The%20Fat%20Rats` at L203, `wfts.The%20Fat%20Rats` at L208,
 `wfts.fun%20and%20possible` at L213).
 
@@ -321,9 +321,9 @@ not structure. In a URL the double quote is percent-encoded as `%22`, e.g.
 A space is **not** in that set: an identifier that merely contains spaces is
 addressed with plain `%20` and no quotes (§3.1, case 1035) — `pFieldName`
 parses `identifier with spaces` unquoted
-(`src/library/PostgREST/ApiRequest/QueryParams.hs#L331-L332`). Quoting buys one
+(`src/library/PostgREST/ApiRequest/QueryParams.hs#L376-L377`). Quoting buys one
 extra thing for spaces: an *unquoted* field name is trimmed of leading and
-trailing spaces (`#L354-L355`) while a quoted one keeps them (`#L357-L358`),
+trailing spaces (`#L399-L400`) while a quoted one keeps them (`#L402-L403`),
 which is why case 1029's `  col  w  space  ` column needs `%22` even though the
 space itself is not reserved.
 
@@ -340,8 +340,8 @@ first 71 lines: the `TupleSections` pragma is dropped, eleven parser
 combinators are newly exported (`pFieldForest`, `pFieldName`, `pFieldSelect`,
 `pJsonPath`, `pLogicTree`, `pOpExpr`, `pOrder`, `pRelationSelect`,
 `pRequestFilter`, `pSingleVal`, `pSpreadRelationSelect` —
-`src/library/PostgREST/ApiRequest/QueryParams.hs#L11`), the import lists are
-re-wrapped, and a doctest `-- $setup` block is added at `#L69-L71`. From v14.12
+`src/library/PostgREST/ApiRequest/QueryParams.hs#L12`), the import lists are
+re-wrapped, and a doctest `-- $setup` block is added at `#L108-L110`. From v14.12
 L64 / v16.0 L72 onward the two files are byte-identical, which is the narrower
 claim §6's anchors rely on. `*` is reserved because
 `like`/`ilike` translate a `*` in the value into the SQL `%` wildcard, so a
@@ -350,23 +350,23 @@ literal `*` in a value or identifier must be quoted to survive.
 Source (docs): postgrest v16.0
 `docs/references/api/url_grammar.rst#L54` (the reserved-character list, changed
 from v14.12's same line). Source (the `*` -> `%` translation):
-`src/library/PostgREST/Query/SqlFragment.hs#L415` (`star c = if c == '*' then '%' else c`).
+`src/library/PostgREST/Query/SqlFragment.hs#L458` (`star c = if c == '*' then '%' else c`).
 
 Source (behavior tests): postgrest v16.0
-`test/spec/Feature/Query/QuerySpec.hs#L1300-L1321`
+`test/spec/Feature/Query/QuerySpec.hs#L1490-L1508`
 (`describe "values with quotes in IN and NOT IN"` at L1300; only-quoted values
 at L1302/L1305, `not.in` at L1308, mixed quoted/unquoted at L1313, a value
 containing `(`/`)` at L1319). The dual of this rule for quoted *identifiers*
 (columns named `*id*`, `:arr->ow::cast`, `(inside,parens)`, `a.dotted.column`,
 `  col  w  space  `) is exercised at
-`test/spec/Feature/Query/QuerySpec.hs#L1290-L1293`; the fixture table is
-`test/spec/fixtures/schema.sql#L1821-L1827` with data at
+`test/spec/Feature/Query/QuerySpec.hs#L1478-L1481`; the fixture table is
+`test/spec/fixtures/schema.sql#L1823-L1829` with data at
 `test/spec/fixtures/data.sql#L571-L576`.
 
 Backslash escaping inside `in.( … )` (`\"` for a literal double quote, `\\` for
 a literal backslash) is documented at
 `docs/references/api/url_grammar.rst#L68-L74` and tested at
-`test/spec/Feature/Query/QuerySpec.hs#L1323-L1340`; see Gaps — no case is
+`test/spec/Feature/Query/QuerySpec.hs#L1519-L1539`; see Gaps — no case is
 emitted because the required rows are absent from the consolidated fixture.
 
 ---
@@ -380,9 +380,9 @@ column predicates. The root-table subset (`qsFiltersRoot`) is what
 UPDATE/DELETE use.
 
 Source: postgrest v16.0
-`src/library/PostgREST/ApiRequest/QueryParams.hs#L129-L143`
+`src/library/PostgREST/ApiRequest/QueryParams.hs#L168-L183`
 (the `hasOp`/`hasRootFilter` partition); behavior test
-`test/spec/Feature/Query/QuerySpec.hs#L40-L46` (`it "matches with equality"` at
+`test/spec/Feature/Query/QuerySpec.hs#L36-L42` (`it "matches with equality"` at
 L40, `get "/items?id=eq.5"` at L41, body `[{"id":5}]` at L42, headers
 `Content-Range: 0-0/*` / `Content-Length: 10` at L43-L46).
 
@@ -402,21 +402,21 @@ params. Grammar-relevant rules:
   invalid (`InvalidRange`, `PGRST103`, **416**).
 
 Because `offset` is rewritten to `limit` while the query string is parsed
-(`QueryParams.hs#L152`, `replaceLast` at `#L176`), both spellings fold into the
+(`QueryParams.hs#L192`, `replaceLast` at `#L218`), both spellings fold into the
 same top-level range and produce the identical PUT rejection — the message
 names both parameters.
 
-Source: postgrest v16.0 `src/library/PostgREST/ApiRequest.hs#L175-L191`
+Source: postgrest v16.4 `src/library/PostgREST/ApiRequest.hs#L200-L216`
 (GET-only `Range` at L183, PUT rejection at L178, limit-zero at L188-L190);
-error codes/statuses `src/library/PostgREST/Error.hs#L107` (416),
-`#L111` (400), `#L147` (`PGRST103`), `#L158` (`PGRST114`), `#L185` (message).
+error codes/statuses `src/library/PostgREST/Error.hs#L110` (416),
+`#L113` (400), `#L149` (`PGRST103`), `#L160` (`PGRST114`), `#L187` (message).
 
 Behavior tests for the PUT rejection: postgrest v16.0
-`test/spec/Feature/Query/UpsertSpec.hs#L293-L307`
-(`context "Restrictions"` at L294, `it "fails if limit is specified"` at L295
-with `put "/tiobe_pls?name=eq.Javascript&limit=1"` at L296 and the exact
-`PGRST114` envelope + 400 at L299-L300; `it "fails if offset is specified"` at
-L302 with `…&offset=1` at L303 and the same envelope at L306-L307). The block is
+`test/spec/Feature/Query/UpsertSpec.hs#L383-L399`
+(`context "Restrictions"` at L384, `it "fails if limit is specified"` at L385
+with `put "/tiobe_pls?name=eq.Javascript&limit=1"` at L386 and the exact
+`PGRST114` envelope + 400 at L389-L390; `it "fails if offset is specified"` at
+L394 with `…&offset=1` at L395 and the same envelope at L398-L399). The block is
 byte-identical to v14.12 (`UpsertSpec.hs#L295-L309` there, i.e. +2 lines). An earlier draft of
 this model asserted that no such Feature spec line existed in v16.0 — that was
 wrong; cases 1016 and 1030 are transcribed from these two `it`-blocks.
@@ -442,30 +442,30 @@ Source (postgrest v16.0 `src/library/PostgREST/Error.hs`):
 
 | Error | status | code | message |
 | ----- | ------ | ---- | ------- |
-| InvalidResourcePath | `#L123` | `#L169` | `#L195` |
-| UnsupportedMethod   | `#L116` | `#L161` | `#L188` |
-| InvalidRpcMethod    | `#L106` | `#L145` | `#L176` |
-| UnacceptableSchema  | `#L115` | `#L150` | `#L180` (hint `#L222`) |
-| PutLimitNotAllowed  | `#L111` | `#L158` | `#L185` |
-| OpenAPIDisabled     | `#L124` | `#L170` | `#L196` |
-| QueryParamError     | `#L112` | `#L144` | `#L175` (details `#L201`) |
+| InvalidResourcePath | `#L125` | `#L171` | `#L197` |
+| UnsupportedMethod   | `#L118` | `#L163` | `#L190` |
+| InvalidRpcMethod    | `#L109` | `#L147` | `#L178` |
+| UnacceptableSchema  | `#L117` | `#L152` | `#L182` (hint `#L223`) |
+| PutLimitNotAllowed  | `#L113` | `#L160` | `#L187` |
+| OpenAPIDisabled     | `#L126` | `#L172` | `#L198` |
+| QueryParamError     | `#L114` | `#L146` | `#L177` (details `#L203`) |
 
 **v16 refactor (no wire change at defaults).** v14.12 built the error response
 from a `PgrstError` typeclass whose `headers` prepended `proxyStatusHeader`; v16
 splits that into `ErrorBody` + `ErrorHeaders` and emits `Proxy-Status`
-unconditionally from `errorResponseFor` (`src/library/PostgREST/Error.hs#L86`
-builds the header, `#L88` puts it on every error response). The error data types
-moved to a new module `src/library/PostgREST/Error/Types.hs#L29-L60`.
+unconditionally from `errorResponseFor` (`src/library/PostgREST/Error.hs#L89`
+builds the header, `#L91` puts it on every error response). The error data types
+moved to a new module `src/library/PostgREST/Error/Types.hs#L30-L61`.
 
 v16 also adds `client-error-verbosity`: with the default `verbose` the body
 keeps all four keys, with `minimal` it drops `details` and `hint`
-(`src/library/PostgREST/Error.hs#L64-L78`, default `Verbose` at
-`src/library/PostgREST/Config.hs#L338`). All cases in this area assume the
+(`src/library/PostgREST/Error.hs#L65-L81`, default `Verbose` at
+`src/library/PostgREST/Config.hs#L373`). All cases in this area assume the
 default, so the envelope shape is unchanged.
 
-Proxy-status behavior test: `test/spec/Feature/Query/ErrorSpec.hs#L32-L40`
-(`context "includes the proxy-status header on the response"` at L32,
-`get "/invalid/nested/paths"` at L34, `Proxy-Status: PostgREST; error=PGRST125`
+Proxy-status behavior test: `test/spec/Feature/Query/ErrorSpec.hs#L33-L42`
+(`context "includes the proxy-status header on the response"` at L33,
+`get "/invalid/nested/paths"` at L35, `Proxy-Status: PostgREST; error=PGRST125`
 at L38).
 
 ---
@@ -487,8 +487,8 @@ underlying relation name. v16 deprecates that:
   comma-separated). The literal `v` belongs to the product token, not to the
   version: upstream builds
   `pgrstVer = "PostgRESTv" <> BS.filter (/= ' ') prettyVersion`
-  (`src/library/PostgREST/App.hs#L268`) and emits `"299 " <> pgrstVer <> …`
-  (`#L270`), so on v16.0 the token is `PostgRESTv16.0`. Case 1028 matches the
+  (`src/library/PostgREST/App.hs#L291`) and emits `"299 " <> pgrstVer <> …`
+  (`#L293`), so on v16.0 the token is `PostgRESTv16.0`. Case 1028 matches the
   token with `\S+` and is therefore version-agnostic.
 - With `url-use-legacy-target-names = false`: the same request is a **400
   `PGRST108`** with `message` `'tasks' is not an embedded resource in this
@@ -497,21 +497,21 @@ underlying relation name. v16 deprecates that:
   limits.`
 
 Source: config key + default `True` at
-`src/library/PostgREST/Config.hs#L324` (dumped at `#L205`, declared at `#L118`);
-warning collection at `src/library/PostgREST/Plan.hs#L151-L168`
+`src/library/PostgREST/Config.hs#L356` (dumped at `#L219`, declared at `#L131`);
+warning collection at `src/library/PostgREST/Plan.hs#L172-L189`
 (`readPlanWarning` matching `relAlias = Just alias, relIsLegacyTargetNameMatch = True`
-at `#L167`); message/hint text and gating at
-`src/library/PostgREST/App.hs#L212-L218`; `Warning` header construction at
-`src/library/PostgREST/App.hs#L264-L270`; the `PGRST108` code at
-`src/library/PostgREST/Error.hs#L152` with this variant's `details` at `#L214`
-and `hint` at `#L220`, and the error constructor carrying the alias pair at
-`src/library/PostgREST/Error/Types.hs#L46`.
+at `#L188`); message/hint text and gating at
+`src/library/PostgREST/App.hs#L231-L239`; `Warning` header construction at
+`src/library/PostgREST/App.hs#L286-L293`; the `PGRST108` code at
+`src/library/PostgREST/Error.hs#L154` with this variant's `details` at `#L216`
+and `hint` at `#L221`, and the error constructor carrying the alias pair at
+`src/library/PostgREST/Error/Types.hs#L47`.
 
 Behavior tests: default/legacy path with the `Warning` header at
-`test/spec/Feature/Query/QuerySpec.hs#L1183-L1187`; the
+`test/spec/Feature/Query/QuerySpec.hs#L1339-L1343`; the
 `url-use-legacy-target-names = false` variant at
-`test/spec/Feature/Query/QuerySpec.hs#L1695-L1720`. Note the sibling change at
-`#L1159-L1162`: the plain "ordering embeded entities with alias" test now uses
+`test/spec/Feature/Query/QuerySpec.hs#L1941-L1968`. Note the sibling change at
+`#L1313-L1316`: the plain "ordering embeded entities with alias" test now uses
 the alias (`the_tasks.order=name.asc`) rather than the relation name.
 
 ---
@@ -522,46 +522,46 @@ the alias (`the_tasks.order=name.asc`) rather than the relation name.
   depend on PostgREST runtime config (`server-root-spec`,
   `openapi-mode=disabled`) rather than the schema fixture, so no black-box
   conformance case is emitted here. Source for behavior is
-  `test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L17-L23` and
-  `src/library/PostgREST/ApiRequest.hs#L120-L124`. Recorded as a gap because
+  `test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L15-L23` and
+  `src/library/PostgREST/ApiRequest.hs#L149-L153`. Recorded as a gap because
   the conformance runner has no config-injection mechanism for arbitrary new
   case ids (see the next item).
 - **`url-use-legacy-target-names = false`** (the 400 `PGRST108` with the
   `Change 'tasks' to 'the_tasks'` hint,
-  `test/spec/Feature/Query/QuerySpec.hs#L1709-L1720`) needs a per-case config
+  `test/spec/Feature/Query/QuerySpec.hs#L1957-L1968`) needs a per-case config
   override. The frozen harness only applies a case's `config:` block for ids in
   its hardcoded `@variant_case_ids` list
   (`test/support/conformance_server.ex`), which a spec agent may not extend, so
   only the **default** (legacy-enabled, `Warning`-header) side is emitted as a
   case (1028).
 - **`UnsupportedMethod` (PGRST117, 405)** — the `getAction` fall-through
-  (`src/library/PostgREST/ApiRequest.hs#L151`, status `Error.hs#L116`, code
-  `#L161`, message `#L188`) is reachable with a mutating method on the schema
+  (`src/library/PostgREST/ApiRequest.hs#L176`, status `Error.hs#L118`, code
+  `#L163`, message `#L190`) is reachable with a mutating method on the schema
   root (`POST /`, `PATCH /`, …), **or with any method outside the seven matched
   verbs on a relation** (`TRACE /items`, `LINK /items`, …): the
-  `ResourceRelation` clauses at `#L139-L145` have no catch-all, unlike
-  `ResourceRoutine`'s at `#L137`, so an unmatched verb on a table is `PGRST117`
+  `ResourceRelation` clauses at `#L166-L172` have no catch-all, unlike
+  `ResourceRoutine`'s at `#L165`, so an unmatched verb on a table is `PGRST117`
   and not `PGRST101`. v16.0's test suite never asserts it:
-  a repo-wide search for `PGRST117` matches only `Error.hs#L161` and the empty
+  a repo-wide search for `PGRST117` matches only `Error.hs#L163` and the empty
   row in `docs/references/errors.rst#L232`. No case is emitted rather than
   inventing an assertion; §4 keeps the source-level contract.
 - **`OPTIONS` `Allow` variants driven by relation updatability**
   (auto-updatable views, trigger-backed views, partitioned tables —
-  `test/spec/Feature/OptionsSpec.hs#L24-L80`, flags at
-  `src/library/PostgREST/Response.hs#L215-L222`). The consolidated `bier_test`
+  `test/spec/Feature/OptionsSpec.hs#L23-L79`, flags at
+  `src/library/PostgREST/Response.hs#L224-L231`). The consolidated `bier_test`
   has no `projects_*_view_*` relations, and adding them via this area's delta
   would mean re-deriving upstream's trigger/updatability fixture set rather
   than adding one object. Case 1019 pins the writeable-table row of that
   matrix; the remaining rows are omitted and recorded here.
 - **Reserved-character quoting of a filter *value* containing a dot**
   (§6.3): the v16.0 Feature specs exercise the comma, paren and quote/backslash
-  cases directly (`w_or_wo_comma_names`, `QuerySpec.hs#L1300-L1341`) but there
+  cases directly (`w_or_wo_comma_names`, `QuerySpec.hs#L1490-L1540`) but there
   is no `it`-block asserting a `%22`-quoted filter *value* that contains a
   literal dot — the dot-containing reserved-char test is about a quoted *column
-  name* (`QuerySpec.hs#L1290-L1293`, now covered by case 1029). Rather than
+  name* (`QuerySpec.hs#L1478-L1481`, now covered by case 1029). Rather than
   invent a row+assertion, the dotted-value case is omitted.
 - **Backslash / escaped-double-quote values inside `in.( … )`**
-  (`QuerySpec.hs#L1323-L1340`, docs `url_grammar.rst#L68-L74`) need the rows
+  (`QuerySpec.hs#L1519-L1539`, docs `url_grammar.rst#L68-L74`) need the rows
   `'"'`, `'Double"Quote"McGraw"'`, `'\'` and `'/\Slash/\Beast/\'` in
   `w_or_wo_comma_names` (`test/spec/fixtures/data.sql#L348-L351`). The consolidated `bier_test`
   fixture seeds only the six comma/paren names, and this area's write channel
@@ -575,7 +575,7 @@ the alias (`the_tasks.order=name.asc`) rather than the relation name.
   validation** behavior, not a URL-grammar one; it belongs to the `config`
   area's CLI cases and is not emitted here.
 - **Default `Vary: Accept, Prefer, Range` response header** is new in v16
-  (`src/library/PostgREST/App.hs#L253,L259`, test
-  `test/spec/Feature/HttpHeaderSpec.hs#L26-L34`). It is emitted on *every*
+  (`src/library/PostgREST/App.hs#L275,L281`, test
+  `test/spec/Feature/HttpHeaderSpec.hs#L28-L39`). It is emitted on *every*
   response, not only profile-negotiated ones, so it belongs to the `headers`
   area rather than to profile negotiation here.

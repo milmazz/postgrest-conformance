@@ -9,5 +9,5 @@ expect:
   status: 200
   headers:
     Content-Type: application/openapi+json; charset=utf-8
-notes: "Empty path ([]) resolves to ResourceSchema (the OpenAPI root) when OpenAPI is enabled, so the root serves the OpenAPI document with Content-Type application/openapi+json; charset=utf-8. Grammar-level resolution is at ApiRequest.getResource (v16.0 src/library/PostgREST/ApiRequest.hs#L120, the [] branch — v16 moved the library sources under src/library/); observable behavior is OpenApiSpec 'root path returns a valid openapi spec' (L19-L28). Body is the full OpenAPI doc (not asserted here)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L19
+notes: "Empty path ([]) resolves to ResourceSchema (the OpenAPI root) when OpenAPI is enabled, so the root serves the OpenAPI document with Content-Type application/openapi+json; charset=utf-8. Grammar-level resolution is at ApiRequest.getResource (v16.4 src/library/PostgREST/ApiRequest.hs#L149, the [] branch — v16 moved the library sources under src/library/); observable behavior is OpenApiSpec 'root path returns a valid openapi spec' (L18-L31). Body is the full OpenAPI doc (not asserted here)."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L18

@@ -15,7 +15,7 @@ expect:
 notes: >
   `or` inside a wfts value is websearch_to_tsquery syntax, not the PostgREST
   `or=()` logic tree: `text_search_vector @@
-  websearch_to_tsquery('impossible or possible')` (SqlFragment.hs#L412).
+  websearch_to_tsquery('impossible or possible')` (SqlFragment.hs#L455).
   Mirrors QuerySpec.hs it "can use boolean operators(and, or, -) in
   websearch_to_tsquery" (second assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L217
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L241

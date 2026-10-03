@@ -19,4 +19,4 @@ notes: >-
   (upstream regression for issue #2170), which asserts status 200 and
   Content-Type application/json; charset=utf-8. The body is the ordinary JSON
   array for projects id=1 (same row asserted by CustomMediaSpec#L200).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/CustomMediaSpec.hs#L222
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/CustomMediaSpec.hs#L233

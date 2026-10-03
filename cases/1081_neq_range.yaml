@@ -14,4 +14,4 @@ expect:
     - { "id": 3 }
     - { "id": 4 }
 notes: "neq -> `<>` on numrange. Mirrors AndOrParamsSpec.hs 'can handle range operators'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L124
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L131

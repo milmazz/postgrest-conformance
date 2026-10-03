@@ -13,4 +13,4 @@ expect:
     - { "id": 1 }
     - { "id": 2 }
 notes: "cd -> `<@` contained in, on numrange. Mirrors AndOrParamsSpec.hs 'can handle range operators'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L136
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L143

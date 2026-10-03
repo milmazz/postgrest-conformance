@@ -40,4 +40,4 @@ expect:
       },
     ]
 notes: "Omitting `select` entirely (implicit star) applies every domain column's `<domain> AS json` representation cast, identically to the explicit `select=*` of case 1803. Mirrors QuerySpec.hs 'formats implicit star select'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1595
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1831

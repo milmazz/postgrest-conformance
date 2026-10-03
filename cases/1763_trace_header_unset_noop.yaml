@@ -16,7 +16,7 @@ expect:
 notes: >
   When server-trace-header is unset (empty string -> Nothing), the trace
   middleware is a no-op: the incoming X-Request-Id is NOT echoed back. Mirrors
-  App.hs:285-289 (Nothing -> app req respond); `optString` drops an empty
-  string to Nothing (Config.hs:442), so server-trace-header="" is the unset
+  App.hs:308-312 (Nothing -> app req respond); `optString` drops an empty
+  string to Nothing (Config.hs:484), so server-trace-header="" is the unset
   case. Source line is the middleware's Nothing branch.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L286
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L309

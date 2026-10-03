@@ -20,4 +20,4 @@ notes: >
   array of objects, null where the nested row is missing — the m2m
   statement of the rule case 11109 pins for one-to-many
   (SpreadQueriesSpec.hs:458).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L458
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L458

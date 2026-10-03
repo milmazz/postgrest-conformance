@@ -14,5 +14,5 @@ expect:
     details: null
     hint: null
     message: Cannot use the DELETE method on RPC
-notes: "DELETE on /rpc/<fn> is InvalidRpcMethod (PGRST101, 405). Mirrors RpcSpec context 'unsupported method' / 'DELETE fails' (v16.0 it at L620, request at L621, body at L623, 405 at L624). Uses get_parents_below in place of sayhello (same code path)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L620
+notes: "DELETE on /rpc/<fn> is InvalidRpcMethod (PGRST101, 405). Mirrors RpcSpec context 'unsupported method' / 'DELETE fails' (v16.4 it at L720, request at L721, body at L722, 405 at L723). Uses get_parents_below in place of sayhello (same code path)."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L720

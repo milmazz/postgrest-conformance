@@ -20,16 +20,16 @@ notes: >-
   Preference-Applied composes the applied preferences into ONE header value
   joined with ", " in a FIXED order — resolution, missing, representation, count,
   transaction, handling, timezone, max-affected — independent of the order the
-  client sent them (Preferences.hs#L178-L188, header assembled at #L172-L176).
+  client sent them (Preferences.hs#L181-L192, header assembled at #L174-L178).
   This case sends `count=exact` BEFORE `return=representation` and still expects
   "return=representation, count=exact", which is what makes it discriminating:
   case 1300 sends the two tokens already in output order, so it cannot tell a
   fixed-order implementation from one that merely echoes request order. Upstream
-  asserts this exact composed value (InsertSpec.hs#L101, DeleteSpec.hs#L33) but
+  asserts this exact composed value (InsertSpec.hs#L118, DeleteSpec.hs#L37) but
   always with the request tokens supplied in output order, as separate Prefer
   headers; the reversed-order variant is DERIVED FROM the cited prefsVals
   ordering. Everything else is the ordinary Full arm of the MutationCreate
   dispatch: 201, the &select-shaped array body, Content-Type, and Content-Range
   "*/1" because count=exact makes the insert range base 1 0 report the total
-  (Response.hs#L100-L101, #L111).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/Preferences.hs#L179
+  (Response.hs#L109-L110, #L121).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/Preferences.hs#L182

@@ -92,17 +92,18 @@ var noInjectSchemas = map[string]bool{
 	"unicode": true,
 }
 
-// harnessVariantIDs are the 69 case ids HARNESS.md documents as needing a
-// per-case variant instance: §2.3's config-driven table (66 ids), plus the
+// harnessVariantIDs are the 73 case ids HARNESS.md documents as needing a
+// per-case variant instance: §2.3's config-driven table (70 ids), plus the
 // three §2.5-only safe-update cases 1387–1389, which carry no config: block
 // and are selected purely by id.
 var harnessVariantIDs = []int{
 	1129, 1130, 1131, 1132, 1133, 1139, 1140, 1147, 1148, 1149, 1387, 1388,
 	1389, 1466, 1467, 1468, 1469, 1470, 1471, 1472, 1473, 1475, 1476, 1477,
 	1491, 1492, 1493, 1494, 1495, 1497, 1498, 1499, 1517, 1518, 1522, 1573,
-	1654, 1677, 1678, 1680, 1682, 1700, 1701, 1703, 1742, 1758, 1763, 1764,
+	1654, 1677, 1678, 1680, 1682, 1690, 1700, 1701, 1703, 1742, 1758, 1763, 1764,
 	1765, 1766, 1767, 11115, 11116, 11117, 11118, 11119, 11800, 11801, 11802,
 	11803, 11804, 11805, 11806, 11807, 11808, 11815, 11816, 11817, 11818,
+	11819, 11820, 11821,
 }
 
 // areaSchemaLabels are the eleven area schema labels HARNESS.md §2.1.1
@@ -406,6 +407,8 @@ func Route(c *cases.Case) (*Placement, error) {
 	switch c.ID {
 	case 1654:
 		overlay["PGRST_DB_SCHEMAS"] = Val{V: "openapi_no_comment"}
+	case 1690:
+		overlay["PGRST_DB_SCHEMAS"] = Val{V: "SCHEMA_v3"}
 	case 1764:
 		overlay["PGRST_JWT_SECRET"] = Val{Clear: true}
 	}

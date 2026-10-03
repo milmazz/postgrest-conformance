@@ -12,6 +12,6 @@ expect:
   stderr_contains: "Invalid client-error-verbosity. Check your configuration."
 notes: >
   NEW in v16.0. Any value other than "minimal"/"verbose" aborts startup
-  (Config.hs parseErrorVerbosity, #L335-L341). Mirrors
+  (Config.hs parseErrorVerbosity, #L370-L376). Mirrors
   test_cli.py:test_invalid_client_error_verbosity.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L283
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_cli.py#L297

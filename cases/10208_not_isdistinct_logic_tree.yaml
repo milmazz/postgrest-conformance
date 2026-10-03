@@ -15,4 +15,4 @@ notes: >
   The `not` prefix also applies to isdistinct inside an and() logic tree:
   `NOT (arr IS DISTINCT FROM '{1,2,3}')`, i.e. null-safe equality. Mirrors
   AndOrParamsSpec.hs 'operators with not' / 'isdistinct can be negated'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L196
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L203

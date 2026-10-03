@@ -17,5 +17,5 @@ expect:
   body_exact: null
 notes: >
   PATCH with default return (204, no body) still emits the full Server-Timing
-  metric set. Mirrors ServerTimingSpec.hs:38-45.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L38
+  metric set. Mirrors ServerTimingSpec.hs:38-47.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L38

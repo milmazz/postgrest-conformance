@@ -21,5 +21,5 @@ expect:
     - { path: "$.paths['/child_entities'].post.parameters[0]['$ref']", equals: "#/parameters/body.child_entities" }
     - { path: "$.paths['/child_entities'].post.parameters[1]['$ref']", equals: "#/parameters/select" }
     - { path: "$.paths['/child_entities'].post.parameters[2]['$ref']", equals: "#/parameters/preferPost" }
-notes: "GET/POST parameter $ref ordering for a table. Mirrors OpenApiSpec.hs:92-115"
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L92
+notes: "GET/POST parameter $ref ordering for a table. Mirrors OpenApiSpec.hs:100-125"
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L100

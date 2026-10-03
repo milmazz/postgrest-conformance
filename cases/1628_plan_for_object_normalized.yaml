@@ -10,4 +10,4 @@ expect:
   headers:
     Content-Type: 'application/vnd.pgrst.plan+json; for="application/vnd.pgrst.object+json"; options=verbose; charset=utf-8'
 notes: 'for="application/vnd.pgrst.object" is normalized to for="application/vnd.pgrst.object+json" in the response Content-Type (decodeMediaType resolves the for= type, toMime re-renders it canonically). Mirrors PlanSpec ''outputs the plan for application/vnd.pgrst.object''. Assumes: Requires db-plan-enabled = true.'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/PlanSpec.hs#L125
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/PlanSpec.hs#L142

@@ -15,4 +15,4 @@ expect:
     hint: null
     message: Invalid path specified in request URL
 notes: "Path with more than one non-rpc segment is InvalidResourcePath. Mirrors QuerySpec 'invalid resource path'"
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1689
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1935

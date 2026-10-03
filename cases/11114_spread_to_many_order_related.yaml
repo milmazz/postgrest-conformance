@@ -19,4 +19,4 @@ notes: >
   nested related table rather than of the spread relation itself; the
   missing cost row (process id 7) sorts last as null
   (SpreadQueriesSpec.hs:323).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L323
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L323

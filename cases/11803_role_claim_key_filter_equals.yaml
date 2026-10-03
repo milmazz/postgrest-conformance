@@ -16,6 +16,6 @@ expect:
 notes: >-
   RFC 9535 filter selector over an array-of-roles claim (the Keycloak
   `realm_access.roles` shape). When a filter matches several nodes PostgREST
-  takes the first (`evaluateJSPath ... V.!? 0`, Config/JSPath.hs#L51).
+  takes the first (`evaluateJSPath ... V.!? 0`, Config/JSPath.hs#L49).
   Upstream asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L155
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L155

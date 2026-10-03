@@ -25,4 +25,4 @@ expect:
       },
     ]
 notes: "Domain representations are applied to embedded (joined) resources. Mirrors QuerySpec.hs 'formats through join'. v16.0 added the explicit `&order=id` to the upstream request (the top-level row order was previously unspecified); the expected body is unchanged."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1611
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1849

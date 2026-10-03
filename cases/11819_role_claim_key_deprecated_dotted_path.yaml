@@ -1,0 +1,25 @@
+id: 11819
+feature: auth/role-claim-key/deprecated-dotted-path
+request:
+  method: GET
+  path: /authors_only
+  headers: { Accept: application/json }
+  jwt:
+    sign_with: hs256_test_secret
+    payload:
+      postgrest: { a_role: postgrest_test_author }
+      other: claims
+schema: auth
+config:
+  jwt-role-claim-key: '.postgrest.a_role'
+expect:
+  status: 200
+notes: >-
+  The pre-v16 leading-dot JSPath DSL resolves the role again since v16.2
+  (PostgREST#5171): the config parser keeps a value the RFC 9535 parser rejects
+  as a DeprecatedJSPath (Config.hs#L468), and role extraction evaluates it with
+  evaluateDeprecatedJSPath (Config/DeprecatedJSPath.hs#L67). The deprecated twin
+  of 1498 (`$.postgrest.a_role`), same payload. Mirrors
+  test_config.py:test_deprecated_role_claim_key over deprecatedroleclaims[0];
+  upstream asserts the status only.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L194

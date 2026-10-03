@@ -10,5 +10,5 @@ expect:
   body_jsonpath:
     - { path: "$.externalDocs.url", equals: "https://postgrest.org/en/v16/references/api.html" }
     - { path: "$.externalDocs.description", equals: "PostgREST Documentation" }
-notes: "externalDocs points at the pinned docs version (v16). Mirrors OpenApiSpec.hs:40-48 (docsVersion); source OpenAPI.hs:400 (url), 399 (description)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L400
+notes: "externalDocs points at the pinned docs version (v16). Mirrors OpenApiSpec.hs:49-58 (docsVersion); source OpenAPI.hs:501 (url), 399 (description)."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L501

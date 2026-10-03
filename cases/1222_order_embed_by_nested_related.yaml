@@ -22,4 +22,4 @@ notes: >
   tasks.order=projects(id).desc,name. limit=1 restricts the top resource to the
   single user Angela, matching the upstream assertion. The single-term variant
   tasks.order=projects(id).desc is asserted at RelatedQueriesSpec.hs#L67.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L80
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L80

@@ -28,4 +28,4 @@ notes: >
   "#001100" is parsed by `json AS color` on the way in and re-formatted by
   `color AS json` on the way out, and the explicit ?select restricts the
   returned document to the two named columns.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L870
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1054

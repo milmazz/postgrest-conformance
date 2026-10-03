@@ -13,4 +13,4 @@ expect:
     - { "id": 3 }
     - { "id": 4 }
 notes: "nxl -> `&>` does not extend to the left of, on numrange. Mirrors AndOrParamsSpec.hs 'can handle range operators'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L146
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L153

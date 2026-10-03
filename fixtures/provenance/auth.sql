@@ -36,8 +36,8 @@ SET search_path = test, public;
 -- ---------------------------------------------------------------------------
 -- Tables guarded by role ownership / grants
 -- authors_only: owned by / granted to postgrest_test_author only.
---   schema.sql#L505 (table) + privileges.sql#L31 (revoke from anon) +
---   privileges.sql#L51 (grant ALL to author)
+--   schema.sql#L507 (table) + privileges.sql#L33 (revoke from anon) +
+--   privileges.sql#L53 (grant ALL to author)
 -- ---------------------------------------------------------------------------
 CREATE TABLE test.authors_only (
   owner  text NOT NULL DEFAULT current_setting('request.jwt.claims', true)::json->>'id',
@@ -45,7 +45,7 @@ CREATE TABLE test.authors_only (
   CONSTRAINT authors_only_pkey PRIMARY KEY (secret)
 );
 
--- private_table: empty table, no grants to anyone (schema.sql#L596)
+-- private_table: empty table, no grants to anyone (schema.sql#L598)
 CREATE TABLE test.private_table ();
 
 -- items: readable by anonymous; used to show anon access works/blocked.
@@ -108,7 +108,7 @@ INSERT INTO postgrest.auth (id, rolname, pass) VALUES ('jdoe', 'postgrest_test_a
 -- RPC functions exercised by the auth cases
 -- ---------------------------------------------------------------------------
 
--- login(): mints an HS256 token whose role claim = rolname (schema.sql#L236)
+-- login(): mints an HS256 token whose role claim = rolname (schema.sql#L238)
 CREATE OR REPLACE FUNCTION test.login(id text, pass text) RETURNS public.jwt_token
   LANGUAGE sql SECURITY DEFINER STABLE AS $$
   SELECT jwt.sign(row_to_json(r), 'reallyreallyreallyreallyverysafe') AS token
@@ -119,7 +119,7 @@ CREATE OR REPLACE FUNCTION test.login(id text, pass text) RETURNS public.jwt_tok
   ) r;
 $$;
 
--- jwt_test(): encodes a fixed set of custom + standard claims (schema.sql#L350)
+-- jwt_test(): encodes a fixed set of custom + standard claims (schema.sql#L352)
 CREATE OR REPLACE FUNCTION test.jwt_test() RETURNS public.jwt_token
   LANGUAGE sql SECURITY DEFINER AS $$
   SELECT jwt.sign(row_to_json(r), 'reallyreallyreallyreallyverysafe') AS token
@@ -132,7 +132,7 @@ CREATE OR REPLACE FUNCTION test.jwt_test() RETURNS public.jwt_token
 $$;
 
 -- reveal_big_jwt(): reads standard + custom claims from request.jwt.claims
--- (schema.sql#L393)
+-- (schema.sql#L395)
 CREATE OR REPLACE FUNCTION test.reveal_big_jwt() RETURNS TABLE (
   iss text, sub text, exp bigint, nbf bigint, iat bigint, jti text,
   "http://postgrest.com/foo" boolean
@@ -147,12 +147,12 @@ LANGUAGE sql SECURITY DEFINER STABLE AS $$
          (current_setting('request.jwt.claims')::json->>'http://postgrest.com/foo')::boolean;
 $$;
 
--- get_current_user(): returns the role PostgREST switched into (schema.sql#L382)
+-- get_current_user(): returns the role PostgREST switched into (schema.sql#L384)
 CREATE OR REPLACE FUNCTION test.get_current_user() RETURNS text
   LANGUAGE sql STABLE AS $$ SELECT current_user::text; $$;
 
 -- switch_role(): db-pre-request proc that reads the id claim and SET ROLE
--- (schema.sql#L363)
+-- (schema.sql#L365)
 CREATE OR REPLACE FUNCTION test.switch_role() RETURNS void
   LANGUAGE plpgsql AS $$
 declare
@@ -170,12 +170,12 @@ end
 $$;
 
 -- privileged_hello(): execute revoked from PUBLIC, granted only to author
--- (schema.sql#L1222, privileges.sql#L61-L62)
+-- (schema.sql#L1224, privileges.sql#L63-L64)
 CREATE OR REPLACE FUNCTION test.privileged_hello(name text) RETURNS text
   LANGUAGE sql AS $$ SELECT 'Privileged hello to ' || $1; $$;
 
 -- get_guc_value(): reads a GUC, optionally a JSON member of a GUC prefix
--- (schema.sql#L1143 and #L1148)
+-- (schema.sql#L1145 and #L1150)
 CREATE OR REPLACE FUNCTION test.get_guc_value(name text) RETURNS text
   LANGUAGE sql AS $$ SELECT nullif(current_setting(name), '')::text; $$;
 

@@ -21,10 +21,10 @@ expect:
     hint: null
 notes: >
   Range with nonzero start over an empty table + count=exact
-  (rangeHdrsWithCount) -> 416, Content-Range '*/0'. Mirrors RangeSpec.hs:463,
+  (rangeHdrsWithCount) -> 416, Content-Range '*/0'. Mirrors RangeSpec.hs:567,
   which requests '/menagerie' — upstream's single-column EMPTY pagination
   table. Bier's consolidated fixture kept openapi.sql's 7-column type-mapping
   table as `test.menagerie` and renamed the empty one to
   `test.menagerie_empty` (fixtures.sql:75-79, :719-722), so the path targets
   `/menagerie_empty`.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L463
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L567

@@ -26,13 +26,13 @@ notes: >
   limits aliased embeded entities using the target name" (it at L1183, get at
   L1185, expected body at L1186, Warning matcher at L1187). The header value's
   product token is PostgREST's own version string
-  ("PostgRESTv" <> prettyVersion with spaces stripped, App.hs#L268), so the
+  ("PostgRESTv" <> prettyVersion with spaces stripped, App.hs#L291), so the
   assertion is a regex whose token is \S+ — an implementation must emit its own
   product token there; everything after it is byte-exact. The 400 PGRST108
-  counterpart (url-use-legacy-target-names = false, QuerySpec.hs#L1709-L1720)
+  counterpart (url-use-legacy-target-names = false, QuerySpec.hs#L1957-L1968)
   needs a per-case config override the frozen harness only honors for its
   hardcoded variant-case ids, so it is recorded as a gap instead of a case.
   Body verified against a freshly loaded bier_test: ordering.projects id 1 =
   "Windows 7"; ordering.tasks for project 1 = (1,'Design w7'),(2,'Code w7'), so
   name=like.Code* + order=name.asc + limit=1 selects exactly (2,'Code w7').
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1183
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1339

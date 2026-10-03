@@ -27,17 +27,17 @@ expect:
 notes: >
   Upstream runs this it-block under plain `baseCfg`, whose
   `configServerCorsAllowedOrigins = []`
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L167),
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/SpecHelper.hs#L176),
   so the case must declare `server-cors-allowed-origins: ""` explicitly — the
   "*" answer holds only for the empty origin list, not for a populated
   allowlist (which echoes the Origin and adds Allow-Credentials; see case 1702).
   With that empty list a preflight is answered "naively and permissively": corsOrigins
-  is Nothing so Allow-Origin is "*" (Cors.hs#L31), the method list is the fixed
-  Cors.hs#L33 set plus HEAD, Allow-Headers is "Authorization" plus the names
-  echoed from Access-Control-Request-Headers (Cors.hs#L34/#L47) plus the CORS
-  simple request headers, and Max-Age is 60*60*24 = 86400 (Cors.hs#L38).
+  is Nothing so Allow-Origin is "*" (Cors.hs#L30), the method list is the fixed
+  Cors.hs#L32 set plus HEAD, Allow-Headers is "Authorization" plus the names
+  echoed from Access-Control-Request-Headers (Cors.hs#L33/#L55) plus the CORS
+  simple request headers, and Max-Age is 60*60*24 = 86400 (Cors.hs#L46).
   Mirrors CorsSpec.hs "replies naively and permissively to preflight request".
   The `config` block above is not yet honoured by the frozen runner for HTTP
   cases — recorded in config.yaml under
   "needed_assertion: the runner must honour `config` on HTTP cases".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/CorsSpec.hs#L15
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/CorsSpec.hs#L14

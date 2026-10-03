@@ -13,4 +13,4 @@ expect:
     - { "a": "1", "b": "0" }
     - { "a": "2", "b": "0" }
 notes: "not.is.null -> `NOT (a IS NULL)`. Mirrors QuerySpec.hs 'matches nulls using not operator'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L74
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L76

@@ -18,7 +18,7 @@ notes: >
   both v16.0 additions, but the behavior is not: the fix it guards shipped in
   14.1 ("Fix db-pre-config function failing when function names are pg reserved
   words",
-  https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/CHANGELOG.md#L214),
+  https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/CHANGELOG.md#L255),
   before the previous v14.12 pin. Upstream runs the
   block under `withConfig baseCfg { configDbPreConfig = Just $
   QualifiedIdentifier "test" "true" }`, so it exercises db-pre-config quoting as
@@ -26,8 +26,8 @@ notes: >
   db-pre-config stays with the config area. Upstream asserts only
   `shouldRespondWith 200`; the body
   follows from the fixture definition (`create or replace function "true"()
-  returns boolean as $_$ select true; $_$`, schema.sql#L3881, in schema `test`
-  per the SET search_path at schema.sql#L988) plus the already-modeled scalar
+  returns boolean as $_$ select true; $_$`, schema.sql#L3883, in schema `test`
+  per the SET search_path at schema.sql#L990) plus the already-modeled scalar
   rendering rule rpc.return.scalar — asJsonF's returnsScalar branch emits
   `coalesce(json_agg(_postgrest_t.pgrst_scalar)->0, 'null')`, which is `true`
   here (verified against a loaded bier_test). The routine declares no
@@ -35,4 +35,4 @@ notes: >
   still succeeds because it performs no write (contrast case 1427). The
   `schema: test` label matches upstream, which runs this against the default
   schema; the function ships in spec/conformance/fixtures/rpc.delta.sql.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1497
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1700

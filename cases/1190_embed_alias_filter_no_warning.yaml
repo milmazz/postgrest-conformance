@@ -20,12 +20,12 @@ notes: >
   (the anchor below), so the alias resolves under the default
   url-use-legacy-target-names = true; updateLegacyAttrs only sets
   relIsLegacyTargetNameMatch when the match was by relation name AND an alias
-  exists (Plan.hs#L1033-L1036), so an alias match leaves the flag unset and
-  readPlanWarning (Plan.hs#L167) yields Nothing -> no Warning header
-  (App.hs#L264-L270). Fixture: project 1 owns tasks 1 "Design w7" and
+  exists (Plan.hs#L1101-L1104), so an alias match leaves the flag unset and
+  readPlanWarning (Plan.hs#L188) yields Nothing -> no Warning header
+  (App.hs#L286-L293). Fixture: project 1 owns tasks 1 "Design w7" and
   2 "Code w7"; only "Code w7" matches like.Code*. The alias form of the same
-  request is what QuerySpec asserts for ordering at L1160 and what the
+  request is what QuerySpec asserts for ordering at L1314 and what the
   url-use-legacy-target-names = false spec (QuerySpec#L1709) requires. This
   case deliberately uses a FILTER (`the_tasks.name=like.Code*`); the ORDER
   spelling (`the_tasks.order=name.asc`) is covered cross-area by case 1141.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L1029
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L1097

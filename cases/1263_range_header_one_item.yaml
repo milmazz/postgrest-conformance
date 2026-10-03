@@ -12,5 +12,5 @@ expect:
   status: 200
   headers:
     Content-Range: "0-0/*"
-notes: "One-item Range request (0-0) returns a single row, Content-Range '0-0/*'. Mirrors RangeSpec.hs:434."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L434
+notes: "One-item Range request (0-0) returns a single row, Content-Range '0-0/*'. Mirrors RangeSpec.hs:527."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L527

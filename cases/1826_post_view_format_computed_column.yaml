@@ -39,4 +39,4 @@ notes: >
   due_at is parsed from "2018-01-03T11:00:00+00" by `json AS isodate` and read
   back through `isodate AS json`, which rewrites the +00:00 offset to "Z".
   Body verified against a freshly loaded bier_test.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L880
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1068

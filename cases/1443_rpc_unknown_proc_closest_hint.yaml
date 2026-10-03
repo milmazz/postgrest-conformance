@@ -19,18 +19,18 @@ notes: >
   The closest-proc half of the unknown-proc rule, and the case that backs the
   full envelope claimed by `rpc.notfound.unknown_proc`. Case 1432 is its
   deliberate complement: upstream asserts a *bare* 404 for `/rpc/fake`
-  (RpcSpec.hs#L209), a name nothing in the schema is within the fuzzy threshold
-  of, and asserts the whole body only for `/rpc/sayhell` (RpcSpec.hs#L211-L221).
+  (RpcSpec.hs#L268), a name nothing in the schema is within the fuzzy threshold
+  of, and asserts the whole body only for `/rpc/sayhell` (RpcSpec.hs#L270-L282).
   Every string is fully determined by v16.0 source. Message: `"Could not find
   the function " <> schema <> "." <> procName <> " without parameters in the
   schema cache"` — `fmtPrms` selects the `" without parameters"` branch because
   a GET with no query string yields an empty `argumentKeys` (Error.hs#L246-L252).
-  Details: the same `func` plus `" without parameters"` (Error.hs#L259-L272).
+  Details: the same `func` plus `" without parameters"` (Error.hs#L259-L276).
   Hint: `noRpcHint` prefixes `"Perhaps you meant to call the function " <>
-  schema <> "."` (Error.hs#L372) and picks the single best fuzzy match over the
+  schema <> "."` (Error.hs#L375) and picks the single best fuzzy match over the
   procs of the requested schema at a **0.75** minimum similarity score
   (`getFuzzyHint HintProcedure = Fuzzy.getOneWithMinScore 0.75`,
-  Error.hs#L397-L403).
+  Error.hs#L400-L406).
   `schema: test` is load-bearing twice over. First, PGRST202 qualifies all three
   strings with the REQUESTED schema (see case 1433's note), so upstream's
   verbatim `test.sayhell`/`test.sayhello` text is only reproducible under the
@@ -43,9 +43,9 @@ notes: >
   best match, and the only one clearing the threshold, is therefore the same one
   upstream picks, even though the consolidated `test` schema is a superset of
   upstream's.
-  The `Content-Length: 291` assertion is upstream's own (RpcSpec.hs#L219) and is
+  The `Content-Length: 291` assertion is upstream's own (RpcSpec.hs#L278) and is
   reproduced exactly by the four strings above; being order-independent it pins
   the byte-level key/value *set* while `body_exact` (which the harness decodes,
   so key order is invisible to it) pins the values. Byte-level key ORDER is
   pinned once for the whole tree by case 1525, not re-asserted here.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L211
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L270

@@ -15,12 +15,12 @@ notes: >
   `Vary: Accept, Prefer, Range` so caching proxies and CDNs key on the three
   request headers that change the representation. Emitted in App.hs'
   `toWaiResponse`, which appends `varyHeader` unless the response already
-  carries a Vary (src/library/PostgREST/App.hs#L253, #L259, #L262). It is not
+  carries a Vary (src/library/PostgREST/App.hs#L275, #L281, #L284). It is not
   route-specific — the same header is on reads, writes, RPC and OPTIONS —
   so this single case pins the default value. Upstream asserts only the
   status and this header ("match any body"), which is why no body assertion
   is made here. Mirrors the exact it-block at
-  HttpHeaderSpec.hs:27-34 ("Test default Vary header value matches default
+  HttpHeaderSpec.hs:30-39 ("Test default Vary header value matches default
   one", Vary assertion at L34), whose request is also `GET /projects`; the
   enclosing `withConfig baseCfg` is at L26.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/HttpHeaderSpec.hs#L27
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/HttpHeaderSpec.hs#L30

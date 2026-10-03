@@ -9,4 +9,4 @@ schema: mutations
 expect:
   status: 204
 notes: 'A filter satisfies pg-safeupdate''s WHERE requirement -> 204. Assumes: -- requires pg-safeupdate (safeupdate) loaded for this table/session'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/PgSafeUpdateSpec.hs#L31
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/PgSafeUpdateSpec.hs#L32

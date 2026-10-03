@@ -20,10 +20,10 @@ notes: >
   qualifies every one of the three strings with the REQUESTED schema, not with
   the schema a matching function was eventually found in — `func = schema <>
   "." <> procName` in both the message (Error.hs#L249) and the details
-  (Error.hs#L269), and `noRpcHint schema procName …` builds the hint the same
+  (Error.hs#L273), and `noRpcHint schema procName …` builds the hint the same
   way ("Perhaps you meant to call the function " <> schema <> "." <>, Error.hs
-  #L372,
-  https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L249).
+  #L375,
+  https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L249).
   Under the `rpc` fixture-set label the harness sends `Accept-Profile: rpc`
   (test/support/http_case.ex build_headers), so the wire text would have to
   read `rpc.add_them(…)`; `test` is suppressed as the default schema, which
@@ -32,4 +32,4 @@ notes: >
   404 and the hint's fuzzy match over that single overload's parameter list
   ("(a, b)" vs the supplied "(a, b, smthelse)") reproduce upstream's schema
   cache exactly.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L239
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L300

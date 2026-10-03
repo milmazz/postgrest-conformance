@@ -13,4 +13,4 @@ expect:
     - { "k": "xyyx", "extra": "u" }
     - { "k": "xYYx", "extra": "v" }
 notes: "imatch -> POSIX regex `~*` (case-insensitive). Mirrors QuerySpec.hs 'matches with ~*'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L171
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L187

@@ -23,13 +23,13 @@ expect:
 notes: >-
   PUT single upsert that INSERTS a new row (PK not present) with
   return=representation yields 201 + JSON array body. Status semantics
-  (inserted => 201) per Response.hs#L148-L152. The Preference-Applied:
+  (inserted => 201) per Response.hs#L156-L161. The Preference-Applied:
   return=representation echo is DERIVED FROM SOURCE, not from the cited test:
-  the upstream PUT-insert test (UpsertSpec.hs#L368-L373) asserts only
+  the upstream PUT-insert test (UpsertSpec.hs#L477-L483) asserts only
   matchStatus=201 and does NOT assert Preference-Applied. The echo is produced
   because responsePreferences passes preferRepresentation through for any
-  MutateReadPlan{} (Response.hs#L281-L283) and the SingleUpsert dispatch emits
-  it via prefAppliedHeader (Response.hs#L143,L152); upstream does assert exactly
+  MutateReadPlan{} (Response.hs#L288-L290) and the SingleUpsert dispatch emits
+  it via prefAppliedHeader (Response.hs#L151,L161); upstream does assert exactly
   this echo on the sibling PUT+return=representation it-block at
-  UpsertSpec.hs#L557-L567.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response.hs#L152
+  UpsertSpec.hs#L678-L689.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response.hs#L161

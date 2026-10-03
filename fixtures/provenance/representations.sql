@@ -4,11 +4,11 @@
 -- spec/conformance/cases/13xx_*.yaml.
 --
 -- Source anchors:
---   items:                schema.sql#L126
---   clients:              schema.sql#L546
---   complex_items:        schema.sql#L555
---   projects:             schema.sql#L719
---   auto_incrementing_pk: schema.sql#L515
+--   items:                schema.sql#L128
+--   clients:              schema.sql#L548
+--   complex_items:        schema.sql#L557
+--   projects:             schema.sql#L721
+--   auto_incrementing_pk: schema.sql#L517
 
 CREATE SCHEMA IF NOT EXISTS test;
 SET search_path = test, public;

@@ -45,4 +45,4 @@ notes: >
   no ?select, so the full row — every domain column plus the view's computed
   dark_color — is formatted for each returned row. Body verified against a
   freshly loaded bier_test.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L696
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L814

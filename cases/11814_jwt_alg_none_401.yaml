@@ -21,8 +21,8 @@ notes: >-
   test/io/test_auth.py::test_jwt_errors). This is the "alg: none" downgrade
   attack: header `{"typ":"JWT","alg":"none"}`, payload `{}`, plus a bogus
   signature. jose rejects it with `BadAlgorithm`, mapped to
-  `JwtDecodeErr (BadAlgorithm m)` (Auth/Jwt.hs#L105) -> PGRST301 "Wrong or
+  `JwtDecodeErr (BadAlgorithm m)` (Auth/Jwt.hs#L111) -> PGRST301 "Wrong or
   unsupported encoding algorithm", with jose's explanation surfaced verbatim in
   `details` (Error.hs#L678). An unsigned token must never authenticate, so a
   200 here would be a security bug, not a conformance nit.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L215
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L230

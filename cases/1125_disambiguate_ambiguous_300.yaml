@@ -27,4 +27,4 @@ notes: >
   Ambiguous embed (3 candidate relationships between sites and big_projects)
   returns HTTP 300 Multiple Choices with PGRST201, the details array, and a
   disambiguation hint (EmbedDisambiguationSpec.hs:14).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/EmbedDisambiguationSpec.hs#L14
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/EmbedDisambiguationSpec.hs#L14

@@ -29,4 +29,4 @@ notes: >
   HttpExceptionRequest — refused, reset, DNS failure, timeout — to this same
   text. Mirrors the first half of
   test_cli.py:test_cli_ready_flag_fail_with_http_exception.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L367
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_cli.py#L381

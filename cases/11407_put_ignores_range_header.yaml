@@ -15,8 +15,8 @@ expect:
 notes: >-
   A Range header on PUT is ignored: PUT addresses exactly one resource by its
   full primary key, so the request neither fails with 416 nor returns an empty
-  window — the upserted row is returned as usual. Mirrors UpsertSpec.hs#L477-L487
+  window — the upserted row is returned as usual. Mirrors UpsertSpec.hs#L592-L602
   ("ignores the Range header"), which PUTs Java with ("Range", "1-1") and still
   gets back the single updated row. The seeded `tiobe_pls` already contains
   Java, so this is the update (200) leg, as in case 1382.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L484
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L600

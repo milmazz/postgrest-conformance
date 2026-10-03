@@ -25,4 +25,4 @@ notes: >-
   application/vnd.pgrst.array+json;nulls=stripped" (same row, same expected
   body). Allocated from this area's overflow band because 1600..1649 is fully
   taken.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/NullsStripSpec.hs#L28
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/NullsStripSpec.hs#L29

@@ -16,4 +16,4 @@ notes: >
   Fat Cats')`. Mirrors QuerySpec.hs context "text and json columns" ->
   context "Use of the phraseto_tsquery function" -> it "finds matches"
   (text_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L461
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L530

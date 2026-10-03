@@ -19,4 +19,4 @@ notes: >
   `NOT name ilike '%ITY2'`. Entity 4 is excluded because its name IS NULL, so
   the negated ilike is NULL rather than TRUE. Mirrors AndOrParamsSpec.hs
   'operators with not' / 'gt, lte, ilike can be negated'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L193
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L200

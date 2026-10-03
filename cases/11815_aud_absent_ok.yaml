@@ -18,4 +18,4 @@ notes: >-
   (`parseMaybe (.:? "aud")` yields Nothing, so `audMatchesCfg` is never
   applied). Distinct from case 1494, which sends no JWT and short-circuits
   before claim validation, and from 11816, where the key is present but null.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L142
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L159

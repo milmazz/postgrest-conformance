@@ -16,4 +16,4 @@ notes: >-
   A single-element array `aud` whose only element matches jwt-aud -> 200. Its
   own upstream it-block, separate from the multi-element match pinned by case
   1471.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L64
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L70

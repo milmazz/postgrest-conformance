@@ -18,6 +18,6 @@ notes: >-
   A configured `jwt-role-claim-key` fully replaces the default `$.role`: with
   `$.myRole` configured, the token's `role` claim is NOT consulted, the path
   matches nothing, and the request falls back to `db-anon-role`
-  (Auth/Jwt.hs#L114-L115) which cannot read `authors_only` -> 401. Upstream
+  (Auth/Jwt.hs#L121-L120) which cannot read `authors_only` -> 401. Upstream
   asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L150
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L150

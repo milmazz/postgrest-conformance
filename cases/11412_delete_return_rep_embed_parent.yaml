@@ -25,6 +25,6 @@ notes: >-
   Documented as a first-class feature of Delete ("Deletions also support
   :ref:`prefer_return`, :ref:`resource_embedding` and :ref:`v_filter`",
   docs/references/api/tables_views.rst#L702). Mirrors the it-block "can embed
-  (parent) entities" (DeleteSpec.hs#L71-L76), which asserts exactly this request,
+  (parent) entities" (DeleteSpec.hs#L84-L89), which asserts exactly this request,
   this body, 200 and Content-Range "*/*".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/DeleteSpec.hs#L71
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/DeleteSpec.hs#L84

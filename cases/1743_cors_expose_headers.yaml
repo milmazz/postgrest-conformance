@@ -21,4 +21,4 @@ notes: >
   CORS policy (Cors.hs#L36-#L37) and is not affected by
   server-cors-allowed-origins. Mirrors CorsSpec.hs "exposes necesssary response
   headers to regular request", which asserts any body and status 200.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/CorsSpec.hs#L30
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/CorsSpec.hs#L33

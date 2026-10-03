@@ -16,10 +16,10 @@ notes: >
   to_tsquery config AND as the config of the automatic to_tsvector() wrap on
   the column side. The emitted SQL is
   `to_tsvector('french', text_search) @@ to_tsquery('french', 'amusant')` --
-  pgFmtFtsLang is called from pgFmtFilter (SqlFragment.hs#L412) and again from
-  pgFmtField (SqlFragment.hs#L248). Modelling only the query side would be
+  pgFmtFtsLang is called from pgFmtFilter (SqlFragment.hs#L455) and again from
+  pgFmtField (SqlFragment.hs#L285). Modelling only the query side would be
   wrong here: with the default english config the row would not match, because
   'amusant' does not stem to the same lexeme. Mirrors the upstream it-block
   literally titled "finds matches with different dictionaries and uses them as
   configuration for to_tsvector()" (text_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L404
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L459

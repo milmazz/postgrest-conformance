@@ -18,4 +18,4 @@ expect:
 notes: >
   A many-to-one spread nested inside an m2m spread contributes one element
   per far row, repeating shared parents (SpreadQueriesSpec.hs:422).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L422
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L422

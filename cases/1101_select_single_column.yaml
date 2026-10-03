@@ -10,5 +10,5 @@ expect:
   headers:
     Content-Type: application/json; charset=utf-8
   body_exact: [{"id":1},{"id":2},{"id":3}]
-notes: "one simple column (QuerySpec.hs:589)"
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L589
+notes: "one simple column (QuerySpec.hs:673)"
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L673

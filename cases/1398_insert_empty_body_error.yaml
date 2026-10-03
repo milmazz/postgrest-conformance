@@ -13,7 +13,7 @@ expect:
   body_exact: { "message": "Empty or invalid json", "code": "PGRST102", "details": null, "hint": null }
 notes: >-
   A POST with a completely empty body is rejected with the same PGRST102
-  envelope as malformed JSON (case 1355). Mirrors InsertSpec.hs#L293-L300
+  envelope as malformed JSON (case 1355). Mirrors InsertSpec.hs#L352-L358
   (context "with no payload", `post "/simple_pk" ""`), which asserts the
   four-key envelope, status 400 and matchContentTypeJson.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L295
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L354

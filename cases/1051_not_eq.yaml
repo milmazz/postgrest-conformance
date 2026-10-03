@@ -25,4 +25,4 @@ expect:
     - { "id": 14 }
     - { "id": 15 }
 notes: "not prefix negates eq. Mirrors QuerySpec.hs 'matches with equality using not operator'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L48
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L45

@@ -21,10 +21,10 @@ notes: >-
   New in v16.0 as a black-box assertion (v14.12 had it only in
   test/io/test_auth.py::test_jwt_errors). `iat` is checked with the same
   `inTheFuture` predicate as `nbf` -- `now + 30 < iat` -- but reports
-  JWTIssuedAtFuture (Auth/Jwt.hs#L60). Together with case 1496 (a valid,
+  JWTIssuedAtFuture (Auth/Jwt.hs#L66). Together with case 1496 (a valid,
   non-future `iat` succeeds) this pins both sides of the check. Upstream uses
   `relativeSeconds 35`; a fixed far-future value stands in because the case
   shape has no relative-time primitive, so the 30s skew boundary itself is not
   pinned -- see the `needed_assertion: relative-time claim values` gap in
   spec/auth.yaml.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L162
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L175

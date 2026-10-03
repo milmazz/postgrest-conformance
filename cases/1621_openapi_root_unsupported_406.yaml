@@ -8,4 +8,4 @@ schema: test
 expect:
   status: 406
 notes: "An unsupported Accept (text/csv) on the root path returns 406; the root only produces openapi+json / json / */*. Mirrors OpenApiSpec 'should respond to openapi request with unsupported media type with 406'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L35
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L41

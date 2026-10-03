@@ -18,4 +18,4 @@ expect:
 notes: >
   A one-to-many spread nested inside an m2m spread yields an array of
   arrays — one inner array per far row (SpreadQueriesSpec.hs:434).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L434
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L434

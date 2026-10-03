@@ -21,4 +21,4 @@ notes: >
   without the color parser. Nothing is returned, so the response is 204 with no
   Content-Type and no Content-Length, but it still carries the Content-Range of
   the single matched row.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L648
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L750

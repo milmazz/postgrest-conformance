@@ -22,4 +22,4 @@ notes: >
   domain value: the body is parsed by `json AS color` / `json AS isodate` and the
   ?select-restricted representation re-formats label_color through
   `color AS json`. Content-Range is 0-0/* for the one matched row.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L659
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L765

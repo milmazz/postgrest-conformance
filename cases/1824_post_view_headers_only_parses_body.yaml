@@ -30,4 +30,4 @@ notes: >
   same way the base table does; the write reaches test.datarep_todos underneath.
   Location is keyed on the view's inherited primary key (id), which PostgREST
   resolves through the view's column dependencies.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L855
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1035

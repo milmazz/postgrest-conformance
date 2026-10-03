@@ -13,4 +13,4 @@ expect:
 notes: >
   like with `*` wildcard. Only lowercase xyyx matches (xYYx does not, like is
   case-sensitive). Mirrors QuerySpec "matches with like".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L136
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L150

@@ -32,4 +32,4 @@ notes: >
   Reproduced on a freshly loaded bier_test (PostgreSQL default max_stack_depth
   2048kB) in ~34 ms: `ERROR: stack depth limit exceeded`, with the identical
   hint. Fixture objects come from fixtures/errors.delta.sql.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L19
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L18

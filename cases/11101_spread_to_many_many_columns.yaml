@@ -18,4 +18,4 @@ notes: >
   Each column selected in a spread to-many becomes its own parallel JSON
   array; element i of every array belongs to the same child row
   (SpreadQueriesSpec.hs:114).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L114
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L114

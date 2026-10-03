@@ -14,4 +14,4 @@ notes: >
   not. negates a json arrow filter. Only the id=1 row has foo.bar and it
   equals baz, so the negation yields []. Mirrors JsonOperatorSpec
   "can filter by properties inside json column using not".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L175
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L201

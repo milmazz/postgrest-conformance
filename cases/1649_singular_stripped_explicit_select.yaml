@@ -19,4 +19,4 @@ notes: >-
   application/vnd.pgrst.object+json;nulls=stripped". This is the singular
   counterpart of case 1634 (array + explicit select) and the explicit-select
   counterpart of case 1632 (singular, default select).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/NullsStripSpec.hs#L105
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/NullsStripSpec.hs#L114

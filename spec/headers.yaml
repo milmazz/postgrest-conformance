@@ -1,4 +1,4 @@
-# Behavior model: HTTP headers (request + response) for PostgREST v16.0.
+# Behavior model: HTTP headers (request + response) for PostgREST v16.4.
 #
 # Scope: request + response headers, Prefer echo (Preference-Applied),
 # Content-Profile / Accept-Profile schema switching, Location on insert,
@@ -9,7 +9,7 @@
 # so the asserting it-block is machine-fetchable). Behaviors that could not be
 # traced to a concrete source line are recorded in `gaps`.
 #
-# Version: PostgREST v16.0 (re-synced from v14.12)
+# Version: PostgREST v16.4 (re-synced from v14.12, re-pinned from v16.0)
 # Conformance case band for this area: 1550..1599
 #
 # v14.12 -> v16.0 diff summary for this area:
@@ -32,7 +32,7 @@
 #     the two tags).
 
 area: headers
-version: v16.0
+version: v16.4
 
 entries:
   # -------------------------------------------------------------------------
@@ -44,23 +44,23 @@ entries:
       in the `Preference-Applied` response header. This entry models only the
       single-preference path exercised by the cited it-block ("should not throw
       and return location header when selecting without PK",
-      InsertSpec.hs#L116-L125): one `Prefer: return=representation` and no count
+      InsertSpec.hs#L138-L152): one `Prefer: return=representation` and no count
       preference, so the echo is exactly `return=representation` and
       `Content-Range` is `*/*`. The two-preference echo is a distinct it-block
       and a distinct entry (headers.prefer.preference_applied.multiple).
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L116
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L138
     case_ids: [1550]
 
   - id: headers.prefer.preference_applied.multiple
     claim: >
       Several applied preferences are comma-joined in a single
       `Preference-Applied` value. Upstream's witness ("includes related data
-      after insert", InsertSpec.hs#L93-L102) sends `Prefer: return=representation`
+      after insert", InsertSpec.hs#L106-L120) sends `Prefer: return=representation`
       and `Prefer: count=exact` as two separate request headers on a POST and
-      asserts `Preference-Applied: return=representation, count=exact` (#L101)
-      together with `Content-Range: */1` (#L100) — the count preference is what
+      asserts `Preference-Applied: return=representation, count=exact` (#L118)
+      together with `Content-Range: */1` (#L117) — the count preference is what
       turns the range total from `*` into a number.
       Coverage note: this it-block is already mirrored byte-for-byte by
       conformance case 1300 in the representations band, so no headers-band case
@@ -68,7 +68,7 @@ entries:
       single-preference path.
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L101
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L118
     case_ids: [1300]
 
   - id: headers.prefer.handling.strict.error
@@ -81,7 +81,7 @@ entries:
       Unchanged at v16.0 except that `timezone=` tokens are no longer among the
       preferences strict can reject (see headers.prefer.timezone.invalid).
     request_header: Prefer
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/HandlingSpec.hs#L15
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/HandlingSpec.hs#L15
     case_ids: [1551]
 
   - id: headers.prefer.handling.lenient.ignored
@@ -94,7 +94,7 @@ entries:
       headers.prefer.handling.lenient.echo for the echo, which is witnessed in
       MaxAffectedSpec.hs instead).
     request_header: Prefer
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/HandlingSpec.hs#L44
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/HandlingSpec.hs#L48
     case_ids: [1552]
 
   - id: headers.prefer.handling.lenient.echo
@@ -102,7 +102,7 @@ entries:
       `Preference-Applied` lists only the preferences that were actually
       applied, so under `handling=lenient` a preference lenient declines to
       enforce is dropped from the echo. The single v16.0 it-block that asserts
-      this ("should not fail", MaxAffectedSpec.hs#L49-L56) sends
+      this ("should not fail", MaxAffectedSpec.hs#L57-L65) sends
       `Prefer: handling=lenient, max-affected=10` on a DELETE that affects 14
       rows: the cap is not enforced (204) and the echo is `handling=lenient`
       alone, with no `max-affected` token.
@@ -110,7 +110,7 @@ entries:
       headers-band case duplicates it.
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L56
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L65
     case_ids: [1392]
 
   - id: headers.prefer.timezone.applied
@@ -121,12 +121,12 @@ entries:
       rendered body is identical either way; only the echo differs. The two
       it-blocks of the cited context assert both halves against the same
       `/timestamps` rows: without `handling` the echo is the single token
-      `timezone=America/Los_Angeles` (#L24-L32), and with it the echo is two
+      `timezone=America/Los_Angeles` (#L28-L40), and with it the echo is two
       tokens in preference order, `handling=strict,
-      timezone=America/Los_Angeles` (#L14-L22).
+      timezone=America/Los_Angeles` (#L14-L26).
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L13
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L13
     case_ids: [1553, 1584]
 
   - id: headers.prefer.timezone.offsets
@@ -139,7 +139,7 @@ entries:
       POSIX style, so `+05:30` renders as `-05:30` and `-4` as `-04:00`.
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L60
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L74
     case_ids: [1577, 1578]
 
   - id: headers.prefer.timezone.invalid
@@ -155,7 +155,7 @@ entries:
       the default zone, 400 PGRST122, and 200 with `Preference-Applied:
       handling=lenient`.
     request_header: Prefer
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L35
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L43
     case_ids: [1554, 1579, 1580, 1581]
 
   - id: headers.prefer.max_affected.strict
@@ -167,7 +167,7 @@ entries:
       `Preference-Applied`.
     request_header: Prefer
     response_header: Preference-Applied
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L14
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L14
     case_ids: [1555, 1556]
 
   # -------------------------------------------------------------------------
@@ -179,9 +179,9 @@ entries:
       `Vary: Accept, Prefer, Range`. It is appended in App.hs' `toWaiResponse`
       to whatever headers the action produced. Upstream's own it-block ("Test
       default Vary header value matches default one") asserts it on a plain
-      `GET /projects` under the base config (`withConfig baseCfg` at #L26).
+      `GET /projects` under the base config (`withConfig baseCfg` at #L22).
     response_header: Vary
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/HttpHeaderSpec.hs#L27
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/HttpHeaderSpec.hs#L30
     case_ids: [1575]
 
   - id: headers.vary.non_read_responses
@@ -191,24 +191,24 @@ entries:
       OPTIONS carry `Vary: Accept, Prefer, Range` too. OPTIONS is the clean
       witness — `respondInfo` produces exactly
       `[Content-Length, Access-Control-Allow-Origin, Allow]`
-      (Response.hs#L230-L233), so the `varyHeaderPresent` guard cannot fire.
+      (Response.hs#L237-L240), so the `varyHeaderPresent` guard cannot fire.
       A plain OPTIONS (no `Origin`) is passed through by the CORS middleware
-      rather than answered as a preflight (Cors.hs#L27, #L43).
+      rather than answered as a preflight (Cors.hs#L25, #L51).
     response_header: Vary
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L253
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L275
     case_ids: [1582]
 
   - id: headers.vary.absent_on_errors
     claim: >
       Error responses carry NO `Vary`. They never reach `toWaiResponse`: the
       outer handler maps a Left straight through `Error.errorResponseFor`
-      (App.hs#L154), which builds a closed header list — Content-Type,
+      (App.hs#L171), which builds a closed header list — Content-Type,
       Content-Length, Proxy-Status, plus the error's own `headers err`
-      (Error.hs#L88). No middleware adds one either: the CORS middleware sets
-      `corsVaryOrigin = False` (Cors.hs#L39) and `hVary` appears nowhere else
+      (Error.hs#L91). No middleware adds one either: the CORS middleware sets
+      `corsVaryOrigin = False` (Cors.hs#L47) and `hVary` appears nowhere else
       in src/.
     response_header: Vary
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L88
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L91
     case_ids: [1583]
 
   - id: headers.vary.guc_override
@@ -219,7 +219,7 @@ entries:
       (a pre-request function upstream, an RPC in the conformance case) replaces
       the default verbatim rather than adding a second Vary header.
     response_header: Vary
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L253
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L275
     case_ids: [1576]
 
   # -------------------------------------------------------------------------
@@ -231,17 +231,17 @@ entries:
       default). Echoing it back is CONDITIONAL, not unconditional: `getSchema`
       returns `Right (defaultSchema, length configDbSchemas /= 1)` — the second
       component is `iNegotiatedByProfile` — and `profileHeader`
-      (Response.hs#L257-L262) returns Nothing when that flag is False. So an
+      (Response.hs#L264-L269) returns Nothing when that flag is False. So an
       instance exposing more than one schema echoes the resolved default in
       `Content-Profile`, while an instance exposing exactly ONE schema emits no
       `Content-Profile` header at all. Upstream's witness
-      (MultipleSchemaSpec.hs#L24-L33, asserting `Content-Profile: v1`) runs under
+      (MultipleSchemaSpec.hs#L22-L30, asserting `Content-Profile: v1`) runs under
       `configDbSchemas = fromList ["v1", "v2", "SPECIAL \"@/\\#~_-"]`
-      (MultipleSchemaSpec.hs#L21) and therefore only establishes the
+      (MultipleSchemaSpec.hs#L18) and therefore only establishes the
       many-schemas branch. Same statement as spec/url_grammar.md §5.
     request_header: Accept-Profile
     response_header: Content-Profile
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest.hs#L161
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest.hs#L186
     case_ids: [1557]
 
   - id: headers.profile.accept_profile_read
@@ -250,7 +250,7 @@ entries:
       read from; the chosen schema is echoed in `Content-Profile`.
     request_header: Accept-Profile
     response_header: Content-Profile
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L46
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L42
     case_ids: [1558]
 
   - id: headers.profile.content_profile_write
@@ -260,7 +260,7 @@ entries:
       response.
     request_header: Content-Profile
     response_header: Content-Profile
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L141
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L133
     case_ids: [1559]
 
   - id: headers.profile.unknown_schema
@@ -268,9 +268,9 @@ entries:
       A profile header naming a non-exposed schema fails with HTTP 406 and error
       code PGRST106 ("Invalid schema: <name>"), whose hint lists the exposed
       schemas in exposure order. Identical for `Accept-Profile` on a read and
-      `Content-Profile` on a write (MultipleSchemaSpec.hs#L152).
+      `Content-Profile` on a write (MultipleSchemaSpec.hs#L144).
     request_header: Accept-Profile
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L77
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L73
     case_ids: [1560]
 
   - id: headers.profile.special_chars
@@ -280,7 +280,7 @@ entries:
       in `Content-Profile`.
     request_header: Accept-Profile
     response_header: Content-Profile
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L84
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L79
     case_ids: [1574]
 
   # -------------------------------------------------------------------------
@@ -293,7 +293,7 @@ entries:
       (e.g. `/projects?id=eq.11`), no Content-Type, Content-Length 0, and
       `Preference-Applied: return=headers-only`.
     response_header: Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L128
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L155
     case_ids: [1561]
 
   - id: headers.location.compound_pk
@@ -301,7 +301,7 @@ entries:
       For a table with a compound primary key, the `Location` filter includes
       every PK column (e.g. `/car_models?name=eq.Enzo&year=eq.2021`).
     response_header: Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L142
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L172
     case_ids: [1562]
 
   - id: headers.location.absent_no_pk
@@ -310,7 +310,7 @@ entries:
       relation, returns 201 with no `Location` header (and no Content-Type),
       Content-Length 0.
     response_header: Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L157
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L190
     case_ids: [1563]
 
   # -------------------------------------------------------------------------
@@ -322,7 +322,7 @@ entries:
       filter params reordered alphabetically (canonical form),
       e.g. `?b=eq.1&a=eq.1` -> `Content-Location: /no_pk?a=eq.1&b=eq.1`.
     response_header: Content-Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1246
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1428
     case_ids: [1564]
 
   - id: headers.content_location.no_params
@@ -330,7 +330,7 @@ entries:
       When there are no query params, `Content-Location` omits the question mark
       (e.g. `/simple_pk`).
     response_header: Content-Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1253
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1435
     case_ids: [1565]
 
   # -------------------------------------------------------------------------
@@ -343,11 +343,11 @@ entries:
       (e.g. `X-Test: key1=val1; someValue; key2=val2` plus `X-Test-2: key1=val1`).
       The cited it-block ("succeeds setting the headers") makes the same
       assertion three times, once per call shape: `GET
-      /rpc/get_projects_and_guc_headers?id=eq.2&select=id` (#L1032), `GET
-      /rpc/get_int_and_guc_headers?num=1` (#L1038) and the POST form of the
-      latter (#L1044). Case 1566 mirrors the #L1038 request.
+      /rpc/get_projects_and_guc_headers?id=eq.2&select=id` (#L1170), `GET
+      /rpc/get_int_and_guc_headers?num=1` (#L1178) and the POST form of the
+      latter (#L1186). Case 1566 mirrors the #L1178 request.
     response_header: (arbitrary)
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1031
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1169
     case_ids: [1566]
 
   - id: headers.guc.response_headers_invalid
@@ -356,7 +356,7 @@ entries:
       string-valued objects) fails with HTTP 500 / PGRST111
       ("response.headers guc must be a JSON array composed of objects with a
       single key and a string value").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1051
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1195
     case_ids: [1567]
 
   - id: headers.guc.repeated_header
@@ -364,7 +364,7 @@ entries:
       The same response header may be emitted more than once via
       `response.headers` (e.g. two `Set-Cookie` headers).
     response_header: Set-Cookie
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1078
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1220
     case_ids: [1568]
 
   - id: headers.guc.location_override
@@ -372,7 +372,7 @@ entries:
       A trigger may override the `Location` header on an insert by setting the
       `response.headers` GUC (e.g. `/stuff?id=eq.2&overriden=true`).
     response_header: Location
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1089
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1232
     case_ids: [1569]
 
   - id: headers.guc.status_override
@@ -381,16 +381,16 @@ entries:
       the cited it-block ("can override the status on RPC") gets
       `/rpc/send_body_status_403` and asserts 403 with the function's own JSON
       body. A trigger may set the same GUC: the sibling it-block "can override
-      the status through trigger" (#L1136) asserts 205 on `PATCH /stuff?id=eq.1`.
+      the status through trigger" (#L1280) asserts 205 on `PATCH /stuff?id=eq.1`.
     response_header: (status line)
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1128
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1273
     case_ids: [1570, 1571]
 
   - id: headers.guc.status_invalid
     claim: >
       An invalid `response.status` GUC value fails with HTTP 500 / PGRST112
       ("response.status guc must be a valid status code").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1142
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1286
     case_ids: [1572]
 
   - id: headers.guc.no_blank_headers
@@ -399,22 +399,22 @@ entries:
       requests): a `POST /loc_test` must not produce a response header with a
       blank value. Upstream splits the guard into four sibling it-blocks that
       each apply `noBlankHeader` to the whole response header list — POST
-      (#L1103), PATCH (#L1109), GET (#L1115) and DELETE (#L1121); only the POST
+      (#L1248), PATCH (#L1254), GET (#L1260) and DELETE (#L1266); only the POST
       one is modelled here. The frozen harness's `headers_no_blank` assertion
       inspects header VALUES only and never header names
       (test/support/conformance_assertions.ex), so no claim about empty header
       names is made.
       CONFIG CONTEXT: upstream runs these it-blocks under `baseCfg`, which sets
       `configServerTraceHeader = Nothing`
-      (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L171)
+      (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/SpecHelper.hs#L180)
       — no server-trace-header configured. The guarantee does NOT hold on an
       instance with a trace header configured: when the request sends no
       matching header, PostgREST echoes the configured trace header with a
       blank value (e.g. `X-Request-Id: `), so case 1573 pins
       `server-trace-header: ""` (dropped to Nothing by `optString`,
-      https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L442)
+      https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config.hs#L484)
       to reproduce upstream's test-config context.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1103
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1248
     case_ids: [1573]
 
 # Behaviors observed in source/docs for this area that are NOT encoded as
@@ -426,14 +426,14 @@ gaps:
     Preference-Applied echoing only handling=lenient". That behavior no longer
     exists — v16.0 removed the pg_timezone_names membership check from
     Preferences.fromHeaders
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/Preferences.hs#L138)
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/Preferences.hs#L138)
     so every timezone value reaches PostgreSQL and an invalid one is a 400 /
     22023. Cases 1580 and 1581 replace the dropped assertions, and case 1554
     was rewritten from PGRST122 to the database-error envelope.
   - >
     Vary override through a `db-pre-request` function (upstream's own test:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/HttpHeaderSpec.hs#L15
-    with fixture `custom_vary_hdr`, schema.sql#L3875). The conformance runner
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/HttpHeaderSpec.hs#L14
+    with fixture `custom_vary_hdr`, schema.sql#L3877). The conformance runner
     cannot set `db-pre-request` per case (test/support/conformance_server.ex
     starts variant instances only for a frozen id list), so case 1576 drives
     the identical `response.headers` GUC from an RPC instead. The pre-request
@@ -442,8 +442,8 @@ gaps:
     `Warning: 299 PostgRESTvX.Y "…"` response header, new at v16.0, emitted
     when an embedded resource is referenced by relation name despite having an
     alias (construction at
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L264,
-    test QuerySpec.hs#L1183). NOT modelled here: the header is a property of the
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L286,
+    test QuerySpec.hs#L1339). NOT modelled here: the header is a property of the
     embedding/select + reserved-param surface (the deprecation only fires for an
     aliased embed targeted by its relation name), and it is already covered by
     the owning areas' cases — 1028 (url_grammar), 1138/1141 (select),
@@ -459,7 +459,7 @@ gaps:
     PostgREST only parses/applies it when the db-tx-end config is set to a
     "-allow-override" mode -- in the source the preference is Nothing unless
     allowTxDbOverride is true
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/Preferences.hs#L135).
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/Preferences.hs#L135).
     The conformance runner cannot yet set db-tx-end per case (same config-gating
     limitation as the db-pre-request gaps), so this is recorded as a gap rather
     than guessed.
@@ -467,11 +467,11 @@ gaps:
     CROSS-REFERENCE, not a gap: the request.method / request.path /
     request.headers / request.cookies GUCs are set by `txVarQuery` on EVERY
     request, with no `db-pre-request` involvement
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/PreQuery.hs#L44
-    — methodSql/pathSql/headersSql/cookiesSql at #L44-L47), and upstream
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/PreQuery.hs#L47
+    — methodSql/pathSql/headersSql/cookiesSql at #L47-L50), and upstream
     exercises all four through a plain RPC to `/rpc/get_guc_value` under
     `baseCfg` in RpcSpec.hs' `context "HTTP request env vars"`
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L871).
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L978).
     They are already covered in this repo by the auth-band cases against the
     `test.get_guc_value` fixture: 1478 (request.headers, custom header),
     1481/1482 (request.cookies, single + multiple), 1484 (request.method) and
@@ -484,14 +484,14 @@ gaps:
     the Content-Disposition / Content-Type overrides), upstream's
     Feature/RpcPreRequestGucsSpec.hs, which runs under
     `configDbPreRequest = Just (QualifiedIdentifier mempty "custom_headers")`
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/RpcPreRequestGucsSpec.hs#L15,
-    fixture `custom_headers` at test/spec/fixtures/schema.sql#L2051). NOT
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/RpcPreRequestGucsSpec.hs#L14,
+    fixture `custom_headers` at test/spec/fixtures/schema.sql#L2053). NOT
     modelled: the conformance runner cannot set `db-pre-request` per case
     (test/support/conformance_server.ex configures it only on the shared `auth`
     instance, pinned to `auth.switch_role`). The response.headers GUC mechanism
     itself is covered from an RPC by cases 1566-1569.
   - >
     OpenAPI root ("/") echoing Content-Profile per Accept-Profile
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/MultipleSchemaSpec.hs#L270):
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/MultipleSchemaSpec.hs#L265):
     depends on the OpenAPI generator, out of scope for the headers black-box
     cases here.

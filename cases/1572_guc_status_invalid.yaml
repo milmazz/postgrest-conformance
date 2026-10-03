@@ -14,5 +14,5 @@ expect:
     message: "response.status guc must be a valid status code"
     details: null
     hint: null
-notes: "Invalid response.status GUC value -> 500 PGRST112. Mirrors RpcSpec.hs:1142-1149."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1142
+notes: "Invalid response.status GUC value -> 500 PGRST112. Mirrors RpcSpec.hs:1286-1294."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1286

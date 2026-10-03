@@ -25,7 +25,7 @@ notes: >-
   leaves ON CONFLICT DO UPDATE with no column to SET, and PostgREST still
   answers 201 with every payload row echoed (ids 1 and 2 conflict, 4 is
   inserted, so the "something was inserted" 201 rule of case 1374 applies).
-  Verbatim mirror of UpsertSpec.hs#L146-L153 ("succeeds if the table has only PK
+  Verbatim mirror of UpsertSpec.hs#L187-L197 ("succeeds if the table has only PK
   cols and no other cols"); `only_pk` is seeded with ids 1 and 2 in the
   consolidated fixture, exactly as upstream.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L147
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L188

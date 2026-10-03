@@ -10,5 +10,5 @@ expect:
   body_jsonpath:
     - { path: "$.paths['/child_entities'].get.responses['200'].schema.type", equals: "array" }
     - { path: "$.paths['/child_entities'].get.responses['200'].schema.items['$ref']", equals: "#/definitions/child_entities" }
-notes: "GET 200 response schema is an array of the table definition. Mirrors OpenApiSpec.hs:123-142"
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L123
+notes: "GET 200 response schema is an array of the table definition. Mirrors OpenApiSpec.hs:133-155"
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L133

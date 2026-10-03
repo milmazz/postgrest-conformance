@@ -13,18 +13,18 @@ notes: >
   A VARIADIC argument is emitted as type:array with collectionFormat:multi and
   typed items, rather than as the type:string an ordinary array argument gets.
   makeProcGetParam picks `schemaMulti` when the RoutineParam's variadic flag is
-  set (OpenAPI.hs#L188 destructures `RoutineParam n t _ r v`, #L194 `fullSchema
-  = if v then schemaMulti else schemaNotMulti`, #L200-205 builds
+  set (OpenAPI.hs#L209 destructures `RoutineParam n t _ r v`, #L216 `fullSchema
+  = if v then schemaMulti else schemaNotMulti`, #L224-232 builds
   SwaggerItemsPrimitive (Just CollectionMulti) with the element type/format).
   `required: false` comes from the argument's DEFAULT, not from its being
-  VARIADIC: `& required ?~ r` (OpenAPI.hs#L191).
+  VARIADIC: `& required ?~ r` (OpenAPI.hs#L213).
   CORRECTED this pass on two points, neither of which changes an assertion.
   (1) The case carried preconditions creating `test.variadic_param(VARIADIC v
   text[])` — never executed, and a wrong transcription: it omitted the
   `DEFAULT '{}'`, which is the only reason `required` is false. The object is a
   consolidated fixture (conformance/fixtures.sql#L1372, `VARIADIC v text[]
   DEFAULT '{}'`) and is byte-equivalent to upstream's declaration at
-  test/spec/fixtures/schema.sql#L1277. (2) The one-off `openapi_variadic`
+  test/spec/fixtures/schema.sql#L1279. (2) The one-off `openapi_variadic`
   fixture-set label was replaced. The rationale recorded at the time — that it
   "matched no schema built by the loader", unlike the area's `openapi` label —
   was FALSE: `openapi` was built by no loader step either and existed in no
@@ -33,12 +33,12 @@ notes: >
   area's convention. The label is now `test`, the schema this area's objects
   actually live in and the one upstream documents: OpenApiSpec runs under
   baseCfg's `configDbSchemas = fromList ["test"]`
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L151)
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/SpecHelper.hs#L160)
   and its it-blocks issue a bare `get "/"` with no Accept-Profile. That matters
   because the root document is generated for the REQUESTED profile — upstream
   asserts exactly that, with `request methodGet "/" [("Accept-Profile","v1")]`
   changing which paths appear
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/IgnorePrivOpenApiSpec.hs#L49
-  and #L81) — so a label naming an empty schema would have documented nothing.
-  Mirrors OpenApiSpec.hs#L1040-1058.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1040
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/IgnorePrivOpenApiSpec.hs#L53
+  and #L89) — so a label naming an empty schema would have documented nothing.
+  Mirrors OpenApiSpec.hs#L1074-1099.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1074

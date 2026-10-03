@@ -18,4 +18,4 @@ notes: >
   `!inner` on an m2m spread drops parents with no junction rows (Jane
   disappears). The same it-block's second get (L541) asserts the
   equivalent processes=not.is.null form (SpreadQueriesSpec.hs:530).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L530
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L530

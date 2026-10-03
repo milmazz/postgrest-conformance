@@ -17,9 +17,9 @@ notes: >
   anything else, PostgREST wraps the FIELD in to_tsvector(), so this compiles
   to `to_tsvector(text_search) @@ to_tsquery('impossible')` rather than to a
   bare `@@`. The wrap is emitted by pgFmtField's `Just (ToTsVector lang)`
-  branch (SqlFragment.hs#L248), whose flag is set only for Fts op exprs
-  (Plan.hs#L373). Mirrors QuerySpec.hs context "text and json columns" ->
+  branch (SqlFragment.hs#L285), whose flag is set only for Fts op exprs
+  (Plan.hs#L404). Mirrors QuerySpec.hs context "text and json columns" ->
   it "finds matches with to_tsquery" (text_search assertion). Row 2 matches
   because the default text search config is english and both "impossible" and
   the French row's "l'impossible" stem to 'imposs'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L317
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L354

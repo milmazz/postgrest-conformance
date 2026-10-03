@@ -11,8 +11,8 @@ expect:
     Content-Type: application/json; charset=utf-8
   body_exact: [{"i":"0.5"},{"i":"0.6"}]
 notes: >
-  "obtains a composite type field" (JsonOperatorSpec.hs:150, second request):
+  "obtains a composite type field" (JsonOperatorSpec.hs:178, second request):
   the `->>` form of case 1143 extracts the composite field as text, so the same
   values come back quoted. Verified against a freshly loaded bier_test:
   `select to_jsonb(num)->>'i' from test.fav_numbers` => 0.5, 0.6.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L150
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L178

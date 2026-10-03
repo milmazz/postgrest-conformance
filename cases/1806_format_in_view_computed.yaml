@@ -17,4 +17,4 @@ expect:
       { "id": 4, "label_color": "", "dark_color": "" },
     ]
 notes: "Representations apply to view columns including a computed column cast back to the domain ((label_color/2)::color). Mirrors QuerySpec.hs 'formats columns in views including computed columns'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1565
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1796

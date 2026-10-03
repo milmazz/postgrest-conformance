@@ -15,4 +15,4 @@ notes: >
   wfts with a dictionary -> `@@ websearch_to_tsquery('french', 'amusant
   impossible')`. Mirrors QuerySpec.hs 'finds matches with different
   dictionaries' (wfts assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L237
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L263

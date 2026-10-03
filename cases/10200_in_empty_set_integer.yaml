@@ -16,4 +16,4 @@ notes: >
   pListVal yields the singleton list [""] for an empty parenthesised list, and
   pgFmtFilter special-cases it to `= ANY('{}')`, which matches no row. Mirrors
   QuerySpec.hs "IN and NOT IN empty set" / "works for integer".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1362
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1566

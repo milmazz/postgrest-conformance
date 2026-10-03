@@ -22,4 +22,4 @@ notes: >-
   observable upstream asserts (200) is pinned here. The positive counterpart —
   the `jwt;dur=` Server-Timing metric when timing IS enabled — is covered by the
   observability area (case 1750).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/JwtCacheSpec.hs#L55
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/JwtCacheSpec.hs#L55

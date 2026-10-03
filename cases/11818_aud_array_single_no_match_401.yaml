@@ -18,4 +18,4 @@ notes: >-
   401 PGRST303. The negative counterpart of 11817 and its own upstream
   it-block, separate from the multi-element no-match pinned by case 1472 — a
   one-element array must not be mistaken for the ignored-empty-array branch.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L88
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L98

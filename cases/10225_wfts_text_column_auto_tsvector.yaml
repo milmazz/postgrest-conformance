@@ -16,4 +16,4 @@ notes: >
   websearch_to_tsquery('The Fat Rats')`. Mirrors QuerySpec.hs context "text and
   json columns" -> it "finds matches with websearch_to_tsquery" (text_search
   assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L368
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L415

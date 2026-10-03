@@ -1,4 +1,4 @@
-# Behavior model for the "filters" feature area of PostgREST v16.0.
+# Behavior model for the "filters" feature area of PostgREST v16.4.
 #
 # Scope: horizontal filters, logical and/or/not, grouping & precedence,
 # value quoting, JSON arrow filters, filtering on embedded resources.
@@ -70,7 +70,7 @@
 #     `pgVersion190` branch on three SQLSTATE 42883 bodies (errors-area
 #     scope, see gaps); RelatedQueriesSpec.hs's count=planned/estimated
 #     Content-Range values changed (pagination-area scope, see gaps).
-#     EmbedInnerJoinSpec.hs L79 and several QuerySpec.hs it-blocks gained
+#     EmbedInnerJoinSpec.hs L91 and several QuerySpec.hs it-blocks gained
 #     `&order=...` to make already-asserted bodies deterministic — no
 #     behavior change.
 #
@@ -106,7 +106,7 @@
 #     (34/26 minimal, not 35/27) and the +8 anchor shift was spelled out.
 
 area: filters
-version: PostgREST v16.0
+version: PostgREST v16.4
 fixtures: spec/conformance/fixtures/filters.sql
 
 entries:
@@ -121,13 +121,13 @@ entries:
       A value without a recognized leading operator is a 400 PGRST100 parse
       error ("failed to parse filter (...)", "expecting 'not' or operator
       (eq, gt, ...)") for table reads.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L237
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L279
     cases: [1150]
 
   - id: filters.horizontal.eq
     claim: >
       `col=eq.<v>` matches rows where col equals v.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L40
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L36
     cases: [1150]
 
   - id: filters.horizontal.in
@@ -135,7 +135,7 @@ entries:
       `col=in.(a,b,c)` matches rows where col is in the parenthesized,
       comma-separated list. List elements may be bare or double-quoted
       (pListVal / pListElement).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L64
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L64
     cases: [1151, 1166]
 
   - id: filters.horizontal.is
@@ -143,14 +143,14 @@ entries:
       `col=is.<v>` accepts only null, not_null, true, false, unknown
       (case-insensitive). Any other value is a 400. `is.null` matches NULLs;
       `is.true/false/unknown` match trilean boolean values.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L665
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L720
     cases: [1152, 1153, 1163]
 
   # like and ilike are modelled as SEPARATE entries: they are asserted by two
   # different upstream it-blocks, and the case-sensitivity halves of the claim
   # are not interchangeable. `pgFmtFilter` renders both through the same
   # `OpQuant` branch, mapping `*` -> `%` via `star`
-  # (SqlFragment.hs#L386-L389, #L415).
+  # (SqlFragment.hs#L430-L434, #L458).
   - id: filters.horizontal.like
     claim: >
       `col=like.<pat>` does pattern matching where `*` is the wildcard
@@ -158,7 +158,7 @@ entries:
       "matches with like" asserts `/simple_pk?k=like.*yx` and
       `/simple_pk?k=like.xy*` return only "xyyx" while `/simple_pk?k=like.*YY*`
       returns only "xYYx" (QuerySpec#L136-L142).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L136
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L150
     cases: [1154]
 
   - id: filters.horizontal.ilike
@@ -167,9 +167,9 @@ entries:
       case-INSENSITIVELY: upstream's it-block "matches with ilike" asserts that
       `/simple_pk?k=ilike.xy*&order=extra.asc` AND
       `/simple_pk?k=ilike.*YY*&order=extra.asc` each return BOTH "xyyx" and
-      "xYYx" (QuerySpec#L148-L154) - the two rows `like` separates at L136.
+      "xYYx" (QuerySpec#L148-L154) - the two rows `like` separates at L150.
       No filters case duplicates it; claimed cross-area, see gaps.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L148
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L162
     cases: []
 
   # cs and cd are modelled as SEPARATE entries for the same reason like/ilike
@@ -182,7 +182,7 @@ entries:
       whose array contains every listed element: upstream's it-block "matches
       with cs operator" asserts `/complex_items?select=id&arr_data=cs.{2}`
       returns ids 2 and 3 (QuerySpec#L560-L563).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L560
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L640
     cases: [1164]
 
   - id: filters.horizontal.cd
@@ -193,14 +193,14 @@ entries:
       `/complex_items?select=id&arr_data=cd.{1,2,4}` returns ids 1 and 2
       (QuerySpec#L565-L568). No filters case exercises `cd`; claimed
       cross-area, see gaps.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L565
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L646
     cases: []
 
   - id: filters.horizontal.isdistinct
     claim: >
       `col=isdistinct.<v>` implements SQL `IS DISTINCT FROM` (NULL-aware
       inequality); negatable with `not.`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L654
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L709
     cases: [1165]
 
   # ---------------------------------------------------------------------------
@@ -211,14 +211,14 @@ entries:
       A filter value may be prefixed with `not.` to negate the operator:
       `col=not.<op>.<v>`. `pOpExpr` consumes a leading `not` + delimiter into
       a boolean negation flag before parsing the operator.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L645
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L700
     cases: [1155, 1156]
 
   - id: filters.not.is_not_null_equivalence
     claim: >
       `not.is.not_null` is equivalent to `is.null` (double negation of the
       null test).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L89
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L94
     cases: [1156]
 
   # ---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ entries:
     claim: >
       `or=(cond,cond,...)` ORs its comma-separated conditions. Each condition
       is itself a filter `field.op.value` or a nested `and(...)/or(...)` group.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L17
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L17
     cases: [1157]
 
   - id: filters.logic.and
@@ -237,7 +237,7 @@ entries:
       keys are parsed by `pLogicTree`; the parser internally rewrites
       `or=(..)` to `or(..)` so the top-level key and nested groups share one
       grammar.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L823
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L883
     cases: [1162]
 
   - id: filters.logic.not_prefix_on_group
@@ -246,7 +246,7 @@ entries:
       (`not.or=(...)`) or inside a nested group (`not.and(...)`,
       `not.or(...)`). `pLogicPath` lifts a `not` token out of the key path,
       and `pNot` consumes `not.` before a nested group.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L848
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L912
     cases: [1158, 1161]
 
   - id: filters.logic.nesting
@@ -254,14 +254,14 @@ entries:
       and/or groups nest arbitrarily: `or=(and(...),and(...))`, and multiple
       top-level logic params combine (implicitly ANDed with each other and
       with traditional filters).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L53
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L54
     cases: [1159, 1160, 1162]
 
   - id: filters.logic.combined_with_traditional
     claim: >
       A logic param and a traditional horizontal filter on the same request
       are ANDed together, e.g. `or=(id.eq.1,id.eq.2)&name=eq.entity 1`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L22
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L22
     cases: [1160]
 
   - id: filters.logic.arity
@@ -269,14 +269,14 @@ entries:
       A logic group must have at least one condition (sepBy1). Zero
       conditions `or=()` is a 400 PGRST100 ("failed to parse logic tree (())").
       A single condition is allowed; three or more are allowed.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L216
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L223
     cases: [1167, 1168]
 
   - id: filters.logic.whitespace
     claim: >
       Whitespace is permitted around grouping parens, commas, and the and/or
       keywords inside a logic tree (lexeme / ws in pLogicTree).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L211
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L218
     cases: [1169]
 
   - id: filters.logic.reserved_word_columns
@@ -285,7 +285,7 @@ entries:
       (e.g. and_starting_col, or_starting_col) can still be filtered inside a
       logic group; the and/or keyword match does not greedily consume column
       names.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L287
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L310
     cases: [1170]
 
   # ---------------------------------------------------------------------------
@@ -298,7 +298,7 @@ entries:
       e.g. `or=(name.eq."(grandchild,entity,4)",...)`. Backslash escapes the
       next char inside quotes (pQuotedValue / pCharsOrSlashed). like/ilike
       patterns may also be quoted.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L696
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L753
     cases: [1171, 1172, 1166]
 
   # ---------------------------------------------------------------------------
@@ -310,14 +310,14 @@ entries:
       json) and `->>` (returns text) arrows ending in a key, e.g.
       `data->foo->>bar=eq.baz`. The json path is parsed by `pJsonPath` after
       the field name in `pTreePath`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L167
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L191
     cases: [1173, 1174]
 
   - id: filters.json.arrow_not
     claim: >
       JSON arrow filters can be negated with `not.`, e.g.
       `data->foo->>bar=not.eq.baz`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L175
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L201
     cases: [1175]
 
   - id: filters.json.array_index
@@ -326,7 +326,7 @@ entries:
       `data->>0=eq.1`, `data->1->>2=eq.13`. `pJsonPath` distinguishes JIdx
       (numeric) from JKey. This entry covers ONLY positive indexes (the
       "can filter by array indexes" it-block, v16.0 L194).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L194
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L223
     cases: [1176]
 
   - id: filters.json.negative_index
@@ -335,28 +335,28 @@ entries:
       the end, e.g. `data->>-3=eq.1` (the -3rd == element 0 of a 3-element
       array). This is a distinct "can filter with negative indexes" it-block
       from the positive-index one, hence a separate anchor.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L294
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L326
     cases: [1177]
 
   - id: filters.json.in_logic_tree
     claim: >
       JSON arrow paths work inside and/or logic groups, e.g.
       `or=(jsonb_col->a->>b.eq.foo,jsonb_col->>b.eq.bar)`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L185
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L213
     cases: [1178]
 
   - id: filters.json.jsonb_value
     claim: >
       A jsonb sub-document obtained via `->` can be compared with `eq` to a
       JSON literal, e.g. `data->a=eq.{"b":2}` and `data->c=eq.[1,2,3]`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L208
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L241
     cases: [1179]
 
   - id: filters.json.bad_syntax
     claim: >
       Malformed json paths produce a 400 PGRST100 parse error, e.g.
       `select=data->>--34` -> "unexpected '-' expecting digit".
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L308
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L344
     cases: [1180]
 
   # ---------------------------------------------------------------------------
@@ -371,7 +371,7 @@ entries:
       field (or and/or keyword). The path may be more than one segment deep,
       addressing an arbitrarily nested embed
       (`child_entities.grandchild_entities.or=(...)`).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L285
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L329
     cases: [1181, 1182, 1191]
 
   - id: filters.embed.third_level
@@ -381,7 +381,7 @@ entries:
       `child_entities.grandchild_entities.or=(id.eq.1,id.eq.2)`. With the
       default left join every level above the filtered one is preserved, its
       related array emptied where nothing below it matches.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L34
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L36
     cases: [1191]
 
   - id: filters.embed.left_join_default
@@ -389,7 +389,7 @@ entries:
       With the default (left join) embedding, filtering an embedded resource
       filters the embedded rows but keeps parent rows (with an empty array /
       null embedding) that no longer match.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L27
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L27
     cases: [1182]
 
   - id: filters.embed.inner_join_filters_parent
@@ -397,7 +397,7 @@ entries:
       With `!inner`, filtering the embedded resource also filters the source
       (parent) table: parents whose embedding becomes empty are dropped. A
       filter that matches no embedded rows yields an empty top-level array.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L129
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L151
     cases: [1181, 1183, 1184]
 
   - id: filters.embed.inner_join_transitive
@@ -408,7 +408,7 @@ entries:
       level up to the root; when the innermost embedding is a plain (left)
       join, the filter empties that level's arrays and changes nothing above
       it.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L146
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/EmbedInnerJoinSpec.hs#L173
     cases: [1192, 1193]
 
   - id: filters.embed.nonexistent_resource_error
@@ -417,7 +417,7 @@ entries:
       query parameter is a 400 PGRST108 ("'<name>' is not an embedded
       resource in this request") with details null and hint
       "Verify that '<name>' is included in the 'select' query parameter."
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L528
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L608
     cases: [1185]
 
   # The upstream context "related conditions through null operator on embed"
@@ -435,13 +435,13 @@ entries:
       that have NO related row). `addNullEmbedFilters` rewrites any `is null`
       / `not.is null` filter whose field names an embed into a
       `CoercibleFilterNullEmbed` over that embed's aggregate alias
-      (Plan.hs#L969-L972), rendered as `<agg> IS [NOT] DISTINCT FROM NULL`
-      (SqlFragment.hs#L381). The embed is typically projected empty
+      (Plan.hs#L1037-L1040), rendered as `<agg> IS [NOT] DISTINCT FROM NULL`
+      (SqlFragment.hs#L425). The embed is typically projected empty
       (`embed()`) so the related array/object is omitted from the body. This
       entry states the ONE-TO-MANY branch (upstream "works on a one-to-many
       relationship", L174-L198); the many-to-one and many-to-many branches are
       separate entries below.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L174
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L174
     cases: [1186, 1187]
 
   - id: filters.embed.null_filtering_many_to_one
@@ -452,7 +452,7 @@ entries:
       projects that have a client, and `clients=is.null` keeps only the
       client-less "Orphan" project. A distinct upstream it-block ("works on a
       many-to-one relationship") from the one-to-many one.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L152
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L152
     cases: [1196, 1197]
 
   - id: filters.embed.null_filtering_many_to_many
@@ -466,7 +466,7 @@ entries:
       users who own task 1; the `is.null` branch keeps the user who does not
       (not merely users with no tasks at all). A distinct upstream it-block
       ("works on a many-to-many relationship").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L200
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L200
     cases: [1198, 1199]
 
   - id: filters.embed.or_across_embeds
@@ -476,7 +476,7 @@ entries:
       least one of its independently-filtered embeds is non-null:
       `or=(<embedA>.not.is.null,<embedB>.not.is.null)`. `newNullFilters`
       recurses through `CoercibleExpr` before rewriting leaves
-      (Plan.hs#L967-L968), so each `<embed>.not.is.null` leaf inside the group
+      (Plan.hs#L1035-L1036), so each `<embed>.not.is.null` leaf inside the group
       is rewritten to a `CoercibleFilterNullEmbed` exactly as a top-level one
       would be. Each embed keeps its OWN filter inside its lateral, so a
       filtered-out embed aggregates to NULL instead of removing the parent —
@@ -486,7 +486,7 @@ entries:
       `/films?select=title,actors(),directors()&directors.first_name=eq.John&actors.first_name=eq.John&or=(directors.not.is.null,actors.not.is.null)`
       has exactly the shape asserted here) and its own upstream it-block
       ("can do an or across embeds").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L225
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L225
     cases: [1195]
 
   - id: filters.embed.null_filtering_nested
@@ -498,8 +498,8 @@ entries:
       child has a grandchild. `addNullEmbedFilters` recurses into the whole
       read-plan forest, rewriting each `is null` / `not.is null` filter whose
       field names an embed into a `CoercibleFilterNullEmbed` over that
-      embed's aggregate alias (Plan.hs#L959-L963, #L969-L973).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L217
+      embed's aggregate alias (Plan.hs#L1027-L1031, #L1037-L1041).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L217
     cases: [1194]
 
   - id: filters.embed.alias_target
@@ -511,11 +511,11 @@ entries:
       resolves an embed path segment against `relName == segment ||
       relAlias == Just segment`; matching by alias leaves
       `relIsLegacyTargetNameMatch` unset (see `updateLegacyAttrs`,
-      Plan.hs#L1033-L1036), so `readPlanWarning` (Plan.hs#L167) yields
+      Plan.hs#L1101-L1104), so `readPlanWarning` (Plan.hs#L188) yields
       Nothing and NO deprecation `Warning` header is emitted. This is the
       forward-compatible spelling, and the only one accepted when
       `url-use-legacy-target-names = false`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L1029
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L1097
     cases: [1188, 1190]
 
   - id: filters.embed.legacy_target_name_deprecation
@@ -523,15 +523,15 @@ entries:
       NEW IN v16.0 (upstream #4075). Targeting an ALIASED embed by its
       relation NAME in a filter/order/limit (`select=alias:table(...)` +
       `table.col=...`) still resolves under the default config
-      (`url-use-legacy-target-names = true`, Config.hs#L324) but is
+      (`url-use-legacy-target-names = true`, Config.hs#L356) but is
       DEPRECATED: the response carries
       `Warning: 299 PostgRESTv<version> "Embedded resource was referenced by
       relation name even though it has an alias. This is deprecated and will
       stop working in a future release. Update `<relName>` to `<alias>` in
-      query string filters, orders or limits."` (App.hs#L215 gates it on the
-      config flag; App.hs#L264-L270 builds the header) and the same message is
+      query string filters, orders or limits."` (App.hs#L235 gates it on the
+      config flag; App.hs#L286-L293 builds the header) and the same message is
       logged. Multiple offending embeds are joined into one hint with ", ".
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1185
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1341
     cases: [1189]
 
   - id: filters.embed.legacy_target_names_disabled
@@ -541,18 +541,18 @@ entries:
       only, so targeting an aliased embed by its relation name is a 400
       PGRST108 with message "'<relName>' is not an embedded resource in this
       request", details "Target names are not allowed in filters if they have
-      an alias" (Error.hs#L214) and hint "Change '<relName>' to '<alias>' in
-      filters, orders or limits." (Error.hs#L220). This is also what makes
+      an alias" (Error.hs#L216) and hint "Change '<relName>' to '<alias>' in
+      filters, orders or limits." (Error.hs#L221). This is also what makes
       embedding + filtering the SAME table more than once behave correctly
       (QuerySpec#L1699-L1707). No conformance case: see gaps.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1709
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1957
     cases: []
 
 gaps:
   - >
       RETIRED at the 2026-08-08 re-sync (recorded so the reversal is
       auditable): the previous revision claimed that AndOrParamsSpec's
-      third-level logic (v16.0 L34-L50) and EmbedInnerJoinSpec's L146+
+      third-level logic (v16.0 L34-L50) and EmbedInnerJoinSpec's L173+
       one-to-many cases could not be reconciled with the seeded
       grandchild_entities rows. That was a misreading — the 1,2,4,5 / 3,6
       split in the expected bodies is the CHILD distribution over entities 1
@@ -563,13 +563,13 @@ gaps:
       now assert them.
   - >
       Full-text search filter operators inside and/or
-      (fts/plfts/phfts/wfts, AndOrParamsSpec v16.0 L82-L115) and range/array
-      operator *semantics* (L121-L198) are referenced syntactically but their
+      (fts/plfts/phfts/wfts, AndOrParamsSpec v16.0 L83-L121) and range/array
+      operator *semantics* (L128-L205) are referenced syntactically but their
       value semantics belong to the operators feature area; not modeled here
       beyond the and/or/not parser interaction.
   - >
       `is` case-insensitivity of NULL/NoT_NuLl and trilean upper/mixed case
-      (QuerySpec v16.0 L109-L130) is exercised in the filters band only for
+      (QuerySpec v16.0 L118-L133) is exercised in the filters band only for
       the lowercase trilean path (case 1163). The uppercase/mixed-case
       spelling is NOT unasserted overall: it is claimed cross-area by the
       operators area as case 1058 (`operators/is/case_insensitive`,
@@ -577,7 +577,7 @@ gaps:
       duplicates it; if 1058 is dropped in review, re-home it here.
   - >
       `match` (~) and `imatch` (~*) regex filter operators (QuerySpec v16.0
-      L159-L180) parse through the same `pQuantOp`/`quantOperator` path as the
+      L175-L198) parse through the same `pQuantOp`/`quantOperator` path as the
       simple operators, but their value semantics are operators-area scope and
       are claimed there by cases 1063 (`operators/match`) and 1064
       (`operators/imatch`); only `like` is exercised standalone in the filters
@@ -602,9 +602,9 @@ gaps:
       The (any)/(all) operator quantifier modifier
       (e.g. id=eq(any).{3,4,5}, id=gt(all).{4,3}, body=like(any).{%plan%,...})
       is a documented major filter MODIFIER with dedicated tests at
-      QuerySpec.hs v16.0 L1505-L1545. The filters parser is the load-bearing
-      piece: pOperation tries pQuantOp (QueryParams.hs#L649, definition
-      L660-L663), where the optional (any)/(all) is parsed between parens
+      QuerySpec.hs v16.0 L1725-L1769. The filters parser is the load-bearing
+      piece: pOperation tries pQuantOp (QueryParams.hs#L704, definition
+      L715-L718), where the optional (any)/(all) is parsed between parens
       after the base operator. filters.horizontal.shape's claim references
       pOpExpr (which reaches pQuantOp transitively), but this area
       deliberately writes NO conformance case for the quantifier syntax: the
@@ -661,7 +661,7 @@ gaps:
       and carries `cases: []` on purpose — the same treatment as
       filters.horizontal.ilike. The entry was split off filters.horizontal.cs
       because upstream asserts the two in separate it-blocks (QuerySpec#L560
-      "matches with cs operator" vs. #L565 "matches with cd operator") and the
+      "matches with cs operator" vs. #L646 "matches with cd operator") and the
       single previous anchor (L560) supported only the `cs` half of the
       claim. The band's only containment case, 1164, is anchored at
       AndOrParamsSpec#L172 and exercises `cs` alone. The `cd` claim is NOT
@@ -678,9 +678,9 @@ gaps:
   - >
       PGRST120 ("Bad operator on the '<target>' embedded resource", details
       "Only is null or not is null filters are allowed on embedded resources",
-      Error.hs#L164/#L190/#L209) is modelled by NO entry and NO case: at
+      Error.hs#L166/#L192/#L211) is modelled by NO entry and NO case: at
       v16.0 the `UnacceptableFilter` constructor has no raise site anywhere
-      under `src/` (it is declared in Error/Types.hs#L51 and mapped in
+      under `src/` (it is declared in Error/Types.hs#L52 and mapped in
       Error.hs, nothing constructs it) and no spec file asserts the code. It
       is therefore unreachable at this pin, and any expected body for it would
       be a guess.
@@ -736,7 +736,7 @@ gaps:
   - >
       Out-of-area v16.0 changes touched while diffing, recorded so they are not
       lost: (a) every response now carries `Vary: Accept, Prefer, Range`
-      (App.hs#L259, upstream #4609) - headers-area scope, so no filters case
+      (App.hs#L281, upstream #4609) - headers-area scope, so no filters case
       asserts it; (b) PostgreSQL 19+ changes the wording of SQLSTATE 42883
       ("operator does not exist") bodies, which JsonOperatorSpec#L69-L93 and
       QuerySpec#L1655-L1668 now branch on via pgVersion190 - errors/operators

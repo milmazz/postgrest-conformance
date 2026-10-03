@@ -18,4 +18,4 @@ notes: >
   1139. This case pins the config surface only:
   configs/no-defaults-env.yaml sets PGRST_URL_USE_LEGACY_TARGET_NAMES=false and
   configs/expected/no-defaults.config#L47 dumps it back.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/no-defaults.config#L47
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/expected/no-defaults.config#L47

@@ -15,8 +15,8 @@ expect:
 notes: >
   The tsquery OR operator `|` (percent-encoded %7C) passes through to
   to_tsquery unchanged: `text_search_vector @@
-  to_tsquery('impossible|possible')` (SqlFragment.hs#L412). Case 1090 uses the
+  to_tsquery('impossible|possible')` (SqlFragment.hs#L455). Case 1090 uses the
   same encoding incidentally inside a `not.fts` value; this case pins the
   operator itself. Mirrors QuerySpec.hs it "can use lexeme boolean
   operators(&=%26, |=%7C, !) in to_tsquery" (second assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L193
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L213

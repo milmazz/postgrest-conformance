@@ -14,5 +14,5 @@ schema: mutations
 expect:
   status: 201
   body_exact: [{ "name": "Go", "rank": 19 }]
-notes: 'PUT to a non-existent pk inserts the row -> 201. Upstream first asserts GET /tiobe_pls?name=eq.Go returns [] then PUTs. Mirrors UpsertSpec.hs#L362-L373. Assumes: DELETE FROM test.tiobe_pls WHERE name = ''Go'';'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L373
+notes: 'PUT to a non-existent pk inserts the row -> 201. Upstream first asserts GET /tiobe_pls?name=eq.Go returns [] then PUTs. Mirrors UpsertSpec.hs#L472-L483. Assumes: DELETE FROM test.tiobe_pls WHERE name = ''Go'';'
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L483

@@ -187,6 +187,10 @@ func TestRouteSpecials(t *testing.T) {
 	if v := p.Overlay["PGRST_DB_SCHEMAS"]; v.V != "openapi_no_comment" || p.Base != "auth" {
 		t.Fatalf("1654: %+v", p)
 	}
+	p, _ = Route(httpCase(1690, "SCHEMA_v3", "/", nil))
+	if v := p.Overlay["PGRST_DB_SCHEMAS"]; v.V != "SCHEMA_v3" || p.Base != "auth" {
+		t.Fatalf("1690: %+v", p)
+	}
 	p, _ = Route(httpCase(1764, "observability", "/", map[string]any{"log-level": "error"}))
 	if v, ok := p.Overlay["PGRST_JWT_SECRET"]; !ok || !v.Clear {
 		t.Fatalf("1764 must clear jwt-secret: %+v", p)

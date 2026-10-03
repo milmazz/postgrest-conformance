@@ -29,7 +29,7 @@ notes: >
   tree to the THIRD level of the read plan. All three levels use the default
   left join, so parents and intermediate rows are kept with an empty array
   when nothing below them matches. Mirrors AndOrParamsSpec "can do logic on
-  the third level" (v16.0 L34-L50) verbatim, request and body.
+  the third level" (v16.0 L36-L51) verbatim, request and body.
 
   Fixture check against the consolidated bier_test (identical to upstream
   data.sql L362-L375): child_entities parent_ids are 1,1,2,1,1,2 so entity 1
@@ -40,4 +40,4 @@ notes: >
   unreconcilable with the fixture data; that was a misreading of the expected
   body (the 1,2,4,5 / 3,6 split is the CHILD distribution, not the
   grandchild one) and the gap is retired by this case.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L34
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L36

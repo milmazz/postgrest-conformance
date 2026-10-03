@@ -26,4 +26,4 @@ notes: >
   freshly loaded bier_test — test.users_tasks seeds (1,1) (1,2) (1,3) (1,4)
   (2,5) (2,6) (2,7) (3,1) (3,5) as (user_id, task_id), so only user 2
   (Michael Scott) lacks task 1.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L209
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L209

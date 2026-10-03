@@ -11,4 +11,4 @@ schema: auth
 expect:
   status: 401
 notes: "Anonymous lacks EXECUTE on privileged_hello -> 401."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AuthSpec.hs#L40
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AuthSpec.hs#L41

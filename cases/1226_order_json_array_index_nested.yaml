@@ -15,4 +15,4 @@ notes: >
   `to_jsonb(numbers_mult)->2::int->2::int`. Rows: id 0 = {{1,2,3},{4,5,6},{7,8,9}}
   (element [2][2] = 9), id 1 = {{11,12,13},{14,15,16},{17,18,19}} (element
   [2][2] = 19); asc => 9 before 19.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L270
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L299

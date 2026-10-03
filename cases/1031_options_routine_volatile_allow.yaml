@@ -11,13 +11,13 @@ expect:
     Allow: OPTIONS,POST
 notes: >-
   OPTIONS on `/rpc/<fn>` resolves to `ActRoutineInfo`
-  (src/library/PostgREST/ApiRequest.hs#L136), a no-DB info plan whose `Allow`
+  (src/library/PostgREST/ApiRequest.hs#L164), a no-DB info plan whose `Allow`
   header is chosen purely by the routine's volatility: a VOLATILE function may
   only be invoked with POST, so the header is "OPTIONS,POST"
-  (src/library/PostgREST/Response.hs#L224-L225). Mirrors the upstream it-block
-  "includes the POST method for a volatile function" (OptionsSpec.hs#L83 the it,
+  (src/library/PostgREST/Response.hs#L232-L233). Mirrors the upstream it-block
+  "includes the POST method for a volatile function" (OptionsSpec.hs#L82 the it,
   L84 the `request methodOptions "/rpc/reset_table"`, L87 the
   matchHeader "Allow" "OPTIONS,POST"). test.reset_table() is declared VOLATILE
   in the consolidated fixture — verified against a freshly loaded bier_test
   (pg_proc.provolatile = 'v').
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OptionsSpec.hs#L84
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OptionsSpec.hs#L83

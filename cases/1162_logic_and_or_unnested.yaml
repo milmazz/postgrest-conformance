@@ -13,4 +13,4 @@ expect:
 notes: >
   A top-level and= and a top-level or= are ANDed together. Mirrors
   AndOrParamsSpec "can be combined unnested".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L59
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L60

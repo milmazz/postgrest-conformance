@@ -17,7 +17,7 @@ expect:
 notes: >-
   Leading and trailing insignificant whitespace (tab / newline / carriage
   return / space) around the JSON body is ignored rather than making the payload
-  invalid. Verbatim mirror of InsertSpec.hs#L403-L410 (context "insignificant
+  invalid. Verbatim mirror of InsertSpec.hs#L478-L487 (context "insignificant
   whitespace"), which POSTs this exact padded payload to /json_table with
   return=representation and asserts 201 with [{"data":{"foo":"bar"}}].
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L407
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L484

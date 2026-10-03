@@ -13,7 +13,7 @@ config:
     - "CREATE ROLE db_config_authenticator LOGIN NOINHERIT"
     # Deliberately a *parseable* int, unlike upstream's literal 'ignored'
     # (db_config.sql#L56): coerceInt turns 'ignored' into Nothing
-    # (Config.hs#L486) and parseServerPort's `fromMaybe 3000` (Config.hs#L351)
+    # (Config.hs#L533) and parseServerPort's `fromMaybe 3000` (Config.hs#L386)
     # then dumps 3000 whether or not the in-database value was consulted, so
     # the 'ignored' spelling cannot distinguish a correct implementation from
     # one that honours every pgrst.* setting. With '3001' a wrong
@@ -30,6 +30,6 @@ notes: >
   (the source anchor) — `server_port` is absent from that list, so the role
   setting never reaches `overrideFromDbOrEnvironment` and PGRST_SERVER_PORT
   stands. Mirrors the db_config.sql non-reloadable block
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/db_config.sql#L56),
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/db_config.sql#L56),
   with a parseable value so the assertion can actually fail.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config/Database.hs#L45
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config/Database.hs#L44

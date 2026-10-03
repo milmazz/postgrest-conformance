@@ -20,7 +20,7 @@ expect:
 notes: >
   The in-database source is consulted only when db-config is true: the
   --dump-config path runs `when configDbConfig $ AppState.readInDbConfig True
-  appState` (CLI.hs#L55). With db-config=false the role's `pgrst.db_max_rows`
+  appState` (CLI.hs#L56). With db-config=false the role's `pgrst.db_max_rows`
   setting is never read, so the config-file value stands. Converse of case 1724,
   which sets PGRST_DB_CONFIG=true over the same role settings and gets 500.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/CLI.hs#L55
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/CLI.hs#L56

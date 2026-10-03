@@ -13,8 +13,8 @@ notes: >
   Upstream `test_log_level` (the anchored parametrized test) drives one request
   per status class and then counts stdout lines per level; at warn, responses
   with status >= 400 are logged, so the `GET /unknown` 404 IS logged
-  (test_io.py#L552-L560, 2 lines) whereas at error it is not
-  (test_io.py#L546-L551, 1 line).
+  (test_log.py#L57-L65, 2 lines) whereas at error it is not
+  (test_log.py#L51-L56, 1 line).
   WHAT THIS CASE ACTUALLY ASSERTS: only the 404 status that the filter keys on.
   It does NOT exercise log-level at all, for two reasons: (a) the harness has no
   stdout capture (see observability.yaml gaps, `needed_assertion: log_capture`),
@@ -25,4 +25,4 @@ notes: >
   record of the upstream configuration the log-line assertion would need. The
   asserted 404 is independent of log-level, so the case is sound as written —
   it is simply narrower than its feature name suggests.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L523
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L28

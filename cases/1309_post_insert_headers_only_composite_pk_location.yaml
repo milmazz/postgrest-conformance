@@ -23,10 +23,10 @@ notes: >-
   PK column by walking json_each_text over row_to_json of the inserted row — so
   the pairs follow the relation's COLUMN order restricted to the PK columns, not
   the order of the primary-key constraint — and Response.hs renders the pairs
-  with renderSimpleQuery (SqlFragment.hs#L223-L231, Response.hs#L91-L99). For
+  with renderSimpleQuery (SqlFragment.hs#L257-L268, Response.hs#L100-L108). For
   car_models both orders coincide: (name, year). Mirrors
   the upstream it-block "should not throw and return location header for
-  partitioned tables when selecting without PK" (InsertSpec.hs#L142-L154), which
+  partitioned tables when selecting without PK" (InsertSpec.hs#L172-L187), which
   POSTs {"name":"Enzo","year":2021} to /car_models with
   Prefer: return=headers-only and asserts exactly this Location plus 201,
   Content-Range */*, Content-Length 0, Preference-Applied: return=headers-only
@@ -50,5 +50,5 @@ notes: >-
   the INSERT reaches test.car_models and is contained by the conformance
   server's db_tx_end: :rollback. The base table being empty is what makes the
   insert affect exactly one row, which is what the `count(_postgrest_t) = 1`
-  guard in Statements.hs#L48 requires for a Location to be produced at all.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L142
+  guard in Statements.hs#L65 requires for a Location to be produced at all.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L172

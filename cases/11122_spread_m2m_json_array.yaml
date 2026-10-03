@@ -21,4 +21,4 @@ notes: >
   the parent; a parent with no junction rows gets an empty array
   (SpreadQueriesSpec.hs:336; the second get, L348, asserts the aliased
   form).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L336
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L336
