@@ -56,6 +56,30 @@ rather than debugging around it — it's cheap:
 go run ./cmd/oracle db-teardown && go run ./cmd/oracle db-setup
 ```
 
+### Repeat runs do not need a fixture reload
+
+`oracle run` can be repeated against the same database as often as you like
+without another `db-setup`. Every PostgREST instance runs with
+`db-tx-end=rollback`, which undoes every row a case writes — but not the
+`nextval()` calls behind serial and identity defaults, because Postgres
+sequences are non-transactional. Left alone, that drift fails case 1305
+(its `Location` names the generated key, `id=eq.2`) on every run after the
+first (issue #22).
+
+So `db-setup` records every sequence's `(last_value, is_called)` right after
+the fixture chain loads, in
+`.cache/sequences/<host>_<port>_<db>.json`, and `run` restores them all with
+`setval` before executing any case. The baseline is a file rather than a
+table so that the fixture database holds nothing the fixture chain did not
+put there; it records the database's OID, so a baseline left over from an
+earlier build is refused instead of applied. `db-teardown` deletes it.
+
+If `run` reports `no sequence baseline` or `stale sequence baseline`, the
+database was loaded by something other than this tool's `db-setup` (or by
+a version that predates baselines): rebuild it with `db-setup`.
+`-no-reset-sequences` skips the restore; with it, a repeat run fails 1305
+again.
+
 Each subcommand can also be run standalone: `go run ./cmd/oracle fetch`
 downloads and verifies the pinned binary (checksummed against
 [`bin.sha256`](bin.sha256)) without running anything, printing its cached
@@ -125,7 +149,7 @@ booted:
 |---|---|
 | `ORACLE_TEST_BIN` | Set to a real PostgREST binary path to run `internal/cliexec` and `internal/instance` tests that actually start one. |
 | `ORACLE_TEST_DB_URI` | Set alongside `ORACLE_TEST_BIN` (a `postgresql://` URI to a loaded fixture database) to run `internal/instance` tests that boot an instance and talk to it. |
-| `ORACLE_TEST_DB` | Set to any non-empty value, with `make db-up` already running, to run `internal/db` tests that exercise the real fixture-loading chain. |
+| `ORACLE_TEST_DB` | Set to any non-empty value, with `make db-up` already running, to run `internal/db` tests that exercise the real fixture-loading chain and the sequence baseline capture/restore. |
 
 ## Flags (`oracle run`)
 
@@ -138,6 +162,7 @@ booted:
 | `-report` | `report.json` | Path to write the machine-readable JSON report (`{results, findings, total, passed}`). |
 | `-skip-cli` | `false` | Skip `request.kind: cli` cases (the `config` `--dump-config` and startup-validation cases). |
 | `-skip-http` | `false` | Skip HTTP cases. |
+| `-no-reset-sequences` | `false` | Do not restore the sequence baseline `db-setup` recorded before running (see "Repeat runs do not need a fixture reload"). |
 
 `run` prints a human-readable summary to stdout (per-area `passed/total`,
 each failing case's detail with its `source:` citation, every
@@ -156,5 +181,5 @@ This runner has no skip mechanism, and none should be added to it — see
 `HARNESS.md` §6 ("Divergence convention") for where a *consumer's* deliberate
 divergence belongs (never here) and `CONTRIBUTING.md` ("Divergences belong
 to consumers, not here") for the same rule stated for this repository. A
-run that reports fewer than 805/805 is not this tool asking for a
+run that reports fewer than 828/828 is not this tool asking for a
 workaround; it is the tool doing its job.

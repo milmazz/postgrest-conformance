@@ -111,10 +111,13 @@ cd tools/oracle && go run ./cmd/oracle validate            # tree-wide invariant
 Read `report.json` for the failures. Teardown when done:
 `go run ./cmd/oracle db-teardown && make -C tools/oracle db-down`.
 
-**Known trap:** the suite is not idempotent against an unreloaded fixture DB —
-case 1305 fails on a second run (issue #22). If a case fails, rebuild the DB
-(`db-teardown && db-setup`) and re-run before believing it. Distinguishing a
-real drift from this artifact is mandatory before it reaches the report.
+**Known trap (fixed):** sequences are non-transactional, so before issue #22 a
+repeat run without `db-setup` failed case 1305. `oracle run` now restores the
+sequence baseline `db-setup` records, so repeat runs pass; a DB loaded some
+other way fails fast with `no sequence baseline` — rebuild it with `db-setup`.
+Still, if a case fails, rebuild the DB (`db-teardown && db-setup`) and re-run
+before believing it: leftover state other than sequences is not reset, and
+ruling it out is mandatory before a failure reaches the report.
 
 ## Step 4 — Coverage gaps
 

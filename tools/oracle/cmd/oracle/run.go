@@ -41,7 +41,8 @@ var sharedGroupOrder = []string{
 	"auth", "multi", "unicode",
 }
 
-// cmdRun executes every selected case against a real PostgREST binary: CLI
+// cmdRun restores the sequence baseline (unless -no-reset-sequences), then
+// executes every selected case against a real PostgREST binary: CLI
 // cases first (id order), then HTTP cases grouped by their routing
 // (route.Placement.GroupKey), booting one instance per group. It writes a
 // JSON report and a human-readable summary, and returns a non-nil error iff
@@ -55,6 +56,7 @@ func cmdRun(args []string) error {
 	reportFlag := fs.String("report", "report.json", "path to write the JSON report")
 	skipCLI := fs.Bool("skip-cli", false, "skip request.kind: cli cases")
 	skipHTTP := fs.Bool("skip-http", false, "skip HTTP cases")
+	noResetSeqs := fs.Bool("no-reset-sequences", false, "do not restore the sequence baseline recorded by db-setup before running")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -99,6 +101,16 @@ func cmdRun(args []string) error {
 		placements[c.ID] = p
 	}
 	findings := route.CrossCheckHarness(placements)
+
+	// Sequences are non-transactional, so db-tx-end=rollback leaves every
+	// nextval() an earlier run made in place (issue #22). Restore the
+	// baseline db-setup recorded, so this run starts from the fixtures'
+	// sequence state whether or not the database was reloaded since.
+	if !*noResetSeqs {
+		if err := resetSequences(repoRoot, pg, dbname); err != nil {
+			return err
+		}
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

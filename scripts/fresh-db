@@ -11,8 +11,8 @@
 #
 # Idempotent: rebuilding is teardown-then-setup, so a second run leaves the
 # same database and the same result. Run it whenever a suite failure might be
-# leftover state rather than a real defect — sequence values surviving an
-# aborted earlier run have caused exactly that.
+# leftover state rather than a real defect (sequences no longer need it:
+# `oracle run` restores the baseline db-setup records — issue #22).
 #
 # The pinned binary is fetched on demand into tools/oracle/.cache/ and reused,
 # so only the first run needs the network.

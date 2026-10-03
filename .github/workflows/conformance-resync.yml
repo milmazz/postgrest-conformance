@@ -227,11 +227,13 @@ jobs:
           echo "failing=${failing:-none}"           >> "$GITHUB_OUTPUT"
           echo "oracle exit=$rc tally=$tally failing=$failing"
 
-      # A failure here is ambiguous on its own: issue #22 (the suite is not
-      # idempotent against an unreloaded fixture DB — case 1305) can produce
-      # a red run that has nothing to do with upstream. Rebuild the DB and
-      # re-run so the report distinguishes real drift from that artifact.
-      - name: Re-run on a rebuilt DB to rule out issue #22
+      # A failure here is ambiguous on its own: leftover database state can
+      # produce a red run that has nothing to do with upstream. Sequence
+      # drift (issue #22, case 1305) is no longer one — `oracle run` restores
+      # the sequence baseline db-setup records — but anything else a run
+      # leaves behind is not reset, so rebuild the DB and re-run to make the
+      # report distinguish real drift from such an artifact.
+      - name: Re-run on a rebuilt DB to rule out leftover state
         if: steps.run.outcome == 'failure'
         run: |
           cd tools/oracle

@@ -142,9 +142,11 @@ scripts/fresh-db [--db NAME] [--no-run]
   `postgrest_conf_oracle`, which exists only to be rebuilt. The name is
   printed before any drop. Nothing else is touched.
 - Reach for it when a suite failure might be leftover state rather than a
-  real defect — sequence values surviving an aborted earlier run have caused
-  exactly that, and a clean rebuild is what distinguishes the two. When it
-  fails after a rebuild, the failures are real.
+  real defect; a clean rebuild is what distinguishes the two. Sequence drift
+  is no longer such a case: `oracle run` restores every sequence to the
+  baseline `db-setup` recorded before it starts (issue #22), so a repeat run
+  without a rebuild passes. When it fails after a rebuild, the failures are
+  real.
 - Checks the server is reachable first (via `pg_isready` when present) and
   names the container in the error, rather than dying part-way through a
   teardown.
