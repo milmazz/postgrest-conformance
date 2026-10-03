@@ -130,8 +130,8 @@ func TestFullCorpusIsHealthy(t *testing.T) {
 	if len(res.Findings) != 0 {
 		t.Fatalf("full corpus has findings:\n%s", strings.Join(res.Findings, "\n"))
 	}
-	if res.CasesChecked != 828 {
-		t.Fatalf("checked %d cases, want 828", res.CasesChecked)
+	if res.CasesChecked != 832 {
+		t.Fatalf("checked %d cases, want 832", res.CasesChecked)
 	}
 }
 

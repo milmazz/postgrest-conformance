@@ -1,0 +1,44 @@
+id: 1531
+feature: errors/sqlstate/undefined_column_embed_alias
+request:
+  method: GET
+  path: /processes?select=id,factories(banana)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    code: "42703"
+    details: null
+    hint: null
+    message: "column factories_1.banana does not exist"
+notes: >
+  The EMBEDDED spelling of case 1819's 42703. An unknown column inside an
+  embed is not caught by PostgREST — the column reaches the SQL and
+  PostgreSQL raises undefined_column, passed through as a 400 with the PG
+  message verbatim (spec/errors.yaml `sqlstate_to_http`, the catch-all
+  rule). What makes the message worth pinning is the relation it names.
+  Inside an embed the subquery's FROM is aliased: `addRels` sets
+  `fromAlias = newAlias` with
+  `newAlias = Just (qiName (relForeignTable r) <> "_" <> show depth)`
+  (Plan.hs:583), and the cited `getQualifiedIdentifier` turns that alias
+  into the qualifier of every selected column
+  (`maybe mainQi (QualifiedIdentifier mempty) tblAlias`, bound at
+  QueryBuilder.hs:66 and applied to the select list at L70). So the SQL selects
+  `"factories_1"."banana"` and PostgreSQL's message quotes the alias
+  `factories_1` — `<foreign table>_<depth>`, here the many-to-one embed at
+  depth 1. At the root (1819) the qualifier is the bare table name, so 1819
+  pins no alias formula at all and any implementer that generates *some*
+  stable unique alias passes it; this case pins the formula.
+
+  EXTRAPOLATION beyond upstream's own coverage: no upstream it-block
+  requests an unknown column inside an embed — QuerySpec.hs's "fails in some
+  reasonable way when selecting fields that don't exist" (1819's source) is
+  the root spelling only. The body was read off a live run of the pinned
+  v16.4 binary against this suite's fixtures (issue #32), the way 11139's
+  was. Siblings: 1532 (an unrelated preceding sibling does not move the
+  alias), 1533 (the suffix is depth, not sequence), 1534 (many-to-many sets
+  no alias).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/QueryBuilder.hs#L305
