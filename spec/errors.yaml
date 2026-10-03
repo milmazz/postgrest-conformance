@@ -521,9 +521,38 @@ no_rel_between_hint:
       set_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L332
       lookup_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L335
       test_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L972
+      # The same branch with NO suggestion: every target in 11141-11144 has an
+      # origin (`processes`, or `factories` at the root) that is a key of the
+      # relationships map, so this branch runs, finds no child scoring >= 0.33
+      # and below 1.0, and leaves `hint` null — including for the real but
+      # unrelated table `clients` (11142).
+      null_hint_cases: [11141, 11142, 11143, 11144]
   # Unlike TableNotFound, NoRelBetween always carries a non-null `details`.
   details_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L257
   status_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L229
+
+# ---------------------------------------------------------------------------
+# 42703 inside an embed: the relation the PG message names
+# ---------------------------------------------------------------------------
+embed_column_qualifier:
+  # An unknown column is not validated by PostgREST: it reaches the SQL and
+  # PostgreSQL raises 42703 (undefined_column), passed through verbatim under
+  # the catch-all `*` -> 400 rule above. The message quotes the relation the
+  # column was qualified with, and that qualifier is PostgREST's own choice,
+  # so it is observable behavior that an implementer must reproduce.
+  when: "a select list names a column the relation does not have (42703, HTTP 400)"
+  message_format: "column <qualifier>.<column> does not exist"
+  qualifier:
+    root: "the bare table name (case 1819 — no alias formula involved)"
+    embed: "<foreign table>_<depth> — `fromAlias = newAlias`, where depth is the node's nesting depth (root = 0), NOT a sequence number across siblings"
+    many_to_many: "the bare foreign table name — the M2M branch sets no fromAlias"
+  alias_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L583
+  m2m_no_alias_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L590
+  qualifier_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/QueryBuilder.hs#L305
+  cases: [1531, 1532, 1533, 1534]
+  # No upstream it-block requests an unknown column inside an embed; the
+  # embedded bodies (1531-1534) were read off a live run of the pinned v16.4
+  # binary against this suite's fixtures (issue #32).
 
 # ---------------------------------------------------------------------------
 # Conformance case index (this area's band is 1500..1549)
@@ -537,6 +566,8 @@ coverage:
     - { rule: "21000 cardinality_violation -> 500",       case_ids: [1504] }
     - { rule: "54* program limit (54001) -> 500",         case_ids: [1523] }
     - { rule: "42P17 infinite recursion -> 500",          case_ids: [1524] }
+    - { rule: "42703 in an embed names <table>_<depth> (sibling-independent)", case_ids: [1531, 1532, 1533] }
+    - { rule: "42703 in an m2m embed names the bare table (no alias)",       case_ids: [1534] }
     - { rule: "PTnnn -> HTTP nnn / non-numeric -> 500",   case_ids: [1505, 1507] }
     - { rule: "PGRST full response control",              case_ids: [1508, 1509, 1510, 1511] }
     - { rule: "PGRST parse failures -> PGRST121/500",     case_ids: [1512, 1513, 1514] }
