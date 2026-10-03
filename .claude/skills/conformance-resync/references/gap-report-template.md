@@ -34,8 +34,8 @@ Cases whose recorded `expect:` no longer matches the real binary.
 |---|---|---|---|
 | 1461 | auth | … | v16.1 #5159 JWT clock fix |
 
-> Each row was confirmed against a **freshly rebuilt fixture DB**. Issue #22
-> (suite not idempotent, case 1305) was ruled out for every row.
+> Each row was confirmed against a **freshly rebuilt fixture DB**, ruling out
+> leftover database state for every row.
 
 ### Channel B — new upstream behavior (no case exists)
 

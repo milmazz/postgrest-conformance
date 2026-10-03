@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+**The oracle runner is now idempotent against an unreloaded fixture database**
+(closes #22). Postgres sequences are non-transactional, so the runner's
+`db-tx-end=rollback` discarded rows but not `nextval()` advances, and case 1305
+failed on every repeat run without `db-setup`. `oracle db-setup` now records
+every sequence's `(last_value, is_called)` in
+`tools/oracle/.cache/sequences/`, and `oracle run` restores them before any
+case executes (`-no-reset-sequences` opts out). A database without a baseline
+fails fast with a message naming `db-setup`. No case expectation changed.
+
 ## v16.4.0-suite.1
 
 **The pin moves v16.0 → v16.4, and 812 -> 824 cases.** Spans upstream v16.1,

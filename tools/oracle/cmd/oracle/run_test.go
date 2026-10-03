@@ -5,9 +5,11 @@ import (
 	"errors"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/cases"
+	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/db"
 	"github.com/milmazz/postgrest-conformance/tools/oracle/internal/route"
 )
 
@@ -551,3 +553,21 @@ func TestEffectiveSelectionAndCheckSelection(t *testing.T) {
 // non-auth instances, and the per-area single-schema layout — became the
 // documented contract itself in HARNESS.md §2.1/§2.1.1 (issue #5), so a
 // clean run now reports zero findings.
+
+// TestResetSequencesMissingBaselineNamesFix is unguarded (the missing file
+// is detected before any database is contacted): a database with no
+// recorded baseline — loaded by an older tool, or by something other than
+// db-setup — fails the run up front with a message naming db-setup and the
+// escape hatch, rather than letting case 1305 fail on a bare Location.
+func TestResetSequencesMissingBaselineNamesFix(t *testing.T) {
+	p := db.PGEnv{Host: "localhost", Port: "1", User: "postgres", Password: "postgres"}
+	err := resetSequences(t.TempDir(), p, "postgrest_conf_oracle")
+	if !errors.Is(err, db.ErrNoBaseline) {
+		t.Fatalf("resetSequences = %v, want ErrNoBaseline", err)
+	}
+	for _, want := range []string{"oracle db-setup -db postgrest_conf_oracle", "-no-reset-sequences"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q does not mention %q", err, want)
+		}
+	}
+}
