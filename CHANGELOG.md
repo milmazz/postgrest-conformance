@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-**824 -> 828 cases.** No fixture change, no pin change (still v16.4).
+**824 -> 832 cases.** No fixture change, no pin change (still v16.4).
 
 - **select: unresolvable empty embeds — 4 cases (11141-11144).** 11139 only
   ever exercised a nested empty embed whose relation resolves, so an
@@ -15,9 +15,18 @@
   is ever consulted. Bodies read off a live run of the pinned v16.4 binary;
   the issue's guess that `clients()` might draw a fuzzy hint is wrong. Closes
   #31.
+- **errors: the relation an embedded 42703 names — 4 cases (1531-1534).**
+  1819 pins the unknown-column message only at the root, where the qualifier
+  is the bare table name, so any stable alias scheme passes it. Inside an
+  embed PostgreSQL quotes PostgREST's `<foreign table>_<depth>` alias:
+  `factories(banana)` → `factories_1` (1531), unchanged by an unrelated
+  preceding sibling `supervisors(id)` (1532), `process_costs_2` two levels
+  down (1533), and the bare `supervisors` inside an m2m embed, whose plan
+  sets no alias (1534). Bodies read off a live run of the pinned v16.4
+  binary. Closes #32.
 
-Verified: `scripts/check` green (the three Go corpus pins 824 -> 828) and
-`scripts/fresh-db` **TOTAL 828/828**.
+Verified: `scripts/check` green (the three Go corpus pins 824 -> 832) and
+`scripts/fresh-db` **TOTAL 832/832**.
 
 Tooling: **The oracle runner is now idempotent against an unreloaded fixture database**
 (closes #22). Postgres sequences are non-transactional, so the runner's

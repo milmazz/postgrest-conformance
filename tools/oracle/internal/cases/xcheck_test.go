@@ -54,7 +54,7 @@ func TestYAMLCrossCheckAgainstPyYAML(t *testing.T) {
 		}
 		checked++
 	}
-	if checked != 828 {
-		t.Fatalf("cross-checked %d files, want 828", checked)
+	if checked != 832 {
+		t.Fatalf("cross-checked %d files, want 832", checked)
 	}
 }

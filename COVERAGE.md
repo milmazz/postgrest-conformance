@@ -10,8 +10,8 @@ which `api` is the parent counted through its sub-pages).
 A docs page with no covering case (and not explicitly scoped out below) is
 flagged **GAP**.
 
-Pinned target: **PostgREST v16.4** (re-pinned from v16.0 on 2026-10-02). Total cases: **828** across 17 areas
-(counted on disk at the 2026-10-02 unresolvable-empty-embed pass — see the
+Pinned target: **PostgREST v16.4** (re-pinned from v16.0 on 2026-10-02). Total cases: **832** across 17 areas
+(counted on disk at the 2026-10-02 embedded-42703 alias pass — see the
 newest refresh box below; the docs-page enumeration underneath was counted
 at 762 and every mapping row still names files that exist). The page set is unchanged from
 the previous pass — `references.html` lists 12 entries (11 pages plus
@@ -24,6 +24,33 @@ Functions as RPC, Schemas, Computed Fields, Domain Representations, Pagination a
 Count, Resource Embedding, Resource Representation, Media Type Handlers, Aggregate
 Functions, OpenAPI, Prefer Header, Vary Header, CORS, OPTIONS method, URL Grammar.
 
+> **Refresh, 2026-10-02 (errors embedded-42703 alias pass — issue #32).**
+> Four cases, **1531–1534**, at the next free ids of the errors primary band
+> (1500–1549), taking errors 31 → **35** and the tree 828 → **832**. **No
+> fixture change** — they reuse factories/processes/process_costs and the
+> process_supervisor junction. The gap: case **1819** pins `42703 column
+> datarep_todos.banana does not exist` only at the **root**, where the
+> qualifier is the bare table name — so any implementer that generates *some*
+> stable unique alias for embeds passes it. Inside an embed the message quotes
+> an alias PostgREST synthesizes, `newAlias = <foreign table>_<depth>`
+> ([`Plan.hs#L583`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L583)),
+> which `getQualifiedIdentifier`
+> ([`QueryBuilder.hs#L305`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/QueryBuilder.hs#L305))
+> turns into the column qualifier. Read off a live run of the pinned v16.4
+> binary: `processes?select=id,factories(banana)` names `factories_1`
+> (**1531**); adding an unrelated preceding sibling `supervisors(id)` leaves it
+> `factories_1` (**1532** — the case that catches a global embed counter, as
+> bier's did, milmazz/bier#162); two levels down
+> `factories?select=id,processes(process_costs(banana))` names
+> `process_costs_2` (**1533** — the suffix is depth, not sequence); and an
+> m2m embed `processes?select=id,supervisors(banana)` names the **bare**
+> `supervisors` (**1534**), because the M2M branch of `addRels`
+> ([`Plan.hs#L590`](https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L590))
+> sets no `fromAlias`. Every observed body matched the issue's prediction.
+> Model: new `embed_column_qualifier` block and two `coverage.sqlstate_map`
+> rules in `spec/errors.yaml`. Both machine-checked area tables and the three
+> Go corpus pins (828 → **832**) carry the new numbers.
+>
 > **Refresh, 2026-10-02 (select unresolvable-empty-embed pass — issue #31).**
 > Four cases, **11141–11144**, inside the declared `[11100..11199]` range
 > (11145+ free), taking select 91 → **95** and the tree 824 → **828**. **No
@@ -576,7 +603,7 @@ Its findings are itemized under **Known gaps → content_negotiation**.
 | `transactions` (Transactions) | 1387–1392, **11405** (safe-update/delete, max-affected), 1713, 1722 (db-tx-end validation + enum mapping), 1759 (transaction timing), 1523 (a trigger cascade aborted by the statement-depth limit) | Tx-scoped GUCs, safe-update/safe-delete (rollback on missing WHERE), db-tx-end, and the `max-affected` rollback on an **UPDATE** (11405) alongside the existing DELETE flavors. Partial — no explicit characteristics/isolation-level case. **A live dependency on this page's subject is now load-bearing for the mutations band and should be read here**: **ten** of the seventeen new mutations cases target relations the loader does *not* isolate into real tables (11402, 11403, 11408–11415), so nine of them write through auto-updatable view mirrors onto the shared `test.*` tables and are contained only by the conformance server's `db_tx_end: :rollback` (`test/support/conformance_server.ex:194`); the tenth, 11409, expects a 405 and never reaches the database. See **Known gaps → mutations**. |
 | `connection_pool` (Connection Pool) | — (OUT OF SCOPE) | Pool sizing/acquisition behavior is operational and not observable as deterministic black-box HTTP. See **Scope decisions**. |
 | `schema_cache` (Schema Cache) | — (DEFERRED) | Schema-cache reload (`NOTIFY pgrst, 'reload schema'` / SIGUSR1) needs a reload-signal harness. See **Scope decisions**. |
-| `errors` (Errors) | **1500–1530 (errors)**, 1432–1434, 1441, 1443 (rpc errors), 1002, 1024, 1185 (not-found / invalid path), 1455–1464 + 11809–11814 (auth JWT errors), 1288 (PGRST122 under `handling=strict`), **1393, 1395, 1398, 1399, 11401, 11405, 11409** (mutation errors) | SQLSTATE→HTTP mapping (incl. the two 5xx paths 1523/1524), PGRST error codes, the PGRST205 fuzzy hint (1520/1521), **the PGRST200 `noRelBetweenHint` suggester (1527–1530)**, RAISE PGRST full control, RAISE PT custom status, 4xx/5xx envelopes and their byte-exact key order (1525), `Proxy-Status` (1506, 1515–1516, 1519, and its documented *absence* on the inline 416, 1526), client-error-verbosity=minimal (1517, 1518, 1522), **PGRST128** (1441), the closest-proc **PGRST202** envelope with its upstream-asserted `Content-Length` (1443), and — new this pass — the write-path envelopes: **PGRST102** on an empty request body (**1398**), **PGRST105** on a PUT whose filters do not name all and only the pk columns (**11409**, a **405** rather than a 400), **PGRST114** on a PUT carrying `offset` (**1399**), **PGRST124** on an UPDATE exceeding `max-affected` (**11405**) and the raw-SQLSTATE **409 / `23505`** unique-violation path (**11401**, which asserts the SQLSTATE as the envelope `code` rather than a PGRST code). **Still Partial** — the two residual RPC preference legs (PGRST122/PGRST124 on `/rpc/*`) are uncased (see **Known gaps → headers**), and no case in the tree issues a HEAD request that errors (see **Known gaps → errors**). **PGRST127** on an aggregate inside a to-many spread (**11119**, the tree's only assertion of that code — the `aggregate_functions` row owns its modelling). (An earlier version of this row said PGRST127 appears nowhere in the tree; case 11119 closed that on 2026-08-23, and the stale clause survived that pass's fold until the 2026-08-24 `--ready` pass caught it.) **New on 2026-08-29: the PGRST200 `noRelBetweenHint` suggester (1527–1530).** It is a *second*, independent fuzzy hinter, and the tree previously asserted only its silent leg (1124, where the guard `fst k < 1.0` suppresses a suggestion). Its parent branch — `fuzzySetOfParents` / `suggestParent`, reached only when the embed's ORIGIN participates in no relationship — had never been executed at all, which an HPC implementation-coverage run named as one of three concrete unused declarations in `PostgREST.Error`. 1527 pins the suggestion, 1528 the null below threshold, 1529 the candidate set (a hint naming the schema's *second*-closest name, because the closest one has no relationship and so is not a key of `allRels`) and 1530 the child branch it contrasts with. The threshold is the discriminating fact: `suggestParent` calls plain `Fuzzy.getOne` at fuzzyset's default **0.33**, not `getFuzzyHint`'s **0.75** — so 1520/1521's PGRST205 numbers do not transfer. Upstream has no it-block for the parent branch (`grep "Perhaps you meant '" test/spec/` returns only QuerySpec.hs:848/:868, both child branch), so 1527–1529 cite the executable doctests in `Error.hs` instead. |
+| `errors` (Errors) | **1500–1534 (errors)**, 1432–1434, 1441, 1443 (rpc errors), 1002, 1024, 1185 (not-found / invalid path), 1455–1464 + 11809–11814 (auth JWT errors), 1288 (PGRST122 under `handling=strict`), **1393, 1395, 1398, 1399, 11401, 11405, 11409** (mutation errors) | SQLSTATE→HTTP mapping (incl. the two 5xx paths 1523/1524, and — new 2026-10-02 — the relation an embedded **42703** names: `<table>_<depth>` alias, independent of siblings and tracking depth, bare table in an m2m embed, 1531–1534), PGRST error codes, the PGRST205 fuzzy hint (1520/1521), **the PGRST200 `noRelBetweenHint` suggester (1527–1530)**, RAISE PGRST full control, RAISE PT custom status, 4xx/5xx envelopes and their byte-exact key order (1525), `Proxy-Status` (1506, 1515–1516, 1519, and its documented *absence* on the inline 416, 1526), client-error-verbosity=minimal (1517, 1518, 1522), **PGRST128** (1441), the closest-proc **PGRST202** envelope with its upstream-asserted `Content-Length` (1443), and — new this pass — the write-path envelopes: **PGRST102** on an empty request body (**1398**), **PGRST105** on a PUT whose filters do not name all and only the pk columns (**11409**, a **405** rather than a 400), **PGRST114** on a PUT carrying `offset` (**1399**), **PGRST124** on an UPDATE exceeding `max-affected` (**11405**) and the raw-SQLSTATE **409 / `23505`** unique-violation path (**11401**, which asserts the SQLSTATE as the envelope `code` rather than a PGRST code). **Still Partial** — the two residual RPC preference legs (PGRST122/PGRST124 on `/rpc/*`) are uncased (see **Known gaps → headers**), and no case in the tree issues a HEAD request that errors (see **Known gaps → errors**). **PGRST127** on an aggregate inside a to-many spread (**11119**, the tree's only assertion of that code — the `aggregate_functions` row owns its modelling). (An earlier version of this row said PGRST127 appears nowhere in the tree; case 11119 closed that on 2026-08-23, and the stale clause survived that pass's fold until the 2026-08-24 `--ready` pass caught it.) **New on 2026-08-29: the PGRST200 `noRelBetweenHint` suggester (1527–1530).** It is a *second*, independent fuzzy hinter, and the tree previously asserted only its silent leg (1124, where the guard `fst k < 1.0` suppresses a suggestion). Its parent branch — `fuzzySetOfParents` / `suggestParent`, reached only when the embed's ORIGIN participates in no relationship — had never been executed at all, which an HPC implementation-coverage run named as one of three concrete unused declarations in `PostgREST.Error`. 1527 pins the suggestion, 1528 the null below threshold, 1529 the candidate set (a hint naming the schema's *second*-closest name, because the closest one has no relationship and so is not a key of `allRels`) and 1530 the child branch it contrasts with. The threshold is the discriminating fact: `suggestParent` calls plain `Fuzzy.getOne` at fuzzyset's default **0.33**, not `getFuzzyHint`'s **0.75** — so 1520/1521's PGRST205 numbers do not transfer. Upstream has no it-block for the parent branch (`grep "Perhaps you meant '" test/spec/` returns only QuerySpec.hs:848/:868, both child branch), so 1527–1529 cite the executable doctests in `Error.hs` instead. |
 | `configuration` (Configuration) | 1700–1749, 11700–11707 (config) | Sources (env/file/db-role-settings, incl. `db-config = false` disabling the in-db source, 1744, **1749**, `db-aggregates-enabled` — the first entry of `dbSettingsNames` — set through `ALTER ROLE … SET pgrst.*`, and **11707**, `jwt-cache-max-entries` through the same source, fixed in v16.4), the deprecated jwt-role-claim-key syntax (**11700–11706**, new 2026-10-02), aliases, validation, coercion (incl. `coerceBool` from numeric/text strings, 1740–1741), unknown-key tolerance (1739), precedence, app-settings, CORS keys (1702–1704, 1742–1743), plus the v16 keys `client-error-verbosity` (1731–1732), `server-reuseport` (1735), `url-use-legacy-target-names` (1736), `admin-server-unix-socket` (1737–1738). **Partial** — the page's *In-Database Configuration* section documents `db-pre-config` as the recommended mechanism and its *App Settings* section documents `current_setting('app.settings.*')`; neither has a case. See **Known gaps → config**. |
 | `observability` (Observability) | **1750–1771** (observability, **22** cases), 1497 (JWT-cache Server-Timing), 1625–1628, 1643 (execution plan), 1506/1515/1516/1519/1526/1002 (Proxy-Status, present and absent) | The live page has three top-level sections — **Logs** (SQL Query Logs, Database Logs), **Metrics** (Schema Cache / Connection Pool / JWT Cache / GHC Runtime), **Traces** (Server Version Header, Trace Header, Proxy-Status Header, Server-Timing Header, Content-Length Header, Execution plan). Covered: Server-Timing, Trace header, log-level→status signal, execution plan, Proxy-Status, and — **new this pass** — the **Server Version Header** (1771, `HEAD /` asserting the `Server: postgrest/…` prefix, which closes a gap this file listed last pass). **1770 is not a second copy of 1750**: 1750 uses the loose upstream-style presence regex (any separator, any number of decimals, mirroring `matchServerTimingHasTiming`), while 1770 pins the **exact wire render** in the doctest form — `\A` / `\z`-anchored, `", "` separators, exactly one fractional digit per metric, all five metrics in the fixed order (`Response/Performance.hs#L29`). **Partial** — the whole **Metrics** section and the whole **Logs** section have no case, and three further legs are uncovered; see **Known gaps → observability**. |
 | `admin_server` (Admin Server) | 1717 (admin-port = server-port fatal), 1737 (`admin-server-unix-socket` dump), 1738 (admin socket-mode validation) | Config-surface validation via the CLI harness; `/live` and `/ready` covered by ExUnit (`test/bier/admin_server_test.exs`). Partial — `/metrics` and `/schema_cache` have no case. |
@@ -1111,7 +1138,7 @@ ordering audit found a **named docs section** with a worked example
 **worked example on the same page** — `&actors.limit=10&actors.offset=2` — whose
 two halves have 1 case and 0 cases respectively. `url_grammar` makes it a third
 time, and the errors pass a fourth: the tree's **13 HEAD cases all expect 2xx**,
-so a HEAD that errors is untested across **828** cases. The observability pass
+so a HEAD that errors is untested across **832** cases. The observability pass
 added the thirteenth (**1771**, `HEAD /` for the `Server:` header) without closing
 it — the same pattern the pagination pass showed with the twelfth. **The operators
 pass added 37 cases and not one HEAD, the rpc pass three more, the mutations pass
@@ -2746,7 +2773,7 @@ Two missing-coverage findings, **0 citation defects**.
 
   Closing any of these is a harness decision (per-`config` instance booting, or
   `@variant_case_ids` entries) behind the human harness gate, not a spec edit.
-  **138** of the **828** cases carry a `config:` key (134 non-empty), spread over
+  **138** of the **832** cases carry a `config:` key (134 non-empty), spread over
   seven areas: config 58, auth 36, observability 21, select 15, openapi 4,
   errors 3, headers 1
   (that breakdown counts the key's *presence* and sums to 138; the four empty
@@ -2772,7 +2799,7 @@ Two missing-coverage findings, **0 citation defects**.
   **69** HTTP cases now carry a non-empty `config:` outside
   `@variant_case_ids` (66 re-derived on disk at the 812-case state against the
   harness's then-live 18-id list, plus the v16.4 re-pin's 11819–11821), now out
-  of **777** HTTP cases (828 − 51 CLI; the `--ready` cases
+  of **781** HTTP cases (832 − 51 CLI; the `--ready` cases
   and 1749 are all CLI, so they move the numerator not at all and leave 66
   standing — and the denominator not at all either, each adding one to both
   sides). **Corrected rather

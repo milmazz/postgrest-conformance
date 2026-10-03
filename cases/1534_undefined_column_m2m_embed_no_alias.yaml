@@ -1,0 +1,33 @@
+id: 1534
+feature: errors/sqlstate/undefined_column_m2m_embed_no_alias
+request:
+  method: GET
+  path: /processes?select=id,supervisors(banana)
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+  body_exact:
+    code: "42703"
+    details: null
+    hint: null
+    message: "column supervisors.banana does not exist"
+notes: >
+  The many-to-many exception to 1531's alias formula: an unknown column
+  inside an m2m embed (`processes` -> `supervisors` through the junction
+  `process_supervisor`) names the BARE table, `supervisors`, not
+  `supervisors_1`. The M2M branch of `addRels` (cited line) builds the plan
+  WITHOUT setting `fromAlias` — the comment on the line before it reads "m2m
+  does internal implicit joins that don't need aliasing" — whereas the
+  generic branch (Plan.hs:594) sets `fromAlias = newAlias` (L583).
+  With `fromAlias = Nothing`, `getQualifiedIdentifier` (QueryBuilder.hs:305)
+  falls back to `mainQi`, the schema-qualified `test.supervisors`, and
+  PostgreSQL's message renders it unqualified by schema. An implementer that
+  aliases every embed uniformly passes 1531-1533 and fails here.
+
+  EXTRAPOLATION beyond upstream's own coverage, as for 1531. The body was
+  read off a live run of the pinned v16.4 binary against this suite's
+  fixtures (issue #32).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L590
