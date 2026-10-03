@@ -23,8 +23,9 @@
 # follow-up 19 (adopting filters.yaml's declare-the-range convention) —
 # opened 2026-08-23 by the spread-to-many/aggregates-on-spreads pass
 # (11100-11121) and extended the same day by the many-to-many spread pass
-# (11122-11138), then by the nested-empty-projection pass (11139-11140);
-# 11141+ within the range is free.
+# (11122-11138), then by the nested-empty-projection pass (11139-11140), then
+# by the unresolvable-empty-embed pass (11141-11144, issue #31); 11145+ within
+# the range is free.
 #
 # Convention for `source_url`: raw.githubusercontent.com line anchors, pinned to
 # the v16.4 tag, matching the form mandated by spec/case.schema.json (the lint
@@ -638,8 +639,49 @@ entries:
       `...process_supervisor(supervisors())` give the same error with their
       own alias) and of whether the spread also projects real columns
       (`...processes(id,process_costs())` is the same 400). Contrast 11109,
-      the same nesting with a non-empty `process_costs(cost)` (200).
+      the same nesting with a non-empty `process_costs(cost)` (200). The
+      relation must resolve FIRST: an unresolvable empty embed in the same
+      position is a PGRST200, not this 42703 (select.empty_embed_unresolvable,
+      11141-11144).
     cases: [11139]
+
+  - entry_id: select.empty_embed_unresolvable
+    claim: >
+      An empty embed `relation()` is resolved like any other embed: if no
+      relationship exists between its parent and the named relation — a
+      made-up name or a real but unrelated table — the request is a 400
+      PGRST200 "Could not find a relationship between '<parent>' and
+      '<relation>' in the schema cache". This holds nested in a spread,
+      nested in an ordinary embed and at the root alike. `addRels` resolves
+      every non-root node through `findRel` before anything reads the
+      node's select list; `rsEmptyEmbed` is computed only afterwards, by
+      `generateRelSelectField` under `addRelSelects`, and only decides how
+      an already-resolved embed renders.
+    source_url: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L655
+    source_line: 655
+    note: >-
+      Deviates from this file's it-line convention for the same reason as
+      select.spread_nested_empty_embed_error: upstream's empty-embed and
+      empty-spread it-blocks (SpreadQueriesSpec.hs:603 and its siblings)
+      name real relationships only, so the anchor is the `findRel` branch
+      that raises NoRelBetween. The call site is Plan.hs:602
+      (`rel = findRel schema allRels origin relName relHint`), the
+      depth >= 1 recursion that propagates a child's failure is L604, and
+      `rsEmptyEmbed` is L750. The parent named in the error is the embed's
+      immediate parent (`origin`, L597-L601): 'processes' for the nested
+      spellings 11141-11143, 'factories' for the root spelling 11144. All
+      four `hint`s are null: each parent is a key of the relationships map,
+      so `noRelBetweenHint` takes its child branch (Error.hs:326) and
+      neither "bogus" nor "clients" fuzzy-matches one of the parent's
+      children — issue #31 had speculated that `clients()` might draw a
+      hint; it does not. Bodies (with Content-Length) were read off a live
+      run of the pinned v16.4 binary against this suite's fixtures. Cases:
+      11141 `...processes(bogus())`, 11142 `...processes(clients())`,
+      11143 `processes(bogus())`, 11144 root `bogus()`. Contrast 11139,
+      where the nested empty embed DOES resolve and the spread path then
+      fails with 42703 — an implementer that skips resolution for empty
+      embeds passes 11139 and fails all four (milmazz/bier#161).
+    cases: [11141, 11142, 11143, 11144]
 
   - entry_id: select.spread_drop_junction
     claim: >
@@ -864,6 +906,18 @@ gaps:
     all three verified live and reported in the 11139/11140 notes; they add
     cardinality coverage, not a new rule.
   - >
+    CLOSED 2026-10-02 (issue #31): 11139 exercised the nested-empty-embed
+    path only on a relation that RESOLVES, so nothing in the tree showed
+    that an empty embed must be resolved at all — an implementer that
+    short-circuits empty embeds before relationship resolution passed every
+    case (milmazz/bier#161). Now cased in four spellings, all 400 PGRST200
+    with a null hint (entry select.empty_embed_unresolvable): a nonexistent
+    relation nested in a spread (11141), a real but unrelated table nested
+    in a spread (11142), a nonexistent relation nested in a plain embed
+    (11143) and at the root (11144). Bodies read off a live run of the
+    pinned v16.4 binary. The issue's open question — whether `clients()`
+    draws a fuzzy child hint — is settled: it does not.
+  - >
     JSON path negative array indexes (data->>-1::int) are traced at
     JsonOperatorSpec.hs#L312 but not given a separate case; covered indirectly
     by the array-index entry.
@@ -967,7 +1021,7 @@ gaps:
     the fixture argument that justified the ordering-area gap no longer applies
     to it. What is left is a genuine authoring gap, not an ownership one: it
     belongs here, beside 11118 (the other `...processes(count())` aggregate over
-    process_supervisor), and the band has room at 11141+. Its it-block also
+    process_supervisor), and the band has room at 11145+. Its it-block also
     carries a second `get` at #L191 aliasing the aggregate (`cost_sum:`), so
     the block is worth two cases, not one. Deferred only because this pass
     stopped at the two SpreadQueriesSpec contexts it set out to close.

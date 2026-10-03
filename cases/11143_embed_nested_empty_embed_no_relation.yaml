@@ -1,0 +1,37 @@
+id: 11143
+feature: select/embed/nested-empty-embed-no-relation
+request:
+  method: GET
+  path: /factories?select=name,processes(bogus())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "258"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'processes' and 'bogus' in the schema cache"
+    details: "Searched for a foreign key relationship between 'processes' and 'bogus' in the schema 'test', but no matches were found."
+    hint: null
+notes: >
+  11141 without the spread: an unresolvable empty embed nested in an
+  ordinary to-many embed. Byte-for-byte the same 400 as 11141, which is the
+  point — the spread plays no part in the failure. The cited line is the
+  depth >= 1 branch of `addRels`, which builds the node's plan from
+  `findRel`'s result and recurses into its children with `updateForest`
+  (L620); the child `bogus` fails in `findRel` (L655) and the `Left`
+  propagates up through the `<*>` on this line. Only an already-resolved
+  embed reaches `generateRelSelectField` (L745), where the non-spread clause
+  consults `rsEmptyEmbed` (L750) to render an empty embed as nothing — the
+  rendering 11139 shows the spread path skips — so no amount of "an empty
+  embed contributes nothing" reasoning applies before resolution has
+  succeeded. Same null-hint derivation as 11141 (child branch,
+  Error.hs:326). Content-Length 258 was recounted against the body above.
+
+  EXTRAPOLATION beyond upstream's own coverage: upstream's empty-embed
+  it-blocks name real relationships only. The body was read off a live run
+  of the pinned v16.4 binary against this suite's fixtures (issue #31).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L604

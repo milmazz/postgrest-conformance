@@ -1,0 +1,37 @@
+id: 11144
+feature: select/embed/empty-embed-no-relation
+request:
+  method: GET
+  path: /factories?select=name,bogus()
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "258"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'factories' and 'bogus' in the schema cache"
+    details: "Searched for a foreign key relationship between 'factories' and 'bogus' in the schema 'test', but no matches were found."
+    hint: null
+notes: >
+  The root spelling of 11141/11143: an unresolvable empty embed directly
+  under the requested table. The root branch of `addRels` (L617) passes the
+  root node to `updateForest`, so each direct child is resolved by the cited
+  `findRel` call with `origin` = the root table (L598-L599, no root alias on
+  a plain GET) — hence 'factories', not 'processes', in both strings. The
+  empty parens do not exempt it: `findRel` never sees the child's select
+  list, and `rsEmptyEmbed` (L750) is only computed once resolution has
+  succeeded. `test.factories` participates in relationships, so the hint
+  comes from the CHILD branch of `noRelBetweenHint` (Error.hs:326); "bogus"
+  matches none of factories' children and the hint is null. Content-Length
+  258 was recounted against the body above (same length as 11141 because
+  'factories' and 'processes' are both nine characters).
+
+  EXTRAPOLATION beyond upstream's own coverage: no upstream it-block
+  requests an empty embed of a nonexistent relation. The body was read off a
+  live run of the pinned v16.4 binary against this suite's fixtures
+  (issue #31).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L602
