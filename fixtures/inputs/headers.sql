@@ -20,22 +20,22 @@
 -- spec/conformance/cases/15xx_*.yaml.
 --
 -- Source anchors (v14.12 test/spec/fixtures):
---   projects:                       schema.sql#L719
---   timestamps:                     schema.sql#L3578  data.sql#L841
---   tiobe_pls:                      schema.sql#L1437
---   loc_test:                       schema.sql#L2106
---   private.stuff / test.stuff:     schema.sql#L2074  schema.sql#L2079
---   location_for_stuff trigger:     schema.sql#L2081
---   status_205_for_updated_stuff:   schema.sql#L2097
---   send_body_status_403:           schema.sql#L1303
---   send_bad_status:                schema.sql#L1310
---   get_projects_and_guc_headers:   schema.sql#L1317
---   get_int_and_guc_headers:        schema.sql#L1322
---   bad_guc_headers_1:              schema.sql#L1327
---   set_cookie_twice:               schema.sql#L1339
---   v1.parents / v2.parents:        schema.sql#L2112 / schema.sql#L2130
---   v2.another_table:               schema.sql#L2143
---   SPECIAL "@/\#~_-".names:        MultipleSchemaSpec.hs#L82 (special-named schema)
+--   projects:                       schema.sql#L721
+--   timestamps:                     schema.sql#L3580  data.sql#L841
+--   tiobe_pls:                      schema.sql#L1439
+--   loc_test:                       schema.sql#L2108
+--   private.stuff / test.stuff:     schema.sql#L2076  schema.sql#L2081
+--   location_for_stuff trigger:     schema.sql#L2083
+--   status_205_for_updated_stuff:   schema.sql#L2099
+--   send_body_status_403:           schema.sql#L1305
+--   send_bad_status:                schema.sql#L1312
+--   get_projects_and_guc_headers:   schema.sql#L1319
+--   get_int_and_guc_headers:        schema.sql#L1324
+--   bad_guc_headers_1:              schema.sql#L1329
+--   set_cookie_twice:               schema.sql#L1341
+--   v1.parents / v2.parents:        schema.sql#L2114 / schema.sql#L2132
+--   v2.another_table:               schema.sql#L2145
+--   SPECIAL "@/\#~_-".names:        MultipleSchemaSpec.hs#L77 (special-named schema)
 
 CREATE SCHEMA IF NOT EXISTS test;
 -- multi-schema exposure: v1 is the default (first) schema, v2 secondary.
@@ -231,7 +231,7 @@ INSERT INTO v2.another_table (id, another_value) VALUES (5, 'value 5'), (6, 'val
 -- Exposed as a third schema (after v1, v2) so a profile header may name it and
 -- be echoed verbatim in Content-Profile. Mirrors PostgREST's own fixture
 -- (test/spec/fixtures/schema.sql) which exposes the same special-named schema.
--- Source: test/spec/Feature/Query/MultipleSchemaSpec.hs#L82
+-- Source: test/spec/Feature/Query/MultipleSchemaSpec.hs#L77
 -- ---------------------------------------------------------------------------
 
 CREATE SCHEMA IF NOT EXISTS "SPECIAL ""@/\#~_-";

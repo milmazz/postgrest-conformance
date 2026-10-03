@@ -16,4 +16,4 @@ notes: >
   Row 5 (range IS NULL) is excluded, unlike the null-safe isdistinct of case
   10206. Mirrors AndOrParamsSpec.hs 'can handle range operators' (eq
   assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L122
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L129

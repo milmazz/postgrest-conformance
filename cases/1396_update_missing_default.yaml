@@ -24,10 +24,10 @@ notes: >-
   Prefer: missing=default also applies to PATCH: `field-with_sep` is listed in
   ?columns but absent from the JSON object, so the column DEFAULT (1) is written
   instead of NULL. Columns outside ?columns (settings, arr_data) keep their
-  stored values. Mirrors UpdateSpec.hs#L371-L381 ("updates table using default
+  stored values. Mirrors UpdateSpec.hs#L449-L460 ("updates table using default
   values(field-with_sep) when json keys are undefined"), which the mutations
   area schema reproduces: `mutations.complex_items` is a real table (LIKE
   test.complex_items INCLUDING ALL) whose `field-with_sep` DEFAULT is 1 and
   whose id=3 row seeds settings={"foo":{"bar":"baz","int":1}} and
   arr_data={1,2,3}.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L371
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L449

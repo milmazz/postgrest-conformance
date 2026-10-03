@@ -18,7 +18,7 @@ expect:
     - {"project_id":4,"total":4100,"projects":{"name":"OSX"}}
 notes: >
   "allows the use of an JSON-embedded relationship column as part of the group
-  by" (AggregateFunctionsSpec.hs:92) — "Grouping by an Embedded Resource" in the
+  by" (AggregateFunctionsSpec.hs:97) — "Grouping by an Embedded Resource" in the
   docs. Distinct from case 1131 (implicit GROUP BY over plain columns only) and
   from case 1133 (the aggregate living inside the embed): here the many-to-one
   embed `projects(name)` is itself part of the grouping and renders as a JSON
@@ -28,4 +28,4 @@ notes: >
   300/1200/3200/4100 for projects Windows 7 / Windows 10 / IOS / OSX. Requires
   db-aggregates-enabled = true (see the harness_exposure gap in
   spec/select.yaml).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L92
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L97

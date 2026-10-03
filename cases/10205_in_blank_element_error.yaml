@@ -21,4 +21,4 @@ notes: >
   cast to integer[], which Postgres rejects with SQLSTATE 22P02 -> HTTP 400.
   Mirrors QuerySpec.hs "only returns an empty result set if the in value is
   empty".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1395
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1599

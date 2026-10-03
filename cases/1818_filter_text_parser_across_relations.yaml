@@ -28,4 +28,4 @@ notes: >
   the table-name target `datarep_todos.` is not affected by v16's aliased-target
   deprecation. Mirrors QuerySpec.hs 'uses text parser on value for filter across
   relations' (v16.0 request carries the explicit &order=id).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1649
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1893

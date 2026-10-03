@@ -15,7 +15,7 @@ notes: >
   The `not` prefix and the to_tsvector wrap compose: pgFmtFilter emits the NOT
   token BEFORE the (already wrapped) field reference, giving
   `NOT to_tsvector(text_search) @@ to_tsquery('impossible|fat|fun')`
-  (SqlFragment.hs#L383 for the operand ordering, SqlFragment.hs#L248 for the
+  (SqlFragment.hs#L427 for the operand ordering, SqlFragment.hs#L285 for the
   wrap). Mirrors QuerySpec.hs context "text and json columns" -> it "can be
   negated with not operator" (first text_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L424
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L485

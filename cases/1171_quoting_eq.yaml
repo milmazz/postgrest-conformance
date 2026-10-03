@@ -13,4 +13,4 @@ expect:
 notes: >
   Double quotes protect the reserved characters ( ) , inside an eq value in a
   logic group. Mirrors AndOrParamsSpec "eq can have quotes".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L201
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L208

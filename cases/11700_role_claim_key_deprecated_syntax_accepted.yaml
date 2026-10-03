@@ -1,0 +1,28 @@
+id: 11700
+feature: config/jwt-role-claim-key/deprecated-syntax-accepted
+request:
+  kind: cli
+  flag: "--dump-config"
+schema: config
+config:
+  env:
+    PGRST_JWT_ROLE_CLAIM_KEY: ".roles.user_role"
+expect:
+  exit_code: 0
+  dump_contains:
+    - 'jwt-role-claim-key = ".\"roles\".\"user_role\""'
+notes: >
+  REVERSES the v16.0 behavior case 1711 used to pin. v16.0 replaced the
+  leading-dot JSPath DSL with RFC 9535 JSONPath and made `.role.other` a
+  startup error; v16.2 (PostgREST#5171) made jwt-role-claim-key backwards
+  compatible again. parseRoleClaimKey tries pRoleClaimKey first and, when it
+  fails, pDeprecatedRoleClaimKey (Config.hs#L468), keeping the result as a
+  DeprecatedJSPath. The dump renders it with dumpDeprecatedJSPath, which quotes
+  every key: `.roles.user_role` dumps as `."roles"."user_role"` (the
+  spelling upstream's own warning text uses, test_config.py#L314). The value is
+  upstream's "deprecated syntax" parametrization of
+  test_deprecated_role_claim_key_warning; its "new syntax" twin
+  (`$.roles.user_role`) is the ordinary RFC 9535 path already covered by
+  1705/1707. Companion of 11701 (the deprecation warning) and 11702-11706 (the
+  five string-comparison operators).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_config.py#L299

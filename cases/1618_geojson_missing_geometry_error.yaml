@@ -15,4 +15,4 @@ expect:
     code: "22023"
     message: geometry column is missing
 notes: 'GeoJSON on a relation without a geometry column fails 400 / SQLSTATE 22023. Mirrors PostGISSpec ''fails for a table that doesn''t have a geometry column''. Assumes: Requires the postgis extension to be installed so the geo+json handler is registered.'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/PostGISSpec.hs#L28
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/PostGISSpec.hs#L32

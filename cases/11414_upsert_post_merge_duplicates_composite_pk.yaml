@@ -28,7 +28,7 @@ notes: >-
   INSERT ... ON CONFLICT (name, year) DO UPDATE returns every payload row in
   payload order, and the status is 201 because at least one row was inserted.
   Mirrors the it-block "INSERTs and UPDATEs rows on composite pk conflict for
-  partitioned tables" (UpsertSpec.hs#L62-L73), which posts the same two rows to
+  partitioned tables" (UpsertSpec.hs#L74-L89), which posts the same two rows to
   /car_models with the same two Prefer values and asserts 201 +
   Preference-Applied "resolution=merge-duplicates, return=representation".
   Two derivations from upstream, both narrowing rather than widening the claim:
@@ -40,4 +40,4 @@ notes: >-
   identical either way, since merge-duplicates puts updated and inserted rows
   alike in the RETURNING set. The conflicting-row leg is NOT derivable here and
   is recorded under gaps.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L62
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L74

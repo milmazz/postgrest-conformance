@@ -23,6 +23,6 @@ notes: >
   renders as `-04:00`. Same removal of the pg_timezone_names membership check
   as 1577 (src/library/PostgREST/ApiRequest/Preferences.hs#L138). Wire bytes
   are upstream's, re-verified against a loaded bier_test. Mirrors the exact
-  it-block at Preferences/TimezoneSpec.hs:70-78 ("should change with negative
+  it-block at Preferences/TimezoneSpec.hs:88-98 ("should change with negative
   offset").
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L70
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L88

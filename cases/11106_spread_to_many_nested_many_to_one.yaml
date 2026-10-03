@@ -18,4 +18,4 @@ notes: >
   A many-to-one spread nested inside a spread to-many contributes one
   element per child row, repeating shared parents
   (SpreadQueriesSpec.hs:173).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L173
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L173

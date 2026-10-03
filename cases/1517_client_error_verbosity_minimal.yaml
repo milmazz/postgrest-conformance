@@ -17,10 +17,10 @@ notes: >
   shape. With the default `verbose` the body is {code, message, details, hint}
   (see cases 1515/1516); with `minimal` only {code, message} are emitted — the
   details and hint keys are OMITTED entirely, not set to null
-  (toJsonPgrstError's Minimal branch, Error.hs:75-78). The status is unchanged.
+  (toJsonPgrstError's Minimal branch, Error.hs:77-81). The status is unchanged.
   Mirrors ErrorSpec.hs "hides details and hint when set to 'minimal'", which
   runs GET /itemsx under `configClientErrorVerbosity = Minimal` and expects
   exactly this two-key body with status 404. `test.itemsx` does not exist in
   the conformance database (verified against a freshly loaded bier_test), so
   the request resolves to the PGRST205 TableNotFound error.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L230
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L246

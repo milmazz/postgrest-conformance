@@ -17,4 +17,4 @@ notes: >
   `<>` is null-propagating, which is exactly the difference from isdistinct
   (case 10207 returns 1, 3 and 4). Mirrors AndOrParamsSpec.hs 'can handle
   array operators' (neq assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L156
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L163

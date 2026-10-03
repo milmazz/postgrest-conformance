@@ -18,4 +18,4 @@ expect:
 notes: >
   related order on a many-to-one relationship: order=clients(name).nullsfirst
   orders projects by the embedded client's name, nulls first.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L14
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L14

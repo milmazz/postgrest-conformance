@@ -10,4 +10,4 @@ expect:
   status: 201
   headers_absent: [Content-Type]
 notes: "Empty object {} inserts a row using all column defaults (serial pk)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L343
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L406

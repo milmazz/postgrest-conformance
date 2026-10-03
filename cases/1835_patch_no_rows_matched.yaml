@@ -25,9 +25,9 @@ notes: >
   matches id=eq.2001, and the response is 200 rather than 404 and rather than
   the 400 the `json AS color` cast would raise on "invalid": the parse lives in
   the LATERAL pgrst_body subquery of `UPDATE … SET … FROM (…) pgrst_payload,
-  LATERAL (…) pgrst_body WHERE …` (QueryBuilder.hs#L152-L153,
-  SqlFragment.hs#L316), so with no matching target row it never has to produce a
+  LATERAL (…) pgrst_body WHERE …` (QueryBuilder.hs#L168-L173,
+  SqlFragment.hs#L354), so with no matching target row it never has to produce a
   value. Upstream asserts the status and nothing else (`shouldRespondWith` 200 at
-  UpdateSpec.hs#L736), so this case does the same; the response body is not
+  UpdateSpec.hs#L867), so this case does the same; the response body is not
   pinned.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L733
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L861

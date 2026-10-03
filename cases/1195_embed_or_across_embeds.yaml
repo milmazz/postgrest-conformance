@@ -17,11 +17,11 @@ notes: >
   Embedded null filters may sit INSIDE a logic tree, so two different embeds
   can be OR-ed against each other: a parent survives if at least one of its
   (independently filtered) embeds is non-null. `addNullEmbedFilters` recurses
-  through `CoercibleExpr` before it rewrites leaves (Plan.hs#L967-L968), so
+  through `CoercibleExpr` before it rewrites leaves (Plan.hs#L1035-L1036), so
   each `<embed>.not.is.null` leaf inside the `or=(...)` group becomes a
   `CoercibleFilterNullEmbed` over that embed's aggregate alias
-  (Plan.hs#L972), rendered as `<agg> IS NOT DISTINCT FROM NULL` /
-  `IS DISTINCT FROM NULL` (SqlFragment.hs#L381). Because each embed's own
+  (Plan.hs#L1040), rendered as `<agg> IS NOT DISTINCT FROM NULL` /
+  `IS DISTINCT FROM NULL` (SqlFragment.hs#L425). Because each embed's own
   filter lives inside its LEFT JOIN LATERAL, a filtered-out embed aggregates
   to NULL rather than removing the parent — that is what makes the OR
   meaningful.
@@ -51,4 +51,4 @@ notes: >
   OSX over project_ids 1,1,2,2,3,3,4,4. Both embeds are projected empty so the
   related arrays/objects stay out of the body; row order is the projects
   physical order (1,3,4), as in every other null-filtering case in this band.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L225
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L225

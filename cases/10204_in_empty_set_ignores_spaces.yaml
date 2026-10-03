@@ -16,4 +16,4 @@ notes: >
   `ws *> p <* ws`, so the surrounding spaces are consumed and the single
   element parses as "", hitting the same `= ANY('{}')` branch as `in.()`.
   Mirrors QuerySpec.hs "returns an empty result ignoring spaces".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1391
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1595

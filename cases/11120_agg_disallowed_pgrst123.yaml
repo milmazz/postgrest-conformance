@@ -17,5 +17,5 @@ expect:
 notes: >
   With db-aggregates-enabled at its default (false), using an aggregate
   returns 400 PGRST123. Assumes: default db-aggregates-enabled=false
-  (AggregateFunctionsSpec.hs:312, run under baseCfg at L310).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L312
+  (AggregateFunctionsSpec.hs:346, run under baseCfg at L344).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L346

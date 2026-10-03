@@ -17,4 +17,4 @@ expect:
 notes: >
   Filters on the spread embed (processes.name=not.like.*1) narrow the
   arrays without dropping parents (SpreadQueriesSpec.hs:261).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L261
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L261

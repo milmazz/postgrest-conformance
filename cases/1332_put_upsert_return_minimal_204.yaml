@@ -18,11 +18,11 @@ notes: >-
   PUT single upsert with return=minimal yields 204 with empty body regardless of
   insert vs replace, and echoes Preference-Applied: return=minimal. Directly
   mirrors the upstream it-block "works with request method PUT and
-  return=minimal" (UpsertSpec.hs#L543-L552: matchStatus 204,
+  return=minimal" (UpsertSpec.hs#L661-L673: matchStatus 204,
   matchHeaderAbsent hContentType, "Preference-Applied" <:> "return=minimal"),
   substituting /items for /UnitTest — the mutable relation this area's fixture
   isolates. Status/body come from the None arm of the SingleUpsert dispatch
-  (Response.hs#L153); the echo from responsePreferences passing
-  preferRepresentation through for any MutateReadPlan{} (Response.hs#L281-L283)
-  plus prefAppliedHeader (Response.hs#L143).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L543
+  (Response.hs#L162); the echo from responsePreferences passing
+  preferRepresentation through for any MutateReadPlan{} (Response.hs#L288-L290)
+  plus prefAppliedHeader (Response.hs#L151).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L661

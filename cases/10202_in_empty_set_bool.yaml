@@ -14,4 +14,4 @@ notes: >
   Same `= ANY('{}')` emission for a boolean column; the empty list never
   reaches a type parser, so no 22P02 is raised. Mirrors QuerySpec.hs
   "IN and NOT IN empty set" / "works for bool".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1368
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1572

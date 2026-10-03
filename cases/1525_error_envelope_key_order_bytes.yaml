@@ -13,9 +13,9 @@ expect:
 notes: >
   Pins the WIRE BYTES of the error envelope, which no other case can do.
   `errorPayload` constructs the object as [code, message, details, hint]
-  (Error.hs:69-74) but emits it through `JSON.encode` (Error.hs:66) over an
+  (Error.hs:70-76) but emits it through `JSON.encode` (Error.hs:67) over an
   aeson `KeyMap`. postgrest.cabal pins `aeson >= 2.0.3 && < 2.3`
-  (postgrest.cabal:107) and neither postgrest.cabal nor cabal.project overrides
+  (postgrest.cabal:108) and neither postgrest.cabal nor cabal.project overrides
   aeson's `ordered-keymap` flag, whose default is True — so KeyMap is
   `Data.Map.Strict` and the encoder walks keys in ascending order. The emitted
   body is therefore ALPHABETICAL (code, details, hint, message), NOT the
@@ -26,7 +26,7 @@ notes: >
   '{"code":"57014","details":null,"hint":null,"message":"canceling statement due to statement timeout"}'.
   The request, the message text, the null hint and the Content-Length 119 are
   the same ground truth as case 1521 (ErrorSpec.hs "don't show hint when
-  similarity score is less than 75%", ErrorSpec.hs:97-103): `test.projxxxx`
+  similarity score is less than 75%", ErrorSpec.hs:105-111): `test.projxxxx`
   does not exist in a freshly loaded bier_test and nothing in that schema
   clears the 0.75 fuzzy threshold for it, so `hint` is null.
   This case is deliberately `body_raw` rather than `body_exact`: the harness
@@ -36,4 +36,4 @@ notes: >
   Bier's default encoder (Elixir's stdlib `JSON`, via Bier.json_library/0)
   preserves insertion order, so an implementation that follows the
   construction order emits a byte-different body that only this case catches.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_settings.py#L299
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_settings.py#L299

@@ -21,12 +21,12 @@ notes: >
   my_json json, OUT num int, OUT str text)` has ZERO input arguments —
   pg_proc.proargtypes is empty for it, and the routines query keeps only
   input arguments (`WHERE type IS NOT NULL -- only input arguments`,
-  https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/SchemaCache.hs#L427).
+  https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/SchemaCache.hs#L473).
   So `pdParams pd == []` and makeProcSchema's `properties .~ fromList []`
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L157)
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L174)
   leaves the field at its aeson default (an empty map), exactly as
   `required .~ []`
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L158)
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L175)
   leaves that one at its default (an empty list). The swagger2 encoder DROPS
   every field still equal to its default (`| Just x == def = rest` in
   Data/Swagger/Internal/AesonUtils.hs), so neither key is emitted.
@@ -34,23 +34,23 @@ notes: >
   whole-schema equality above is safe to assert: the `a_json` column schema is
   asserted to equal EXACTLY `{"format":"json"}` with no `properties`/`required`
   and no `type`
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L514
-  , the aesonQQ literal running to #L526), and the `child_entities_view`
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L530
+  , the aesonQQ literal running to #L542), and the `child_entities_view`
   definition is asserted as a whole object with no `required` key at all
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L179
-  , running to #L209). `type: object` IS emitted because makeProcSchema sets it
-  explicitly with `?~` (OpenAPI.hs#L156), and `description` is absent because
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L192
+  , running to #L222). `type: object` IS emitted because makeProcSchema sets it
+  explicitly with `?~` (OpenAPI.hs#L173), and `description` is absent because
   the fixture carries no COMMENT on the function.
   The `required` assertion is the one upstream states directly:
-  OpenApiSpec.hs#L1024-1030 ("doesn't include OUT params of function as
+  OpenApiSpec.hs#L1046-1058 ("doesn't include OUT params of function as
   required parameters") reads
   paths./rpc/many_out_params.post.parameters[0].schema.required and asserts
   Nothing. parameters[0] is the inline `args` body param
-  (makeProcPostParams, OpenAPI.hs#L216-223).
+  (makeProcPostParams, OpenAPI.hs#L244-252).
   The fixture is the same object upstream uses:
   conformance/fixtures.sql#L1360 declares `test.many_out_params(OUT my_json
   json, OUT num int, OUT str text)`, matching test/spec/fixtures/schema.sql
-  #L1257. It carries no explicit GRANT and therefore relies on PostgreSQL's
+  #L1259. It carries no explicit GRANT and therefore relies on PostgreSQL's
   default PUBLIC EXECUTE to be visible under the default openapi-mode
   (follow-privileges) to the anonymous role.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1024
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1046

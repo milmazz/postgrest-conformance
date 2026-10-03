@@ -16,7 +16,9 @@ expect:
   status: 200
 notes: >-
   v16.0 replaced the JSPath DSL of `jwt-role-claim-key` with RFC 9535 JSON Path
-  (CHANGELOG.md#L88): every value must now start with `$`, so the v14.12 key
-  `.postgrest.a_role` becomes `$.postgrest.a_role`. A nested member path
-  selects the role to switch to. Upstream asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L123
+  (CHANGELOG.md#L126), so the v14.12 key `.postgrest.a_role` becomes
+  `$.postgrest.a_role`. A nested member path selects the role to switch to.
+  Upstream asserts the status only. v16.2 (PostgREST#5171) accepts the
+  leading-dot form again as deprecated syntax; its twin, with the same payload
+  and the v14.12 spelling, is 11819.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L123

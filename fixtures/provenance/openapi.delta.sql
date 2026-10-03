@@ -1,0 +1,1 @@
+-- Folded into ../02_base.sql on 2026-10-02 (the mixed-case schema "SCHEMA_v3": CREATE SCHEMA, COMMENT 'v3 schema', USAGE grant; case 1690, PostgREST#5158, v16.4 re-pin); empty until the next delta.

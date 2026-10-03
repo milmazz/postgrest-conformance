@@ -12,4 +12,4 @@ expect:
   body_exact:
     - { "id": 4 }
 notes: "On GET, the Range header paginates a SETOF proc result (offset 1, one row). Content-Range 1-1/* with no count."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L26
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L24

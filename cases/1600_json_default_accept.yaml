@@ -27,9 +27,9 @@ notes: >-
   SpecHelper#L121 (the OpenAPI schema-validation helper) -- so the
   explicit-Accept half is cited at the
   source level instead: application/json has a built-in handler
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/SchemaCache.hs#L1019)
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/SchemaCache.hs#L1085)
   and MTApplicationJSON renders as `application/json` + charset
-  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/MediaType.hs#L69).
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/MediaType.hs#L78).
   The previous revision cited only the MediaType.hs line, which establishes the
   Content-Type but says nothing about the asserted path or body.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RawOutputTypesSpec.hs#L15
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RawOutputTypesSpec.hs#L16

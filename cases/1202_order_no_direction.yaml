@@ -11,4 +11,4 @@ expect:
     Content-Range: "0-1/*"
   body_exact: [{ "id": 1 }, { "id": 2 }]
 notes: "Order with no direction or nulls specified; PostgreSQL default (ascending) applies."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1144
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1297

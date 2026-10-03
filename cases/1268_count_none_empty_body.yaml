@@ -15,10 +15,10 @@ expect:
   body_exact: []
 notes: >
   count=none over an empty relation returns [] with Content-Range '*/*'.
-  Mirrors the it-block at RangeSpec.hs:161-166 (inside the context "when I
-  don't want the count" at :160): the request line :162 carries the path and
-  the anchored line :163 carries the `[("Prefer", "count=none")] ""` tuple,
-  with the asserted Content-Range at :166. Upstream requests '/menagerie', its
+  Mirrors the it-block at RangeSpec.hs:198-205 (inside the context "when I
+  don't want the count" at :197): the request line :201 carries the path and
+  the anchored line :202 carries the `[("Prefer", "count=none")] ""` tuple,
+  with the asserted Content-Range at :205. Upstream requests '/menagerie', its
   single-column EMPTY pagination table. Bier's consolidated fixture kept
   openapi.sql's 7-column type-mapping table as `test.menagerie` and renamed the
   empty one to `test.menagerie_empty` (fixtures.sql:75-79, :719-722), so the
@@ -26,6 +26,6 @@ notes: >
   `Preference-Applied` must be ABSENT: 'count=none' is not a PreferCount value
   (Preferences.hs:134 parses only count=exact|planned|estimated), so
   preferCount stays Nothing, prefAppliedHeader has nothing to serialize
-  (Preferences.hs:174-183) and the header is omitted. Upstream asserts only the
+  (Preferences.hs:176-187) and the header is omitted. Upstream asserts only the
   Content-Range here; the absence is source-derived.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L163
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L202

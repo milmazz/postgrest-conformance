@@ -19,4 +19,4 @@ notes: >
   not contain the substring "thing". Article 3 contains neither pattern.
   Mirrors QuerySpec.hs "works with the match/imatch operator" (first
   assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1540
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1767

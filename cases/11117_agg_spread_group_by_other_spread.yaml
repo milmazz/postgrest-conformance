@@ -17,6 +17,6 @@ expect:
 notes: >
   An aggregate on one to-one spread grouped by a plain field spread from a
   DIFFERENT relationship; the key defaults to the aggregate's name.
-  Requires db-aggregates-enabled=true (AggregateFunctionsSpec.hs:156; the
-  it-block's second get, L162, asserts the aliased form).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L156
+  Requires db-aggregates-enabled=true (AggregateFunctionsSpec.hs:170; the
+  it-block's second get, L177, asserts the aliased form).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L170

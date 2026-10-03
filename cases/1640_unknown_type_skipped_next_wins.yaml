@@ -15,6 +15,6 @@ notes: >-
   "text/unknowntype, text/csv" resolves to CSV rather than 406. Mirrors QuerySpec
   'should respond correctly to multiple types in accept header' (which asserts
   the 200); the Content-Type follows from firstAcceptedPick
-  (Plan/Negotiate.hs#L63) plus toMime MTTextCSV (MediaType.hs#L72), the same
+  (Plan/Negotiate.hs#L67) plus toMime MTTextCSV (MediaType.hs#L81), the same
   mechanism asserted by cases 1604/1605.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1229
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1405

@@ -24,4 +24,4 @@ notes: >
   the default url-use-legacy-target-names=true but is deprecated and adds a
   Warning header (case 1224) — hence headers_absent here pins that the canonical
   alias form emits no deprecation Warning.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1159
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1313

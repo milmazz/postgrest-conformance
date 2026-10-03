@@ -18,4 +18,4 @@ notes: >
   which pgErrorStatus maps to HTTP 409. The body is the raw PG ServerError:
   code is the SQLSTATE, message/details from PG. Mirrors InsertSpec.hs
   "attempting to insert a row with the same primary key fails returning a 409".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L317
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L375

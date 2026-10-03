@@ -17,6 +17,6 @@ expect:
 notes: >-
   A claim name containing characters other than `_` must be quoted with the RFC
   9535 bracket selector: v14.12's `."https://www.example.com/roles"[0].value`
-  becomes `$["https://www.example.com/roles"][0].value` (CHANGELOG.md#L90).
+  becomes `$["https://www.example.com/roles"][0].value` (CHANGELOG.md#L129).
   Mixed member/index/member traversal. Upstream asserts the status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L137
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L137

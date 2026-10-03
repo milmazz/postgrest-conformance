@@ -13,5 +13,5 @@ expect:
     message: "Query result exceeds max-affected preference constraint"
     details: "The query affects 14 rows"
     hint: null
-notes: "handling=strict, max-affected=10 on a DELETE affecting 14 rows -> 400 PGRST124. Mirrors Preferences/MaxAffectedSpec.hs:14-20."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L14
+notes: "handling=strict, max-affected=10 on a DELETE affecting 14 rows -> 400 PGRST124. Mirrors Preferences/MaxAffectedSpec.hs:14-21."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L14

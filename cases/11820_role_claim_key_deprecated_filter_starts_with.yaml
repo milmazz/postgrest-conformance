@@ -1,0 +1,25 @@
+id: 11820
+feature: auth/role-claim-key/deprecated-filter-starts-with
+request:
+  method: GET
+  path: /authors_only
+  headers: { Accept: application/json }
+  jwt:
+    sign_with: hs256_test_secret
+    payload:
+      realm_access: { "roles": ["other", "postgrest_test_author"] }
+schema: auth
+config:
+  jwt-role-claim-key: '.realm_access.roles[?(@ ^== "postgrest_te")]'
+expect:
+  status: 200
+notes: >-
+  A deprecated-DSL string-comparison filter evaluated against a real claim:
+  `^==` is starts-with, so of ["other", "postgrest_test_author"] only the second
+  element matches and becomes the role. RFC 9535 has no such operator (the v16
+  replacement is a `search()` regex), which is why this filter, unlike
+  `==`/`!=` (11803/11804), had no conformance case at v16.0 at all. Mirrors
+  test_config.py:test_deprecated_role_claim_key over deprecatedroleclaims
+  (`^==` entry); upstream asserts the status only. The parse side of all five
+  operators is pinned by 11702-11706.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L241

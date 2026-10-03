@@ -1,5 +1,88 @@
 # Changelog
 
+## Unreleased — re-pin to PostgREST v16.4
+
+**The pin moves v16.0 → v16.4, and 812 -> 824 cases.** Spans upstream v16.1,
+v16.2, v16.3 and v16.4. Closes #26, #33, #34 and #35 (the four scheduled
+drift reports for this span).
+
+**Behavioral drift: one case.** Before any case changed, the suite ran
+**811/812** against the v16.4 binary on a freshly rebuilt fixture database.
+The single failure was case 1711, as #26 predicted. v16.2
+([PostgREST#5171](https://github.com/PostgREST/postgrest/pull/5171)) accepts the
+pre-v16 leading-dot JSPath again, as *deprecated* syntax, so `.role.other` now
+loads. 1711 now pins `@@.role.other`, which upstream's `invalidroleclaimkeys`
+moved to and which neither grammar accepts. Downstream (bier#99): the message
+1711 asserts is unchanged, but its input is not.
+
+**New cases, one per caseable changelog line:**
+
+- **config, deprecated `jwt-role-claim-key` syntax — 7 cases (11700-11706).**
+  Covers acceptance and `--dump-config` normalization (`.roles.user_role` dumps
+  as `."roles"."user_role"`), the startup WARNING, and each of the five
+  restored string-comparison operators (`==`, `!=`, `^==`, `==^`, `*==`),
+  mirroring upstream's one-operator-per-file `jspath-str-op-dump{1..5}.config`
+  goldens. The WARNING is emitted while the config loads, so `--dump-config`
+  prints it to stderr and no running server is needed.
+- **config, `jwt-cache-max-entries` through the in-database source — 1 case
+  (11707).** v16.4 ([#5269](https://github.com/PostgREST/postgrest/pull/5269))
+  fixes `dbSettingsNames`, which listed the nonexistent
+  `jwt_cache_max_lifetime`. `spec/config.yaml` had recorded that bug as a
+  QUIRK; the entry now records the fix.
+- **auth, deprecated syntax evaluated against real JWTs — 3 cases
+  (11819-11821).** Covers a dotted path, the `^==` filter (which RFC 9535 does
+  not have), and the object-vs-string 401.
+- **openapi, root document of a mixed-case schema — 1 case (1690).** v16.4
+  ([#5158](https://github.com/PostgREST/postgrest/pull/5158)) quotes the
+  schema name before `::regnamespace`. The fixture is upstream's `"SCHEMA_v3"`:
+  the schema, its comment and a USAGE grant, folded through the new
+  `fixtures/provenance/openapi.delta.sql`. The case is routed like 1654: an
+  id-selected `db-schemas` override in the oracle router and in HARNESS.md
+  §2.3/§2.5. **bier's harness must add the same `variant_extra_opts(1690)`
+  clause when it bumps the pin.**
+
+Each new case was also run against the v16.0, v16.2 and v16.3 binaries. Every
+one fails before the release that introduced its behavior and passes from that
+release on, so each case is anchored to its changelog line, not merely
+compatible with it.
+
+**Not caseable, recorded only:** v16.1's JWT clock fix
+([#5159](https://github.com/PostgREST/postgrest/pull/5159)) and v16.3's
+sporadic PGRST303 and log-timestamp fixes (#5196, #5213). All three need a
+controllable clock. All 69 pre-existing auth cases pass unchanged at v16.4. No
+case either for the docs, packaging, CI and `test/io` reorganization changes.
+
+**Bands.** config's primary band was full, so config opens the tree's sixth
+5-digit band, **[11700..11799]**, declared closed in `spec/config.yaml` when
+opened. auth grows contiguously to 11800-11821. openapi takes 1690 and leaves
+1689 unused, because `spec/openapi.yaml` still holds the withdrawn 1689 for
+restoration.
+
+**Re-anchoring.** All 2224 raw citations now carry the `v16.4` ref, but the ref
+was the easy part. Between the tags upstream reformatted every Haskell file
+(stylish-haskell → fourmolu) and split `test/io/test_io.py` and `test_auth.py`
+into `test_log.py`, `test_config.py`, `test_connection.py` and
+`test_reloading.py`. So nearly every `#L` anchor had moved even where behavior
+had not, and `oracle validate` checks the ref, not the line. Every URL anchor,
+bare prose reference (`Error.hs#L224`, `RangeSpec.hs:163`, `… at L303`) and
+`source_line:` field was re-mapped mechanically:
+
+- **Exact:** an LCS alignment of the two versions of each file, ignoring
+  whitespace and commas.
+- **Split lines:** a line fourmolu split across several maps to the first of
+  them.
+- **Moved files:** split-file refs are aligned function by function.
+
+Every match that was not exact was reviewed by hand. Prose refs whose file was
+ambiguous (226 continuations such as "… at :1266") were resolved by hand
+against the v16.0 text. References that cite v14.12, and the suite's own
+`fixtures.sql`, were left alone.
+
+Verified: `oracle validate` clean over 824, `go test ./...` green,
+`fixtures/06_area_schemas.sql` regenerates byte-identical, and a full run
+against the pinned v16.4 binary on a freshly rebuilt fixture database —
+**TOTAL 824/824**.
+
 ## v16.0.0-suite.5
 
 **805 -> 812 cases.** All three spec passes are the dispatched ranks of this

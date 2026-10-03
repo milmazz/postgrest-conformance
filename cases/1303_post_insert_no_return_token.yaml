@@ -13,5 +13,5 @@ expect:
     Content-Length: "0"
   headers_absent: [Content-Type, Location]
   body_exact: ""
-notes: "No return token behaves like minimal (empty body) but emits NO Preference-Applied: return=... and no Location when selecting without PK. Mirrors InsertSpec.hs:156."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L156
+notes: "No return token behaves like minimal (empty body) but emits NO Preference-Applied: return=... and no Location when selecting without PK. Mirrors InsertSpec.hs:189."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L189

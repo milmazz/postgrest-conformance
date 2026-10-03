@@ -11,4 +11,4 @@ expect:
   headers:
     Preference-Applied: handling=lenient
 notes: 'handling=lenient ignores the max-affected cap even with 14 rows -> 204; only handling=lenient echoed. Assumes: DELETE FROM test.items; INSERT INTO test.items (id) SELECT generate_series(1, 15);'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L48
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L56

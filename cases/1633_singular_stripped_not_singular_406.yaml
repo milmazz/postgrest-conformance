@@ -20,4 +20,4 @@ notes: >-
   application/json error body (NOT the stripped object media type). Mirrors
   NullsStripSpec 'throws error when Accept:
   application/vnd.pgrst.object+json;nulls=stripped and result not singular'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/NullsStripSpec.hs#L66
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/NullsStripSpec.hs#L71

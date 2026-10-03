@@ -1,4 +1,4 @@
-# PostgREST v16.0 — Horizontal-filter operators behavior model
+# PostgREST v16.4 — Horizontal-filter operators behavior model
 #
 # Scope: the operators usable in `?<column>=<op>.<value>` horizontal filters
 # (and inside and=()/or=() logic trees), plus the `not` prefix and the
@@ -30,7 +30,7 @@
 # modeled" bucket. That was wrong. The whole upstream `context "text and json
 # columns"` block — fts/plfts/phfts/wfts against NON-tsvector columns, which
 # PostgREST silently wraps in `to_tsvector()` — exists at both pins
-# (v14.12 QuerySpec.hs#L311, v16.0 QuerySpec.hs#L316) and had zero coverage:
+# (v14.12 QuerySpec.hs#L311, v16.4 QuerySpec.hs#L353) and had zero coverage:
 # every fts case on disk targeted an actual tsvector column. So did the
 # tsvector-domain, recursive-tsvector-domain and tsvector-computed-field
 # variants, and the tsquery/websearch boolean-operator assertions. The
@@ -49,7 +49,7 @@
 # Operator enums are in
 #   src/library/PostgREST/ApiRequest/Types.hs (QuantOperator / SimpleOperator / FtsOperator)
 
-version: PostgREST v16.0
+version: PostgREST v16.4
 area: operators
 
 # ---------------------------------------------------------------------------
@@ -67,42 +67,42 @@ grammar:
     syntax: "<column>=not.<op>.<value>"
     sql: "NOT <field> <op> <value>"
     # operand ordering (NOT before the field reference):
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L383
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L427
     # the NOT token itself: notOp = if hasNot then "NOT" else mempty
-    not_token_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L414
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L645
+    not_token_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L457
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L700
   quantifiers:
     # any()/all() modifiers are only valid on QuantOperator operators
     # (eq, gte, gt, lte, lt, like, ilike, match, imatch); pQuantOp parses the
     # optional `(any)`/`(all)` between the operator token and the delimiter.
     syntax: "<column>=<op>(any|all).<value>"   # value is a pg array literal {…}
     # shape of a quantified filter: <field> <quantOperator op> <fmtQuant …>
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L386
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L430
     sql_any: "<field> <op> ANY(<arr>)"
     # Just QuantAny -> "ANY(" <> val <> ")"
-    sql_any_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L417
+    sql_any_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L460
     sql_all: "<field> <op> ALL(<arr>)"
     # Just QuantAll -> "ALL(" <> val <> ")"
-    sql_all_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L418
+    sql_all_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L461
     # Nothing -> val (an unquantified operator emits no ANY(/ALL( wrapper)
-    sql_unquantified_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L419
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L662
+    sql_unquantified_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L462
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L717
   value_lists:
     # in.() parenthesised lists: pListVal parses ( e1 , e2 , … ) — a
     # comma-separated sepBy1 of pListElement between literal parens.
     syntax: "<column>=in.(v1,v2,…)"
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L691
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L748
     # each element: a quoted value, else bare chars up to `,` or `)`
-    element_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L694
+    element_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L751
     # quoted elements: "…" with backslash escapes (pQuotedValue/pCharsOrSlashed)
-    quoted_value_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L697
+    quoted_value_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L754
     # Both parens are parsed through `lexeme p = ws *> p <* ws`, so whitespace
     # around the list is consumed before the elements are split on `,`. This is
     # why `in.()` and `in.(    )` both yield the singleton list [""] (the
     # `= ANY('{}')` branch, cases 10200/10204), while `in.( ,3,4)` yields
     # ["", "3", "4"] and reaches Postgres as the array literal {"","3","4"}
     # (a 22P02 cast failure -> 400, case 10205).
-    whitespace_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L283
+    whitespace_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L327
   fts_language_modifier:
     # every fts operator accepts an optional parenthesised text-search config
     # between the operator token and the delimiter, e.g. fts(french).amusant
@@ -117,17 +117,17 @@ grammar:
     # grammar.fts_auto_tsvector for the coercion rule itself.
     sql_tsvector_column: "<field> @@ <fts_fn>(<language>, <value>)"
     sql_other_column: "to_tsvector(<language>, <field>) @@ <fts_fn>(<language>, <value>)"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L678
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L735
     # Fts op lang val -> " " <> ftsOperator op <> "(" <> pgFmtFtsLang lang <> …
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L412
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L455
     # pgFmtFtsLang = maybe mempty (\l -> unknownLiteral l <> ", ")
-    lang_sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L422
+    lang_sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L465
     # the column-side use of the same lang: pgFmtField's ToTsVector branch
     #   Just (ToTsVector lang) -> "to_tsvector(" <> pgFmtFtsLang lang <> fmtFld <> ")"
-    column_side_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
+    column_side_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
     # it "finds matches with different dictionaries and uses them as
     #    configuration for to_tsvector()"  (cases 10222/10223)
-    behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L403
+    behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L458
 
   fts_auto_tsvector:
     # An fts/plfts/phfts/wfts filter does NOT require a tsvector column. When
@@ -144,35 +144,35 @@ grammar:
     sql_non_tsvector_column: "to_tsvector([<lang>, ]<field>) @@ <fts_fn>([<lang>, ]<value>)"
     sql_tsvector_column: "<field> @@ <fts_fn>([<lang>, ]<value>)"
     # the tag: OpExpr _ (Fts _ lang _) -> Just $ ToTsVector lang  (Fts only)
-    flag_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L373
+    flag_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L404
     # the emission: pgFmtField's `Just (ToTsVector lang)` branch
-    emit_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
+    emit_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
     # THE EXEMPTION (load-bearing for the pre-existing tsvector cases 1067-1071,
     # 1090 and 10217-10219): resolveTypeOrUnknown clears cfToTsVector when the
     # column's base type is tsvector —
     #   cf@CoercibleField{cfBaseType="tsvector"} -> cf{… cfToTsVector=Nothing}
     # Without it those cases would compile to to_tsvector(<tsvector col>),
     # which does not type-check in Postgres at all.
-    tsvector_exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L335
+    tsvector_exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L362
     # DOMAINS: the exemption keys off cfBaseType, which is the introspected
     # `data_type` column — and for a domain that projection substitutes the
     # BASE type (format_type(bt.base_type)) whenever the base type lives in
     # pg_catalog. So a domain over tsvector is exempt too.
-    domain_base_type_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/SchemaCache.hs#L608
+    domain_base_type_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/SchemaCache.hs#L667
     # `base_type` is itself resolved TRANSITIVELY (WITH RECURSIVE pre-PG17,
     # pg_basetype() on PG17+), which is what makes a domain-over-a-domain
     # (`tsvector_not_empty` -> `tsvector_not_null` -> `tsvector`) work.
-    recursive_domain_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/SchemaCache.hs#L383
+    recursive_domain_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/SchemaCache.hs#L428
     # observed behavior — whole `context "text and json columns"` block
     # (cases 10220-10227)
-    behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L316
+    behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L353
     # it "works when the column type is a tsvector domain"        (case 10229)
-    domain_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L302
+    domain_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L337
     # it "works when the column type is a recursive tsvector domain" (10230)
-    recursive_domain_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L309
+    recursive_domain_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L345
     # it "works with tsvector computed fields" — the coercion is skipped for a
     # computed field returning tsvector as well                    (case 10228)
-    computed_field_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L295
+    computed_field_behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L329
 
   fts_value_passthrough:
     # The fts operand is emitted as a bare `unknownLiteral`, i.e. handed to
@@ -181,13 +181,13 @@ grammar:
     # client percent-decodes to is the tsquery/websearch string.
     sql: "<fts_fn>([<lang>, ]'<value>')"
     # Fts op lang val -> … <> pgFmtFtsLang lang <> unknownLiteral val <> ") "
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L412
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L455
     tsquery_operators: "& (%26), | (%7C), ! — to_tsquery lexeme booleans"
     # it "can use lexeme boolean operators(&=%26, |=%7C, !) in to_tsquery"
-    tsquery_operators_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L189
+    tsquery_operators_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L208
     websearch_operators: "and / or / - — websearch_to_tsquery booleans"
     # it "can use boolean operators(and, or, -) in websearch_to_tsquery"
-    websearch_operators_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L212
+    websearch_operators_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L236
 
 # ---------------------------------------------------------------------------
 # Quantifiable operators (QuantOperator) — accept any()/all()
@@ -202,8 +202,8 @@ operators:
       - "id=eq(any).{3,4,5}"
       - "range=eq.[1,3]"      # whole-range equality
       - "arr=eq.{1,2,3}"      # whole-array equality (order + length), not membership
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L207
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L119
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L249
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L144
 
   - name: gt
     pg_op: ">"
@@ -212,8 +212,8 @@ operators:
     examples:
       - "id=gt.2"
       - "id=gt(all).{4,3}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L209
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L121
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L251
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L146
 
   - name: gte
     pg_op: ">="
@@ -222,8 +222,8 @@ operators:
     examples:
       - "id=gte.2"
       - "id=gte(all).{4,3}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L208
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L120
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L250
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L145
 
   - name: lt
     pg_op: "<"
@@ -232,8 +232,8 @@ operators:
     examples:
       - "id=lt.14"
       - "id=lt(all).{4,3}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L211
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L123
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L253
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L148
 
   - name: lte
     pg_op: "<="
@@ -242,8 +242,8 @@ operators:
     examples:
       - "id=lte.3"
       - "id=lte(all).{4,3}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L210
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L122
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L252
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L147
 
   - name: neq
     pg_op: "<>"
@@ -253,8 +253,8 @@ operators:
       - "id=neq.5"
       - "range=neq.[1,3]"
       - "arr=neq.{1,2}"       # null-propagating: a NULL arr is NOT returned
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L194
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L107
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L236
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L132
 
   # -------------------------------------------------------------------------
   # Pattern matching
@@ -268,12 +268,12 @@ operators:
       - "k=like.*yx"     # -> like '%yx'
       - "k=like.xy*"     # -> like 'xy%'
       - "body=like(any).{%plan%,%brain%}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L212
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L124
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L254
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L149
     # OpLike -> fmtQuant quant $ unknownLiteral (T.map star val)
-    star_rewrite_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L387
+    star_rewrite_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L432
     # star c = if c == '*' then '%' else c
-    star_fn_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L415
+    star_fn_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L458
 
   - name: ilike
     pg_op: "ilike"
@@ -283,12 +283,12 @@ operators:
     examples:
       - "k=ilike.xy*"
       - "body=ilike(all).{%plan%,%greatness%}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L213
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L125
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L255
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L150
     # OpILike -> fmtQuant quant $ unknownLiteral (T.map star val)
-    star_rewrite_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L388
+    star_rewrite_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L433
     # star c = if c == '*' then '%' else c
-    star_fn_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L415
+    star_fn_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L458
 
   - name: match
     pg_op: "~"
@@ -297,8 +297,8 @@ operators:
     examples:
       - "k=match.^xy"
       - "body=match(any).{stop,thing}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L214
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L126
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L256
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L151
 
   - name: imatch
     pg_op: "~*"
@@ -307,8 +307,8 @@ operators:
     examples:
       - "k=imatch.^xy"
       - "body=imatch(any).{stop,thing}"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L215
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L127
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L257
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L152
 
   # -------------------------------------------------------------------------
   # in / is / isdistinct  (special parse forms, not quantifiable)
@@ -333,11 +333,11 @@ operators:
       - "int_data=in.(    )"    # -> same, whitespace is consumed by lexeme
       - "int_data=not.in.()"    # -> NOT (= ANY('{}')), every row, NULLs included
     # pIn = In <$> (try (string "in" *> pDelimiter) *> pListVal)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L651
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L706
     # In vals -> " " <> case vals of [""] -> "= ANY('{}') " ; _ -> "= ANY (…) "
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L408
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L451
     # [""] -> "= ANY('{}') "  (empty list)
-    empty_list_sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L409
+    empty_list_sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L453
 
   - name: is
     pg_op: "IS"
@@ -353,15 +353,15 @@ operators:
       - "done=is.unknown"
       - "done=is.NoT_NuLl"   # case-insensitive
     # pIsVal whitelist: null / not_null / true / false / unknown
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L665
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L720
     # Is isVal -> " IS " <> NULL/NOT NULL/TRUE/FALSE/UNKNOWN
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L395
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L439
     # the whitelist is matched with ciString = traverse ciChar
-    case_insensitive_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L685
+    case_insensitive_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L742
     # ciChar c = char c <|> char (toUpper c) — the case-insensitivity itself
-    ci_char_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L683
+    ci_char_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L740
     # any other value is a 400: "fails if 'is' used and there's no null or trilean value"
-    invalid_value_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L132
+    invalid_value_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L146
 
   - name: isdistinct
     pg_op: "IS DISTINCT FROM"
@@ -377,15 +377,15 @@ operators:
       - "range=isdistinct.[1,3]"
       - "arr=isdistinct.{1,2}"
     # pIsDist = IsDistinctFrom <$> (try (string "isdistinct" *> pDelimiter) *> pSVal)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L654
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L709
     # IsDistinctFrom val -> " IS DISTINCT FROM " <> unknownLiteral val
     # NOTE the value goes through bare `unknownLiteral`, NOT through
     # `pgFmtUnknownLiteralForField … fld` the way the SimpleOperator branch
-    # (Op op val, SqlFragment.hs#L384) does — isdistinct never applies a data
+    # (Op op val, SqlFragment.hs#L429) does — isdistinct never applies a data
     # representation / field transform to its operand.
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L403
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L447
     # the contrasting field-coerced branch used by the simple operators:
-    contrast_simple_op_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L384
+    contrast_simple_op_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L429
 
   # -------------------------------------------------------------------------
   # Full text search operators (FtsOperator) — optional (language) modifier
@@ -403,9 +403,9 @@ operators:
       - "jsonb_search=fts.impossible"         # jsonb column -> to_tsvector wrap
       - "text_search_vector=fts.fun&!possible"  # value reaches to_tsquery verbatim
     # try (string "fts" $> FilterFts)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L673
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L729
     # FilterFts -> "@@ to_tsquery"
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L131
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L156
     # The `text` half of type_constraints above is NOT a bare `@@` against a
     # text column: it is only true because PostgREST wraps a non-tsvector
     # field in to_tsvector(). Full rule: grammar.fts_auto_tsvector.
@@ -413,11 +413,11 @@ operators:
       applies_when: "the field's BASE type is not tsvector (text, json, jsonb, …)"
       sql: "to_tsvector([<lang>, ]<field>) @@ to_tsquery([<lang>, ]<value>)"
       # pgFmtField: Just (ToTsVector lang) -> "to_tsvector(" <> pgFmtFtsLang lang <> fmtFld <> ")"
-      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
+      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
       # cleared for tsvector (and tsvector-domain) columns
-      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L335
+      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L362
       # it "finds matches with to_tsquery" under context "text and json columns"
-      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L317
+      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L354
 
   - name: plfts
     pg_op: "@@ plainto_tsquery"
@@ -429,19 +429,19 @@ operators:
       - "text_search_vector=plfts(french).amusant impossible"
       - "text_search=plfts.The Fat Rats"      # text column -> to_tsvector wrap
     # try (string "plfts" $> FilterFtsPlain)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L674
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L731
     # FilterFtsPlain -> "@@ plainto_tsquery"
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L132
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L157
     # see grammar.fts_auto_tsvector — the `text` half of type_constraints is
     # only true because of this wrap
     to_tsvector_coercion:
       applies_when: "the field's BASE type is not tsvector (text, json, jsonb, …)"
       sql: "to_tsvector([<lang>, ]<field>) @@ plainto_tsquery([<lang>, ]<value>)"
       # pgFmtField: Just (ToTsVector lang) -> "to_tsvector(" <> pgFmtFtsLang lang <> fmtFld <> ")"
-      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
-      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L335
+      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
+      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L362
       # it "finds matches with plainto_tsquery" under context "text and json columns"
-      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L359
+      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L404
 
   - name: phfts
     pg_op: "@@ phraseto_tsquery"
@@ -453,20 +453,20 @@ operators:
       - "text_search_vector=phfts(german).Art Spass"
       - "text_search=phfts.The Fat Cats"      # text column -> to_tsvector wrap
     # try (string "phfts" $> FilterFtsPhrase)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L675
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L732
     # FilterFtsPhrase -> "@@ phraseto_tsquery"
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L133
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L158
     # see grammar.fts_auto_tsvector — the `text` half of type_constraints is
     # only true because of this wrap
     to_tsvector_coercion:
       applies_when: "the field's BASE type is not tsvector (text, json, jsonb, …)"
       sql: "to_tsvector([<lang>, ]<field>) @@ phraseto_tsquery([<lang>, ]<value>)"
       # pgFmtField: Just (ToTsVector lang) -> "to_tsvector(" <> pgFmtFtsLang lang <> fmtFld <> ")"
-      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
-      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L335
+      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
+      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L362
       # context "Use of the phraseto_tsquery function" nested under
       # context "text and json columns" -> it "finds matches"
-      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L460
+      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L529
 
   - name: wfts
     pg_op: "@@ websearch_to_tsquery"
@@ -479,20 +479,20 @@ operators:
       - "text_search_vector=wfts.fun and -possible"  # websearch booleans, verbatim
       - "text_search=wfts.The Fat Rats"       # text column -> to_tsvector wrap
     # try (string "wfts" $> FilterFtsWebsearch)
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L676
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L733
     # FilterFtsWebsearch -> "@@ websearch_to_tsquery"
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L134
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L159
     # see grammar.fts_auto_tsvector — the `text` half of type_constraints is
     # only true because of this wrap
     to_tsvector_coercion:
       applies_when: "the field's BASE type is not tsvector (text, json, jsonb, …)"
       sql: "to_tsvector([<lang>, ]<field>) @@ websearch_to_tsquery([<lang>, ]<value>)"
       # pgFmtField: Just (ToTsVector lang) -> "to_tsvector(" <> pgFmtFtsLang lang <> fmtFld <> ")"
-      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L248
-      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L335
+      source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L285
+      exemption_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L362
       # it "finds matches with websearch_to_tsquery" under context "text and
       # json columns"
-      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L367
+      behavior_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L414
 
   # -------------------------------------------------------------------------
   # Array / range operators (SimpleOperator) — not quantifiable
@@ -504,8 +504,8 @@ operators:
     examples:
       - "arr_data=cs.{2}"
       - "range=cs.[1,2]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L195
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L108
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L237
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L133
 
   - name: cd
     pg_op: "<@"
@@ -514,8 +514,8 @@ operators:
     examples:
       - "arr_data=cd.{1,2,4}"
       - "range=cd.[1,6]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L196
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L109
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L238
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L134
 
   - name: ov
     pg_op: "&&"
@@ -524,8 +524,8 @@ operators:
     examples:
       - "arr=ov.{2,3}"
       - "range=ov.[0,4]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L197
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L110
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L239
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L135
 
   - name: sl
     pg_op: "<<"
@@ -533,8 +533,8 @@ operators:
     type_constraints: "range strictly left of"
     examples:
       - "range=sl.[9,10]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L198
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L111
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L240
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L136
 
   - name: sr
     pg_op: ">>"
@@ -542,8 +542,8 @@ operators:
     type_constraints: "range strictly right of"
     examples:
       - "range=sr.[3,4]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L199
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L112
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L241
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L137
 
   - name: nxr
     pg_op: "&<"
@@ -551,8 +551,8 @@ operators:
     type_constraints: "range does not extend to the right of"
     examples:
       - "range=nxr.[4,7]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L200
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L113
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L242
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L138
 
   - name: nxl
     pg_op: "&>"
@@ -560,8 +560,8 @@ operators:
     type_constraints: "range does not extend to the left of"
     examples:
       - "range=nxl.[4,7]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L201
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L114
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L243
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L139
 
   - name: adj
     pg_op: "-|-"
@@ -569,5 +569,5 @@ operators:
     type_constraints: "range adjacent to"
     examples:
       - "range=adj.(3,10]"
-    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L202
-    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L115
+    parse_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L244
+    sql_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L140

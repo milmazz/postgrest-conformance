@@ -12,7 +12,7 @@
 -- the routines exercised by spec/conformance/cases/14xx_*.yaml. All objects live
 -- in schema `test`, which is the exposed (db-schemas) schema for these cases.
 --
--- Upstream source: https://github.com/PostgREST/postgrest/blob/v16.0/test/spec/fixtures/schema.sql
+-- Upstream source: https://github.com/PostgREST/postgrest/blob/v16.4/test/spec/fixtures/schema.sql
 -- Re-pinned v14.12 -> v16.0 after verifying all 23 vendored routines are still
 -- defined upstream at v16.0 with unchanged argument signatures. The local copy
 -- deliberately adds IMMUTABLE/STABLE/VOLATILE markers upstream omits, because
@@ -56,66 +56,66 @@ INSERT INTO test.projects (id, name, client_id) VALUES
 -- ---------------------------------------------------------------------------
 
 -- SETOF table type; STABLE -> callable via GET (read-only tx).
--- schema.sql#L214
+-- schema.sql#L216
 CREATE FUNCTION test.getitemrange(min bigint, max bigint) RETURNS SETOF test.items
   LANGUAGE sql STABLE
   AS $$ SELECT * FROM test.items WHERE id > min AND id <= max; $$;
 
 -- SETOF table type with no args; STABLE.
--- schema.sql#L1037 (volatility relaxed to STABLE so GET is allowed in this fixture)
+-- schema.sql#L1039 (volatility relaxed to STABLE so GET is allowed in this fixture)
 CREATE FUNCTION test.getallprojects() RETURNS SETOF test.projects
   LANGUAGE sql STABLE
   AS $$ SELECT * FROM test.projects; $$;
 
 -- SETOF table type taking an id; STABLE -> GET-callable.
--- schema.sql#L1019 (upstream is VOLATILE; relaxed to STABLE so the GET
+-- schema.sql#L1021 (upstream is VOLATILE; relaxed to STABLE so the GET
 -- "select works on the first level" case (1422) can invoke it via GET).
 CREATE FUNCTION test.getproject(id int) RETURNS SETOF test.projects
   LANGUAGE sql STABLE
   AS $$ SELECT * FROM test.projects WHERE id = $1; $$;
 
 -- scalar int return.
--- schema.sql#L1862
+-- schema.sql#L1864
 CREATE FUNCTION test.add_them(a integer, b integer) RETURNS integer
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT a + b; $$;
 
 -- scalar text return.
--- schema.sql#L434
+-- schema.sql#L436
 CREATE FUNCTION test.sayhello(name text) RETURNS text
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT 'Hello, ' || name; $$;
 
 -- no-parameter proc returning scalar text.
--- schema.sql#L225
+-- schema.sql#L227
 CREATE FUNCTION test.noparamsproc() RETURNS text
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT a FROM (VALUES ('Return value of no parameters procedure.')) s(a); $$;
 
 -- SETOF integer.
--- schema.sql#L1086
+-- schema.sql#L1088
 CREATE FUNCTION test.ret_setof_integers() RETURNS SETOF integer
   LANGUAGE sql IMMUTABLE
   AS $$ VALUES (1), (2), (3); $$;
 
 -- array return (single scalar array, not SETOF).
--- schema.sql#L1074
+-- schema.sql#L1076
 CREATE FUNCTION test.ret_array() RETURNS integer[]
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT '{1,2,3}'::integer[]; $$;
 
 -- SETOF that yields zero rows.
--- schema.sql#L479
+-- schema.sql#L481
 CREATE FUNCTION test.test_empty_rowset() RETURNS SETOF integer
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT null::int FROM (SELECT 1) a WHERE false; $$;
 
 -- void return.
--- schema.sql#L1129
+-- schema.sql#L1131
 CREATE FUNCTION test.ret_void() RETURNS void LANGUAGE sql AS '';
 
 -- composite type return (exposed schema).
--- schema.sql#L1105
+-- schema.sql#L1107
 CREATE TYPE test.point_2d AS (x integer, y integer);
 CREATE FUNCTION test.ret_point_2d() RETURNS test.point_2d
   LANGUAGE sql IMMUTABLE
@@ -126,31 +126,31 @@ CREATE FUNCTION test.ret_point_2d() RETURNS test.point_2d
 -- ---------------------------------------------------------------------------
 
 -- single OUT param -> single object.
--- schema.sql#L1249
+-- schema.sql#L1251
 CREATE FUNCTION test.single_out_param(num int, OUT num_plus_one int)
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT num + 1; $$;
 
 -- single INOUT param -> single object.
--- schema.sql#L1261
+-- schema.sql#L1263
 CREATE FUNCTION test.single_inout_param(INOUT num int)
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT num + 1; $$;
 
 -- many OUT params -> single object with many keys.
--- schema.sql#L1257
+-- schema.sql#L1259
 CREATE FUNCTION test.many_out_params(OUT my_json json, OUT num int, OUT str text)
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT '{"a": 1, "b": "two"}'::json, 3, 'four'::text; $$;
 
 -- single-column TABLE return.
--- schema.sql#L1269
+-- schema.sql#L1271
 CREATE FUNCTION test.single_column_table_return() RETURNS TABLE (a text)
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT 'A'::text; $$;
 
 -- multi-column TABLE return.
--- schema.sql#L1273
+-- schema.sql#L1275
 CREATE FUNCTION test.multi_column_table_return() RETURNS TABLE (a text, b text)
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT 'A'::text, 'B'::text; $$;
@@ -160,14 +160,14 @@ CREATE FUNCTION test.multi_column_table_return() RETURNS TABLE (a text, b text)
 -- ---------------------------------------------------------------------------
 
 -- VARIADIC text[] with default; supports GET repeated params and POST array.
--- schema.sql#L1277
+-- schema.sql#L1279
 CREATE FUNCTION test.variadic_param(VARIADIC v text[] DEFAULT '{}')
   RETURNS text[]
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT v; $$;
 
 -- all args have DEFAULT values.
--- schema.sql#L1343
+-- schema.sql#L1345
 CREATE FUNCTION test.three_defaults(a int DEFAULT 1, b int DEFAULT 2, c int DEFAULT 3)
   RETURNS int
   LANGUAGE sql IMMUTABLE
@@ -178,7 +178,7 @@ CREATE FUNCTION test.three_defaults(a int DEFAULT 1, b int DEFAULT 2, c int DEFA
 -- ---------------------------------------------------------------------------
 
 -- VOLATILE proc; GET runs it in a read-only tx and Postgres raises 25006.
--- schema.sql#L448
+-- schema.sql#L450
 CREATE SEQUENCE test.callcounter_count START 1;
 CREATE FUNCTION test.callcounter() RETURNS bigint
   LANGUAGE sql VOLATILE
@@ -189,7 +189,7 @@ CREATE FUNCTION test.callcounter() RETURNS bigint
 -- ---------------------------------------------------------------------------
 -- PostgREST dispatches by the supplied arguments. overloaded() -> [1,2,3],
 -- overloaded(a,b) -> a+b, overloaded(a,b,c) -> a||b||c.
--- schema.sql#L1347, schema.sql#L1355, schema.sql#L1359
+-- schema.sql#L1349, schema.sql#L1357, schema.sql#L1361
 CREATE FUNCTION test.overloaded() RETURNS SETOF int
   LANGUAGE sql IMMUTABLE
   AS $$ VALUES (1), (2), (3); $$;
@@ -208,7 +208,7 @@ CREATE FUNCTION test.overloaded(a text, b text, c text) RETURNS text
 -- A function with a single UNNAMED json parameter receives the ENTIRE POST body
 -- as that argument. A function with a single NAMED json parameter does NOT, so
 -- a top-level body that does not match its named params yields PGRST202.
--- schema.sql#L2355, schema.sql#L2360
+-- schema.sql#L2357, schema.sql#L2362
 CREATE FUNCTION test.unnamed_json_param(json) RETURNS json
   LANGUAGE sql IMMUTABLE
   AS $$ SELECT $1; $$;
@@ -222,7 +222,7 @@ CREATE FUNCTION test.named_json_param(data json) RETURNS json
 -- ---------------------------------------------------------------------------
 
 -- RAISE SQLSTATE PT402 maps to HTTP 402 with message/details/hint.
--- schema.sql#L1289
+-- schema.sql#L1291
 CREATE FUNCTION test.raise_pt402() RETURNS void
   LANGUAGE plpgsql
   AS $$

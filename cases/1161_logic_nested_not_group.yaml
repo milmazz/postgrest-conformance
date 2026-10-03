@@ -13,4 +13,4 @@ expect:
 notes: >
   not. can negate a nested and(...) group. Mirrors AndOrParamsSpec
   "can be negated while nested".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L56
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L57

@@ -15,18 +15,18 @@ expect:
     - { path: "$.paths['/'].get.parameters", absent: true }
 notes: >
   The document documents ITSELF: makePathItems prepends makeRootPathItem to the
-  table and routine path items (OpenAPI.hs#L378-380), and that item is a fixed
+  table and routine path items (OpenAPI.hs#L472-476), and that item is a fixed
   "/" GET with tags ["Introspection"], summary "OpenAPI description (this
   document)", `produces` [application/openapi+json, application/json] and a
-  single 200 "OK" response (OpenAPI.hs#L367-376). It is built from `mempty ::
+  single 200 "OK" response (OpenAPI.hs#L460-470). It is built from `mempty ::
   Operation` with no `parameters` lens set, so the operation carries no
   parameters key.
   No upstream Feature it-block reads paths./ specifically — its correctness is
   covered only indirectly, by validateOpenApiResponse schema-validating the
   whole document against test/spec/fixtures/openapi.json
-  (SpecHelper.hs#L115-123) — so this case is traced to the generator lines that
+  (SpecHelper.hs#L120-131) — so this case is traced to the generator lines that
   produce it. Note that the per-operation `produces` here is a different list
   from the document-level `produces`/`consumes` of case 1688: this one is the
   two media types the root endpoint itself serves (cases 1650/1651), not the
   four the data endpoints serve.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L367
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L460

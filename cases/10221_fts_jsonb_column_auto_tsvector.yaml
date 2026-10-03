@@ -18,7 +18,7 @@ notes: >
   to_tsvector(jsonb), which concatenates the string values). Note this is the
   jsonb column ITSELF, not a `->>` json path, so cfJsonPath is empty and
   pgFmtField emits the plain column inside the to_tsvector() call
-  (SqlFragment.hs#L248 over the `cfJsonPath=[]` branch). Mirrors QuerySpec.hs
+  (SqlFragment.hs#L285 over the `cfJsonPath=[]` branch). Mirrors QuerySpec.hs
   context "text and json columns" -> it "finds matches with to_tsquery"
   (jsonb_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L324
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L362

@@ -14,8 +14,8 @@ expect:
   body_exact: [{"s":"24"}]
 notes: >
   "allows the combination of an alias, a before cast, and an after cast"
-  (AggregateFunctionsSpec.hs:86): output alias `s`, input cast `::integer`
+  (AggregateFunctionsSpec.hs:91): output alias `s`, input cast `::integer`
   before `.sum()`, result cast `::text` after it. Same 10+6+8 = 24 seed as case
   1147, rendered as the JSON string "24". Requires db-aggregates-enabled = true
   (see the harness_exposure gap in spec/select.yaml).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L86
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L91

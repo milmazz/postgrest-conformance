@@ -25,7 +25,7 @@ GRANT USAGE ON SCHEMA test TO postgrest_test_anonymous;
 
 -- ---------------------------------------------------------------------------
 -- items: a single bigserial id column, 15 rows (1..15)
--- Mirrors test/spec/fixtures/schema.sql#L126 and data.sql#L205
+-- Mirrors test/spec/fixtures/schema.sql#L128 and data.sql#L205
 -- ---------------------------------------------------------------------------
 CREATE TABLE test.items (
     id bigserial primary key

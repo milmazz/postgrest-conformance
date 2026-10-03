@@ -20,11 +20,11 @@ expect:
 notes: >-
   The `offset` reserved-embeddable key is rewritten to `limit` while parsing the
   query string (`offsets = first (replaceLast "limit") <$> ...`,
-  QueryParams.hs#L152 with `replaceLast` at #L176), so it folds into the same
+  QueryParams.hs#L192 with `replaceLast` at #L218), so it folds into the same
   top-level range and PUT rejects it with the same PGRST114 envelope as `limit`
   — the message names both parameters. Transcribed from the upstream it-block
-  "fails if offset is specified" (UpsertSpec.hs#L302: the it, L303 the
+  "fails if offset is specified" (UpsertSpec.hs#L394: the it, L395 the
   `put "/tiobe_pls?name=eq.Javascript&offset=1"`, L306 the exact error envelope,
   L307 matchStatus 400 + matchContentTypeJson). Companion to case 1016, which
   covers the `limit` spelling.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L302
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L394

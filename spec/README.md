@@ -48,9 +48,9 @@ pass.
 > **That is the mirror image of the two passes before it** (+20 on six cases,
 > +45 on five), whose growth lived inside case `notes:`. Case **1821** shows why
 > the case half stayed flat here: its `notes:` argues four separate upstream
-> facts — the `OpQuant` vs `Op` arms of `SqlFragment.hs#L388`/`#L384`, the
-> `Error.hs#L584-L586` 42883→404 mapping, upstream's PG-version body branch at
-> `QuerySpec.hs#L1657-L1665`, and `SpecHelper.hs#L139`'s empty
+> facts — the `OpQuant` vs `Op` arms of `SqlFragment.hs#L433`/`#L429`, the
+> `Error.hs#L584-L587` 42883→404 mapping, upstream's PG-version body branch at
+> `QuerySpec.hs#L1902-L1910`, and `SpecHelper.hs#L148`'s empty
 > `configDbExtraSearchPath` — using **bare `file#Lnnn` anchors rather than
 > URLs**, so a URL sweep sees one citation where the argument rests on five.
 > **`case.schema.json` allows exactly one `source:`**, and the overflow goes
@@ -88,7 +88,7 @@ pass.
 
 > **Match the URL prefix, not just the tag.** A naive `grep -v 'postgrest/v16\.0/'`
 > reports dozens of false stale hits, because
-> `github.com/PostgREST/postgrest/blob/v16.0/…` puts `blob/` between the repo
+> `github.com/PostgREST/postgrest/blob/v16.4/…` puts `blob/` between the repo
 > and the tag. Sweep with a prefix-aware pattern
 > (`postgrest/(raw/|blob/|tree/)?<tag>`) or the count is wrong. Do not anchor on
 > `https://` either — several in-scope URLs are written scheme-less.
@@ -168,7 +168,7 @@ pass.
 > diffing both pins rather than carried over", then itemizes what *did* move (the
 > four cited Feature specs shifted 1–3 lines from a harness signature change,
 > `SpecWith ((), Application)` → `SpecWithConfig`, plus a further 7-line shift on
-> every `InsertSpec.hs` anchor after `#L554-L559`, where the generated-column
+> every `InsertSpec.hs` anchor after `#L660-L665`, where the generated-column
 > error block dropped its `actualPgVersion < pgVersion140` branch) and names the
 > one `Preferences.hs` behavior change in its window — `Prefer: timezone` losing
 > the `TimezoneNames` schema-cache check — **together with why it is out of
@@ -203,7 +203,7 @@ pass.
 > claim withdrawn for having no citation at all.** `mutations.yaml`'s
 > `columns_param` section previously asserted that `?columns=` applies to **PUT**.
 > The re-sync found nothing at v16.0 that says so — every `columns=` occurrence in
-> `UpsertSpec.hs` is a POST (L108/L121/L134, L236/L248/L260), the docs reference
+> `UpsertSpec.hs` is a POST (L137/L154/L171, L301/L317/L333), the docs reference
 > `specify_columns` only from Insert (`tables_views.rst#L565`) and Update
 > (`#L607`), and the PUT subsection says the *opposite*: "All the columns must be
 > specified in the request body, including the primary key columns" (`#L689`).
@@ -217,11 +217,11 @@ pass.
 > **The representations pass supplies a SEVENTH species, and it is the subtlest
 > so far: a citation that is real, fetchable, correctly pinned, and proves a
 > NARROWER claim than the model attaches to it.** `representations.yaml` cited
-> `InsertSpec.hs#L745` for "a POST without `return=headers-only` carries no
+> `InsertSpec.hs#L894` for "a POST without `return=headers-only` carries no
 > `Location`". That line exists and asserts exactly that — but it sits under
 > `describe "Inserting into VIEWs"` and posts to `/compound_pk_view`, so it
-> witnesses the rule **on a view only**. The model now cites `#L157` (the
-> no-`Prefer` it-block on the `projects` TABLE) and `#L99`
+> witnesses the rule **on a view only**. The model now cites `#L190` (the
+> no-`Prefer` it-block on the `projects` TABLE) and `#L116`
 > (`return=representation`), and case **1309** was rewritten with it. **Note what
 > this defeats**: the pin sweep passes (right tag), schema validation passes
 > (right shape), and even an adversarial "does the cited line support the claim?"
@@ -233,9 +233,9 @@ pass.
 > made a case's assertion unreachable.** `fixtures/02_base.sql` declared
 > `test.unnamed_bytea_param(bytea) RETURNS bytea`; upstream declares it
 > `returns "application/octet-stream"` — the mime-named **DOMAIN**
-> (`test/spec/fixtures/schema.sql#L2372`). Since a routine's **return type** is
+> (`test/spec/fixtures/schema.sql#L2374`). Since a routine's **return type** is
 > the only thing that registers an octet-stream handler
-> (`SchemaCache.hs#L1016` ships json/csv/geo+json/`*/*` and nothing else), case
+> (`SchemaCache.hs#L1082` ships json/csv/geo+json/`*/*` and nothing else), case
 > **1622**'s expected 200 could never have been produced by a faithful
 > implementation — it would have negotiated to 406/PGRST107. **Every mechanical
 > check in this tree passed on it**: the case validated, its pin was correct, its
@@ -427,8 +427,8 @@ There are two layers:
    > wrote the tree's **second** `fixture_notes:` key (five entries). **And the
    > audit still found two behaviors with neither a case nor an entry**: the
    > `/rpc/*` per-operation `produces` / `responses.200` pair
-   > (`OpenAPI.hs#L357-358`) and the shared `$.parameters.on_conflict` definition
-   > (`#L239-245`), both emitted by every document the server can produce.
+   > (`OpenAPI.hs#L448-449`) and the shared `$.parameters.on_conflict` definition
+   > (`#L275-286`), both emitted by every document the server can produce.
    > Confirmed on disk during synthesis: `on_conflict` appears in four case files,
    > **none of them in the openapi band**, and nowhere in `openapi.yaml`. A gap
    > list records the gaps its author *saw* — which is the same lesson `rpc.yaml`'s
@@ -469,7 +469,7 @@ expect:
     Content-Range: "0-1/*"
   body_exact: [ ... ]          # body_exact | body_jsonpath | body_contains | body_raw | body_json
 notes: "..."                   # rationale, references the upstream it-block
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/...#L<n>
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/...#L<n>
 ```
 
 The schema's `required` list is six keys — `id`, `feature`, `request`, `schema`,
@@ -502,13 +502,13 @@ Two request shapes are supported:
 - **HTTP** (the common case, **724** cases): `request.method` + `request.path`,
   with optional `request.headers` / `request.body` / `request.body_raw` /
   `request.body_json`. The **auth** area may add `request.jwt` to have the runner
-  mint and send a signed token (32 cases do; case 11809 instead spells out a
+  mint and send a signed token (35 cases do; case 11809 instead spells out a
   literal `Authorization` header, because it needs a token signed with a secret
   the harness does not know).
-- **CLI** (config CLI behavior, 43 cases — all of them in `config`,
-  ids **1705–1741 plus 1744–1749**; the band is *not* contiguous, because
+- **CLI** (config CLI behavior, 51 cases — all of them in `config`,
+  ids **1705–1741 plus 1744–1749 plus 11700–11707**; the primary band is *not* contiguous, because
   1742/1743 are HTTP CORS cases sitting inside it): `request.kind: cli` with
-  `request.flag` one of `"--dump-config"` (37 cases), `"--ready"` (4:
+  `request.flag` one of `"--dump-config"` (45 cases), `"--ready"` (4:
   1745–1748) or `"--example"` (1: 1727) — plus case 1719, whose `flag` is a
   positional config path rather than a flag. Asserts on `expect.exit_code`,
   `expect.dump_contains`, `expect.dump_reparse_stable`, and
@@ -616,7 +616,7 @@ those four assertions.
 > `application/x-www-form-urlencoded` body with seven fields
 > (`integer`, `double`, `varchar`, `boolean`, `date`, `money`, `enum`) to
 > `/menagerie` — the openapi type-mapping table, which is exactly the relation
-> upstream's `InsertSpec.hs#L171` targets. So the consolidated fixture now has one
+> upstream's `InsertSpec.hs#L207` targets. So the consolidated fixture now has one
 > case set depending on `menagerie` being the 7-column table and another set
 > depending on `menagerie_empty` being the empty one. Neither name is free to
 > move.
@@ -661,7 +661,7 @@ no `mutations.delta.sql` and no `representations.delta.sql`.**
 > `RETURNS bytea` → `RETURNS public."application/octet-stream"` — and added the
 > `public."application/octet-stream"` domain it now returns, because the return
 > type is the only thing that registers an octet-stream handler
-> (`SchemaCache.hs#L1016`). Under the old transcription case **1622** was
+> (`SchemaCache.hs#L1082`). Under the old transcription case **1622** was
 > unreachable: it could only have answered 406/PGRST107.
 >
 > **Read the fold note in `fixtures/02_base.sql` before reading this as a fix.** It says
@@ -863,8 +863,8 @@ un-audited area left**; `COVERAGE.md` → follow-up 1 is CLOSED.
 > **withdrawn**, **no fixture object**). Both uncovered behaviors are emitted by
 > **every** document the server can produce, and neither had a case *or* a gap
 > entry before the audit: the per-operation `produces` / `responses.200` pair on
-> every `/rpc/*` path item (`OpenAPI.hs#L357-358`) and the shared
-> `$.parameters.on_conflict` parameter definition (`#L239-245`). **Zero coverage
+> every `/rpc/*` path item (`OpenAPI.hs#L448-449`) and the shared
+> `$.parameters.on_conflict` parameter definition (`#L275-284`). **Zero coverage
 > plus zero disclosure is a worse state than a long gap list**, and it is exactly
 > the state a "the area was already re-synced" reading would have left in place.
 >
@@ -898,18 +898,18 @@ un-audited area left**; `COVERAGE.md` → follow-up 1 is CLOSED.
 >
 > - **A documented config gate with no case, declared in a key the harness never
 >   executes.** The model states twice that plan media types resolve only under
->   `db-plan-enabled = true` (`Plan/Negotiate.hs#L74`). Five cases
+>   `db-plan-enabled = true` (`Plan/Negotiate.hs#L78`). Five cases
 >   (**1625–1628**, **1643**) record that requirement in a `preconditions:`
 >   string — parsed, never run — and **nothing pins the 406** the default
->   produces, which upstream asserts at `PlanSpec.hs#L544`. A declaration the
+>   produces, which upstream asserts at `PlanSpec.hs#L735`. A declaration the
 >   harness ignores is not a test, and this is the tree's clearest instance.
 > - **A defective FIXTURE that made a case's assertion unreachable while every
 >   mechanical check stayed green.** See the eighth-species note above.
 > - **A modelled mechanism that was wrong at its root and survived because the
 >   fixtures made it *look* right.** The model described a custom media handler
 >   as an aggregate whose **stype** is the mime-named domain. Discovery keys on
->   the **return type** (`proc.prorettype`, `SchemaCache.hs#L1062-L1071`), plus a
->   second branch for plain non-set-returning functions (`#L1080-L1086`). stype
+>   the **return type** (`proc.prorettype`, `SchemaCache.hs#L1132-L1141`), plus a
+>   second branch for plain non-set-returning functions (`#L1150-L1156`). stype
 >   coincides with the return type exactly when the aggregate has no finalfunc —
 >   true of every fixture in this tree, which is why no case could distinguish
 >   them. **An implementation built from the old rule registers a subtly
@@ -923,8 +923,8 @@ un-audited area left**; `COVERAGE.md` → follow-up 1 is CLOSED.
 > **The representations verdict is the argument against deprioritizing an area
 > you expect to pass.** It came back ✅ *pass* with **0 citation defects** — and
 > still produced **eight** new cases (1315–1319, 1325–1327), a **first** gap list
-> where the model had none, a **narrowed citation** (`InsertSpec.hs#L745` →
-> `#L157` + `#L99`, because the old anchor's enclosing `describe` scoped it to
+> where the model had none, a **narrowed citation** (`InsertSpec.hs#L894` →
+> `#L190` + `#L116`, because the old anchor's enclosing `describe` scoped it to
 > views) and a **corrected gap entry** (the claim that `compound_pk_view` adds a
 > view-specific angle case 1309 misses is false — `car_models` is not in
 > `isolate_representations`' real-table list, so 1309 already runs against a view
@@ -994,7 +994,7 @@ un-audited area left**; `COVERAGE.md` → follow-up 1 is CLOSED.
 > The **pagination** findings were not merely "a case is missing": one modelled
 > *rule* was **wrong** — the Range header was documented as *overriding*
 > limit/offset, when `getRanges` **intersects** them — and the single upstream
-> it-block on the subject (`RangeSpec.hs#L194`, case 1261) is the one shape where
+> it-block on the subject (`RangeSpec.hs#L241`, case 1261) is the one shape where
 > the two rules coincide, so no existing case could have caught it.
 >
 > The **observability** findings went one step further: the modelled rule that
@@ -1007,7 +1007,7 @@ un-audited area left**; `COVERAGE.md` → follow-up 1 is CLOSED.
 >
 > The **representations** finding is the subtlest and the hardest to mechanize: a
 > citation that is real, fetchable, correctly pinned, and proves a **narrower**
-> claim than the model attached to it. `InsertSpec.hs#L745` does assert that a
+> claim than the model attached to it. `InsertSpec.hs#L894` does assert that a
 > POST without `return=headers-only` carries no `Location` — but under
 > `describe "Inserting into VIEWs"`, against `/compound_pk_view`, so it witnesses
 > the rule on a **view** and says nothing about a table. Every check in this
@@ -1042,27 +1042,27 @@ transcribed. Its history is 36 → 42 → 46 → 46 → 46 → 46 → 53 → 53 
 
 > **The total moved +4 this pass, and unusually the composition moved further
 > than the total.** The openapi pass produced **five** motions in one area:
-> **1651** moved *onto* implementation code (`RootSpec.hs#L27` →
-> `Response.hs#L208`), **1662** likewise (`OpenApiSpec.hs#L117` →
-> `OpenAPI.hs#L321`), three of the six new cases arrived there
-> (**1684** `OpenAPI.hs#L158`, **1687** `#L367`, **1688** `#L405`) — and **1682**
+> **1651** moved *onto* implementation code (`RootSpec.hs#L35` →
+> `Response.hs#L218`), **1662** likewise (`OpenApiSpec.hs#L127` →
+> `OpenAPI.hs#L403`), three of the six new cases arrived there
+> (**1684** `OpenAPI.hs#L175`, **1687** `#L460`, **1688** `#L507`) — and **1682**
 > moved *off* it, to `docs/references/api/openapi.rst#L71`, the **only** place
 > that prints the `db-root-spec` document the case asserts byte for byte. Net +4,
 > and the openapi band alone went 3 → **7**. Two of the five (1687, 1688) exist
 > *because* no upstream `it`-block reads those keys at all — the whole-document
-> schema validation in `SpecHelper.hs#L115-123` is upstream's only witness — so
+> schema validation in `SpecHelper.hs#L120-131` is upstream's only witness — so
 > the growth is a direct measure of a hole in upstream's black-box suite, not of
 > sloppy anchoring.
 >
 > **The previous pass's total did not move, and that was a COINCIDENCE — read the
 > composition, not the number.** Four separate motions cancelled exactly:
-> case **1600** moved *off* implementation code (`MediaType.hs#L69` →
-> `RawOutputTypesSpec.hs#L15`, because the audit found an it-block that asserts
+> case **1600** moved *off* implementation code (`MediaType.hs#L78` →
+> `RawOutputTypesSpec.hs#L16`, because the audit found an it-block that asserts
 > the request, body *and* `Content-Type` this case had only derived); the old
-> case **1623** was *deleted* (it anchored at `MediaType.hs#L62`); and two
-> arrived — the **re-issued 1623** (`SchemaCache.hs#L1016`, that
+> case **1623** was *deleted* (it anchored at `MediaType.hs#L71`); and two
+> arrived — the **re-issued 1623** (`SchemaCache.hs#L1082`, that
 > `initialMediaHandlers` registers exactly four handlers and octet-stream is not
-> among them) and **1648** (`MediaType.hs#L127-L129`, the module **doctest** for
+> among them) and **1648** (`MediaType.hs#L137-L139`, the module **doctest** for
 > case-insensitive decoding, which is upstream ground truth of a different kind
 > rather than an absence of it). −2 +2. **A flat metric across a pass that
 > changed six cases is not evidence of stability**, and a moving one across a
@@ -1070,12 +1070,12 @@ transcribed. Its history is 36 → 42 → 46 → 46 → 46 → 46 → 53 → 53 
 
 The seven that produced the last real movement before this one are all
 representations cases —
-**1315**/**1317** (`Query/Statements.hs#L48`/`#L49`, the two Location
-suppressions), **1318** (`ApiRequest/Preferences.hs#L100`, duplicate `return=`
-resolves to the first token in *request* order), **1319** (`Plan.hs#L207`, an
+**1315**/**1317** (`Query/Statements.hs#L65`/`#L66`, the two Location
+suppressions), **1318** (`ApiRequest/Preferences.hs#L101`, duplicate `return=`
+resolves to the first token in *request* order), **1319** (`Plan.hs#L228`, an
 unknown value is ignored unless `handling=strict`), **1325**/**1326**
-(`Response.hs#L283`/`#L281`, `return=` not echoed on reads or RPC) and **1327**
-(`Preferences.hs#L179`, fixed `Preference-Applied` order) — and every one pins a
+(`Response.hs#L290`/`#L288`, `return=` not echoed on reads or RPC) and **1327**
+(`Preferences.hs#L182`, fixed `Preference-Applied` order) — and every one pins a
 rule **upstream never asserts black-box**, which each says in its `notes:`. The
 implementation-anchored *share* is **7.48 %** (57/762) — **down** for the first
 time, because the numerator did not move at all this pass while the denominator
@@ -1101,15 +1101,15 @@ not: the area added two implementation anchors and shed two, netting zero. What
 actually distinguishes the growing passes is narrower than "response shape": both
 were areas where upstream's black-box suite asserts *nothing at all* about the
 rule being pinned. content_negotiation's audit found the opposite problem — real
-upstream it-blocks (`PlanSpec.hs#L544`, `CustomMediaSpec.hs#L188/#L208/#L346/#L369`,
-`RpcSpec.hs#L1168`) that simply have no case. **Missing black-box coverage and
+upstream it-blocks (`PlanSpec.hs#L735`, `CustomMediaSpec.hs#L197/#L219/#L355/#L378`,
+`RpcSpec.hs#L1313`) that simply have no case. **Missing black-box coverage and
 implementation-anchored coverage are different failure modes, and this pass
 separated them.**
 
 **But "no anchor moved off implementation code" is not "no anchor moved."** The
 mutations pass moved one, **within** the test suite and to a different it-block:
-case **1352** went from `InsertSpec.hs#L218` (the single-object no-pk block) to
-`#L268` (`context "with bulk insert"` / `it "returns 201 but no location
+case **1352** went from `InsertSpec.hs#L263` (the single-object no-pk block) to
+`#L322` (`context "with bulk insert"` / `it "returns 201 but no location
 header"`), because the case is a *bulk* insert and had been citing the wrong
 assertion for its own request shape. Its `notes:` now record both the correct
 anchor and the reason the Location-absent assertion holds twice over on `no_pk`.
@@ -1119,7 +1119,7 @@ when a retracted claim could only be refuted at the control flow), and
 **sideways**, from one it-block to the correct one.
 
 **The representations pass adds a fourth: NARROWING.** The model's
-`InsertSpec.hs#L745` citation moved to `#L157` + `#L99` — same file, same suite,
+`InsertSpec.hs#L894` citation moved to `#L190` + `#L116` — same file, same suite,
 but the old anchor sat under `describe "Inserting into VIEWs"` and so proved the
 Location-absence rule only for a view; case **1309** was rewritten with it.
 **Four directions now, each discovered by a different area's audit**, which is
@@ -1128,19 +1128,19 @@ found the same kind.
 
 **The content_negotiation pass adds a fifth, and it is the inverse of narrowing:
 SPLITTING one anchor into many.** Case **1622** kept its `source:`
-(`RpcSpec.hs#L1184`) but its audit found that the anchored it-block asserts only
+(`RpcSpec.hs#L1332`) but its audit found that the anchored it-block asserts only
 `respBody == file` — no status, no `Content-Type` — so the case had been
 attributing two assertions to a line that makes neither. Rather than move the
 anchor, the case now cites the rest **piece by piece in its `notes:`**: the
 fixture declaration that makes octet-stream negotiable at all
-(`schema.sql#L2372`), both branches of the handler-discovery query
-(`SchemaCache.hs#L1062`, `#L1080-L1086`), the built-in handler map that excludes
-octet-stream (`#L1016`), the sibling it-block that pins the 200
-(`RpcSpec.hs#L1257`) and the charset rule (`MediaType.hs#L62`). **One `source:`
+(`schema.sql#L2374`), both branches of the handler-discovery query
+(`SchemaCache.hs#L1132`, `#L1150-L1156`), the built-in handler map that excludes
+octet-stream (`#L1082`), the sibling it-block that pins the 200
+(`RpcSpec.hs#L1415`) and the charset rule (`MediaType.hs#L71`). **One `source:`
 per case is a schema constraint, not an epistemic one** — when a case asserts
 more than its anchor proves, the fix is more citations, not a different anchor.
 Case **1600** in the same pass moved in the ordinary direction (off
-`MediaType.hs#L69` onto `RawOutputTypesSpec.hs#L15`), joining 1189/1016/1767.
+`MediaType.hs#L78` onto `RawOutputTypesSpec.hs#L16`), joining 1189/1016/1767.
 
 > **The same pass also did something no earlier pass has: it DELETED a case and
 > REUSED its id.** Old **1623** (`octet-stream/no-charset`, a 200) is gone; its

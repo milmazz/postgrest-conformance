@@ -7,5 +7,5 @@ request:
 schema: test
 expect:
   status: 406
-notes: "application/openapi+json on a non-root path is 406. Mirrors OpenApiSpec.hs:30-33"
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L30
+notes: "application/openapi+json on a non-root path is 406. Mirrors OpenApiSpec.hs:33-39"
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L33

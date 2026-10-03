@@ -14,5 +14,5 @@ expect:
     code: "PGRST103"
     details: "Limit should be greater than or equal to zero."
     hint: null
-notes: "Negative limit is 416 PGRST103 (NegativeLimit). Mirrors RangeSpec.hs:266; details from Error.hs:204."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L266
+notes: "Negative limit is 416 PGRST103 (NegativeLimit). Mirrors RangeSpec.hs:320; details from Error.hs:206."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L320

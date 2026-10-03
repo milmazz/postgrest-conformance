@@ -15,4 +15,4 @@ notes: >
   When the child row exists but the selected value is null, the spread
   array contains a single null element — distinct from the empty array of
   the no-children case (SpreadQueriesSpec.hs:143).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L143
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L143

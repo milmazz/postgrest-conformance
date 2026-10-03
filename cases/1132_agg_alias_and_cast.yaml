@@ -18,5 +18,5 @@ expect:
     - {"total_charged":"300","project_id":1}
 notes: >
   Aggregate output alias plus result cast: total_charged:invoice_total.sum()::text
-  (AggregateFunctionsSpec.hs:76; alias form documented at L69).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L76
+  (AggregateFunctionsSpec.hs:79; alias form documented at L70).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L79

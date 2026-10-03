@@ -19,10 +19,10 @@ expect:
 notes: >
   Pins WHERE the parent suggestion comes from. `fuzzySetOfParents` is built from
   the keys of the relationships map — `Fuzzy.fromList [qiName (fst p) | p <- HM.keys
-  allRels, snd p == schema]` (the cited line, Error.hs:327) — so only relations
+  allRels, snd p == schema]` (the cited line, Error.hs:331) — so only relations
   that participate in at least one relationship can ever be suggested. That is a
   narrower set than the one PGRST205's `tableNotFoundHint` searches, which is the
-  schema's whole table index `SchemaCache.dbTablesFuzzyIndex` (Error.hs:387, case
+  schema's whole table index `SchemaCache.dbTablesFuzzyIndex` (Error.hs:390, case
   1520).
 
   The fixture makes the difference observable. Ranked by the normalized
@@ -37,9 +37,9 @@ notes: >
   be.
 
   Everything else matches 1527: same branch (`isJust findParent` is False,
-  Error.hs:322), same rendering (Error.hs:324), same 0.33 default threshold.
+  Error.hs:325), same rendering (Error.hs:327), same 0.33 default threshold.
   Upstream asserts this branch nowhere in `test/spec/`; the doctest at
-  Error.hs:302-303 is the only executable statement of it.
+  Error.hs:305-306 is the only executable statement of it.
 
   Fixture derivation: `test.menagerie`, `test.menagerie_empty` (both foreign-key
   free) and `test.managers` are all defined in fixtures/02_base.sql. The
@@ -48,4 +48,4 @@ notes: >
   names' near-identity is the point rather than a hazard, and the request is
   aimed at `menagerie_empty` so that `menagerie` is the excluded near neighbour.
   Content-Length 338 was recounted against the body above.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L327
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L331

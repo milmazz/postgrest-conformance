@@ -11,4 +11,4 @@ expect:
     Content-Type: application/json; charset=utf-8
   body_exact: []
 notes: "A SETOF proc yielding zero rows responds with an empty JSON array."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L402
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L477

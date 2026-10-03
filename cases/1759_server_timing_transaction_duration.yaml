@@ -22,4 +22,4 @@ notes: >
   (test_server_timing_transaction_duration_with_role_statement_timeout), which
   in v16.0 moved out of test_io.py and runs under a role with a 3s statement
   timeout.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_settings.py#L462
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_settings.py#L462

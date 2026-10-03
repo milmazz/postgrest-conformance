@@ -14,4 +14,4 @@ expect:
     - { "data": { "id": 1, "foo": { "bar": "baz" } } }
     - { "data": { "id": 3 } }
 notes: "orders by a json column property asc using the ->> text arrow."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L242
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L274

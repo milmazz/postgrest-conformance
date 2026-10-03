@@ -1,11 +1,18 @@
 # Conformance case index
 
-Cross-reference of the **812** conformance cases under [`cases/`](cases/).
-Pinned target: **PostgREST v16.0** — re-verified mechanically on **2026-08-29**
-at the current 812-case state: 812 files, 812 distinct integer ids, 0 schema
-violations, and every `raw.githubusercontent.com/PostgREST/postgrest/<ref>/`
-URL across `spec/` (18 files) and `cases/` — **2193** of them — carries the
-single ref `v16.0`, matching `PIN`. (The count read 2093 at the 762-case
+Cross-reference of the **824** conformance cases under [`cases/`](cases/).
+Pinned target: **PostgREST v16.4** — re-pinned from v16.0 and re-verified
+mechanically on **2026-10-02** at the 824-case state: 824 files, 824 distinct
+integer ids, 0 schema violations, and every
+`raw.githubusercontent.com/PostgREST/postgrest/<ref>/` URL across `spec/`
+(18 files) and `cases/` — **2224** of them — carries the single ref `v16.4`,
+matching `PIN`. The re-pin moved line anchors, not just the ref: upstream
+reformatted its Haskell sources (fourmolu) and split `test/io/test_io.py`
+between v16.0 and v16.4, so every `#L` anchor and prose line reference was
+re-mapped to the line holding the same content at v16.4 (see
+[`CHANGELOG.md`](CHANGELOG.md)). The 2193 → 2224 delta is the re-pin's
+twelve new cases and the anchors of the claims it rewrote. (At the v16.0 pin,
+on 2026-08-29, the same scan counted **2193**. The count read 2093 at the 762-case
 state and 2149 right after the spread/aggregates passes — +56: 39 new
 `source:` anchors, one per case, plus 17 in `spec/select.yaml`. The PR #18
 review fold then moved 2149 to 2147: its `spec/ordering.yaml`
@@ -205,6 +212,18 @@ disk now; read the `feature:` prefix if a row ever looks ambiguous.
 > closed range in `spec/config.yaml` at the moment it is opened, and avoid every
 > range already in use (10200–10236, [10600..10799], [11100..11199],
 > 11400–11415, 11800–11818, 12400–12401).
+>
+> **2026-10-02 (v16.4 re-pin): config opened that band — the tree's SIXTH
+> 5-digit band, and the second declared at the moment it opened.**
+> `spec/config.yaml` declares **[11700..11799]** closed; 11700–11707 are in
+> use (the deprecated jwt-role-claim-key syntax and jwt-cache-max-entries
+> through the in-database source), 11708+ is free. It ends exactly where
+> auth's overflow begins, and auth itself grew contiguously in the same pass
+> to **11800–11821** (three deprecated-syntax role-claim cases), so the two
+> bands now abut: 11799 | 11800. The same pass added openapi's **1690** and
+> deliberately left **1689** unused — `spec/openapi.yaml` still spells out
+> the withdrawn 1689 verbatim for restoration, and reusing its number for a
+> different behavior would repeat the 1623 ambiguity.
 
 ## Area <-> id band <-> fixture fragment
 
@@ -232,17 +251,17 @@ generator inputs); at runtime all areas load from the single numbered chain
 | representations | 32 | 1300–1327, 1330–1333 | `fixtures/provenance/representations.sql` (**no delta**) | `representations` (31), `rpc` (1 — case 1326, the RPC half of the "`return=` echoed only for mutations" rule) |
 | **mutations** | **65** | **1350–1399, 11400–11405, 11407–11415** | `fixtures/provenance/mutations.sql` (**no delta** — the v16.0 re-sync added seventeen cases and zero fixture objects) | `mutations` (65) |
 | **rpc** | **44** | **1400–1443** | `fixtures/inputs/rpc.sql` + `fixtures/provenance/rpc.delta.sql` (`test."true"()`, folded — the v16.0 re-sync's three later cases 1441–1443 needed **no** new objects, and `fixtures.sql` was not modified at all) | `rpc` (40), `test` (4) |
-| auth | 69 | 1450–1499 **+ 11800–11818** | `fixtures/provenance/auth.sql` | `auth` (69) |
+| **auth** | **72** | **1450–1499 + 11800–11821** | `fixtures/provenance/auth.sql` (**no delta** — the v16.4 re-pin's three deprecated role-claim-key cases 11819–11821 reuse `/authors_only`) | `auth` (72) |
 | **errors** | **31** | **1500–1530** | `fixtures/provenance/errors.sql` + `fixtures/provenance/errors.delta.sql` (cases 1523/1524's `test.infinite_inserts` + `test.infinite_recursion`, folded — the PGRST200 hint cases 1527–1530 needed **no** new object) | `test` (31) |
 | headers | 35 | 1550–1584 | `fixtures/inputs/headers.sql` + `fixtures/provenance/headers.delta.sql` (`test.get_vary_header_override()`, folded) | `headers` (34), `test` (1) |
 | **content_negotiation** | **52** | **1600–1649, 12400–12401** | `fixtures/provenance/content_negotiation.sql` + `fixtures/provenance/content_negotiation.delta.sql` (**folded twice** — the vendored media-type domains + handlers on 2026-08-08, then on **2026-08-09** the octet-stream **correction**: the new `public."application/octet-stream"` domain plus `test.unnamed_bytea_param` **re-declared in place** to return that domain instead of plain `bytea`, without which case 1622 is unreachable) | `test` (52) |
-| **openapi** | **39** | **1650–1688** | `fixtures/provenance/openapi.sql` (**no delta** — the v16.0 re-sync added six cases, rewrote the other 33 and touched **no** fixture object; `fixtures.sql` does not appear in `git status`) | `test` (38), `openapi_no_comment` (1 — case 1654) |
-| **config** | **50** | **1700–1749** | `fixtures/provenance/config.sql` (**no delta** — case 1749 needs no fixture object: its `db_config_authenticator` role is built by the case's own `preconditions_sql`) | `config` (50) |
+| **openapi** | **40** | **1650–1688, 1690** | `fixtures/provenance/openapi.sql` + `fixtures/provenance/openapi.delta.sql` (the mixed-case schema `"SCHEMA_v3"` for case 1690, folded 2026-10-02 at the v16.4 re-pin; the v16.0 re-sync before it had added six cases and touched **no** fixture object) | `test` (38), `openapi_no_comment` (1 — case 1654), `SCHEMA_v3` (1 — case 1690) |
+| **config** | **58** | **1700–1749, 11700–11707** | `fixtures/provenance/config.sql` (**no delta** — cases 1749 and 11707 need no fixture object: their `db_config_authenticator` role is built by each case's own `preconditions_sql`) | `config` (58) |
 | observability | 22 | 1750–1771 | `fixtures/provenance/observability.sql` (**no delta** — the v16.0 re-sync added two cases and zero fixture objects; its `.sql` change is a comment-only provenance re-pin) | `observability` (22) |
 | **domain_representations** | **37** | **1800–1836** | `fixtures/provenance/domain_representations.sql` + `fixtures/provenance/domain_representations.delta.sql` (`test.evil_friends_with_column_default`, folded 2026-08-09 — the channel was opened, used and emptied inside a single pass, a first) | `domain_representations` (36), `test` (1 — case **1822**, and the label is load-bearing: see **Label caveats**) |
 
-Total: **812 cases**, **17 areas**, **17 fixture fragments**
-(plus **9** `*.delta.sql` write channels under `fixtures/provenance/`, all
+Total: **824 cases**, **17 areas**, **17 fixture fragments**
+(plus **10** `*.delta.sql` write channels under `fixtures/provenance/`, all
 currently **comment-only**: stripping comment and blank lines leaves zero
 lines in every one. Each carries a `-- Folded into … on <date> …` provenance
 line and no DDL. **Three** are dated 2026-08-08 (`headers`, `ordering`,
@@ -251,7 +270,9 @@ line and no DDL. **Three** are dated 2026-08-08 (`headers`, `ordering`,
 bier-era fold target `../fixtures.sql`; the **ninth**, `select.delta.sql`
 (folded **twice** on 2026-08-23 — the factories family, then the
 operators/process_operator m2m pair), is the first folded in this
-standalone repo and names the real target `../02_base.sql`. **There is
+standalone repo and names the real target `../02_base.sql`. The
+**tenth**, `openapi.delta.sql` (folded 2026-10-02 at the v16.4 re-pin — the
+mixed-case schema `"SCHEMA_v3"` for case 1690), names the same target. **There is
 still no `mutations.delta.sql` and no `representations.delta.sql`.** See
 [`fixtures/README.md`](fixtures/README.md) for who may write which file).
 
@@ -603,12 +624,12 @@ sub-features present per area (second segment, as on disk):
 | representations | 1300–1327, 1330–1333 | post (13, incl. the two headers-only Location suppressions — bulk insert 1315 and no-PK relation 1317 — plus the return=representation-never-carries-Location rule 1316), patch (5), delete (5), put (4), **prefer** (3 — duplicate-token-first-wins 1318, unknown-token-ignored 1319, fixed `Preference-Applied` order 1327), **read** (1 — 1325, `return=` not echoed on a GET), **rpc** (1 — 1326, the same on a `POST /rpc/`, the area's only `schema: rpc` case) |
 | **mutations** | **1350–1399, 11400–11405, 11407–11415** | insert (incl. the `x-www-form-urlencoded` body 11402, insignificant whitespace 11403, the empty-body PGRST102 1398 and the unique-violation 409/`23505` 11401), update (incl. the multi-row 204 + `Content-Range` 11400 and the one-to-one / m2m **resource-embedding** representations 11413/11415), delete (incl. the to-one parent embed 11412), upsert (incl. the only-pk-table merge/ignore pair 11410/11411, composite-pk POST/PUT 11414/11408, the partial-composite-pk PGRST105 11409, `PUT` ignoring `Range` 11407, ignore-duplicates-with-nothing-created 11404 and the PUT-`offset` PGRST114 1399), columns-param (**POST and PATCH only** — the PUT claim was withdrawn as uncited), missing-default, safe-update, safe-delete, max-affected (incl. the UPDATE flavor 11405). **No new sub-feature was minted**: the four review-driven embedding cases live under `update` and `delete` rather than an `embed` sub-feature |
 | **rpc** | **1400–1443** | return, setof, args (incl. the form-urlencoded variadic POST 1442), method, content-negotiation, count, shape, error (incl. the closest-proc PGRST202 hint 1443, the byte-length-pinned complement of the bare-404 probe 1432), overloaded, single-unnamed-param (**json flavor only** — text and xml have no case), name, **prefer** (**1441**, the RPC-only PGRST128 rule — the tree's only assertion of that code). **No sub-feature exists for untyped (`record` / `SETOF record`) returns, non-variadic array parameters, or resource embedding through a table-valued function**; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → rpc* |
-| auth | 1450–1499, 11800–11818 | anonymous, claims, role, role-claim-key, role-switching, jwt, audience, pre-request, guc, rpc |
+| auth | 1450–1499, 11800–11821 | anonymous, claims, role, role-claim-key (incl. the v16.2 **deprecated** leading-dot syntax 11819–11821: dotted path, the restored `^==` filter, and the object-element 401), role-switching, jwt, audience, pre-request, guc, rpc |
 | **errors** | **1500–1530** | sqlstate (incl. the two 5xx paths 1523/1524), pgrst_code (incl. the PGRST205 fuzzy-hint pair 1520/1521 **and the four PGRST200 `noRelBetweenHint` cases 1527–1530** — the parent branch's positive/negative/candidate-set trio plus the child branch it contrasts with), raise, headers (incl. the `Proxy-Status` custom-code case 1519), verbosity (incl. the inline-416 case 1522), envelope (1525, byte-exact key emission order), proxy_status (1526, absent on the inline 416) |
 | headers | 1550–1584 | prefer, profile, location, content-location, guc, vary |
 | **content_negotiation** | **1600–1649, 12400–12401** | json, csv, geojson, octet-stream (incl. the **negative** 1623 — a scalar RPC with no media-type domain is not negotiable as octet-stream — alongside the SETOF flavor 1624), singular, nulls-stripped (incl. the mutation-representation pair **12400**/**12401** and the explicit-`select=` singular 1649), plan, openapi, precedence, error (incl. the unparsable-media-type echo 1647), custom-media-handler, **case-insensitivity** (1648). The band is 1600–**1649**, not 1646: 1647/1648/1649 and the overflow pair 12400/12401 are on disk |
-| **openapi** | **1650–1688** | root (10 — incl. the document's own `/` path item **1687** and the document-level `produces`/`consumes` list **1688**, both anchored at the generator because no upstream Feature it-block reads either), rpc (8 — incl. the all-OUT args schema that emits neither `properties` nor `required` **1683**, its INOUT-with-no-DEFAULT complement **1684**, and the IMMUTABLE half of the volatility switch **1685**), table (5 — incl. the shared `preferParams` definition and its **suppressed empty enum** **1686**), comments (5), types (4), mode (4), security (2), defaults (1). **No sub-feature exists for the `/rpc/*` per-operation `produces`/`responses` pair or for `$.parameters.on_conflict`**; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → openapi* |
-| config | 1700–1749 | dump-config, ready, sources (incl. **1749**, `db-aggregates-enabled` driven through `ALTER ROLE … SET pgrst.*` — the first entry of `dbSettingsNames`), aliases, validation, coercion, parsing, precedence, db-max-rows, db-tx-end, db-extra-search-path, app-settings, server-cors-allowed-origins, cli, client-error-verbosity, server-reuseport, url-use-legacy-target-names, admin-server-unix-socket |
+| **openapi** | **1650–1688, 1690** | root (11 — incl. the mixed-case schema name **1690**, fixed in v16.4 / PostgREST#5158, incl. the document's own `/` path item **1687** and the document-level `produces`/`consumes` list **1688**, both anchored at the generator because no upstream Feature it-block reads either), rpc (8 — incl. the all-OUT args schema that emits neither `properties` nor `required` **1683**, its INOUT-with-no-DEFAULT complement **1684**, and the IMMUTABLE half of the volatility switch **1685**), table (5 — incl. the shared `preferParams` definition and its **suppressed empty enum** **1686**), comments (5), types (4), mode (4), security (2), defaults (1). **No sub-feature exists for the `/rpc/*` per-operation `produces`/`responses` pair or for `$.parameters.on_conflict`**; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → openapi* |
+| config | 1700–1749, 11700–11707 | dump-config (incl. the v16.2 **deprecated** jwt-role-claim-key syntax 11700–11706: acceptance, the startup WARNING, and its five string-comparison operators), ready, sources (incl. **1749**, `db-aggregates-enabled` driven through `ALTER ROLE … SET pgrst.*` — the first entry of `dbSettingsNames` — and **11707**, `jwt-cache-max-entries` through the same source, fixed in v16.4 / PostgREST#5269), aliases, validation, coercion, parsing, precedence, db-max-rows, db-tx-end, db-extra-search-path, app-settings, server-cors-allowed-origins, cli, client-error-verbosity, server-reuseport, url-use-legacy-target-names, admin-server-unix-socket |
 | observability | 1750–1771 | server-timing (incl. **1770**, the exact five-metric render), trace-header, log-level, server (**1771**, the `Server: postgrest/…` version header — the tree's only `Server:` assertion) |
 | **domain_representations** | **1800–1836** | **write** (18 — the area's largest sub-feature after this pass, and all but four are new: headers-only POST on a table **1823** and on the updatable view **1824**, POST-through-view formatting incl. the computed column **1825**/**1826**, `?columns=` on that view **1827**/**1836**, and the entire PATCH block **1828–1835** — single, bulk, `?columns=`, unknown column, and no-rows-matched), read (11), filter (6 — incl. **1821**, the `ilike`-on-a-datarep-column 404/`42883` that proves pattern operators are deliberately NOT wired to representations), default (2 — no-cast-uses-base-type **1814** and **column-default-beats-domain-default 1822**, the area's only `schema: test` case). **No sub-feature exists for data representations in the presence of COMPUTED RELATIONSHIPS** (upstream `ComputedRelsSpec.hs#L105`), which is blocked by `Prefer: tx=commit` *and* by the single-`request` case shape; see [`COVERAGE.md`](COVERAGE.md) → *Known gaps → domain_representations* |
 
@@ -1022,14 +1043,15 @@ sub-features present per area (second segment, as on disk):
 
 ## Case file shapes
 
-Most cases are HTTP request/response (**763**). The **config** area additionally
+Most cases are HTTP request/response (**773**). The **config** area additionally
 uses a **CLI** shape (`request.kind: cli`) asserting on `expect.exit_code`,
 `expect.dump_contains`, `expect.dump_reparse_stable`, and
-`expect.stderr_contains` rather than an HTTP status — **43** cases, ids
-**1705–1741 plus 1744–1749**. Note the CLI ids are *not* one contiguous run:
+`expect.stderr_contains` rather than an HTTP status — **51** cases, ids
+**1705–1741 plus 1744–1749 plus 11700–11707** (the last eight in config's
+overflow band, opened at the v16.4 re-pin). Note the CLI ids are *not* one contiguous run:
 **1742 and 1743 are HTTP** CORS cases sitting inside the config band, so
 `1705–1749` is the band, not the CLI set. `request.flag` carries three flag
-values — `"--dump-config"` (**37** cases), `"--ready"` (**4**: 1745–1748, added
+values — `"--dump-config"` (**45** cases), `"--ready"` (**4**: 1745–1748, added
 2026-08-24) and `"--example"` (**1**: 1727) — plus case **1719**, whose `flag`
 is a positional config path (`does_not_exist.conf`) rather than a flag at all.
 **Only the `--dump-config` set is startup behavior**: `--ready` health-checks
@@ -1081,9 +1103,10 @@ ids listed in `@variant_case_ids`
 1654, 1677, 1678, 1680, 1682, 1703, 1758, 1763, 1764) plus every `kind: cli`
 case. On any other HTTP case the `config:` block is **inert** — it documents the
 upstream configuration the assertion depends on, but the case still runs against
-a shared instance. Mechanically, **66** HTTP cases carry a non-empty `config:`
-outside `@variant_case_ids` (re-derived on disk this pass against the harness's
-live 18-id list), now out of **769** HTTP cases (812 − 43 CLI); most simply
+a shared instance. Mechanically, **69** HTTP cases carry a non-empty `config:`
+outside `@variant_case_ids` (66 re-derived on disk at the 812-case state against
+the harness's then-live 18-id list, plus the v16.4 re-pin's auth cases
+11819–11821), now out of **773** HTTP cases (824 − 51 CLI); most simply
 restate what the shared instance already provides. The five most recent are
 **11115–11119**, and none of them restates: each needs
 `db-aggregates-enabled: true`, and the shared instance leaves aggregates

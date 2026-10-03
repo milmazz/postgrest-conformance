@@ -17,8 +17,8 @@ expect:
 notes: >-
   The JSON Path selects nothing (index 3 of a 2-element array), so no role is
   extracted and PostgREST falls back to `db-anon-role`
-  (Auth/Jwt.hs#L114-L115). The anonymous role cannot read `authors_only`, so
+  (Auth/Jwt.hs#L121-L120). The anonymous role cannot read `authors_only`, so
   the request ends in the 42501 -> 401 envelope of case 1450. Upstream asserts
   the status only; the exact envelope is already pinned by case 1450, so this
   case deliberately pins nothing beyond it.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L143
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L143

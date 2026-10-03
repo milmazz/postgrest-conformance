@@ -22,4 +22,4 @@ notes: >
   or_starting_col, so `eq.smth` matches nothing. (The seed matches upstream
   data.sql L371-L375, which also leaves both columns null.) A runner that
   wants to stay faithful to the source alone should assert only status 200.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L287
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L310

@@ -17,6 +17,6 @@ expect:
 notes: >-
   RFC 9535 index selector: `$.customObject.manyRoles[1]` picks the second
   element of the array claim as the role. Zero-based, same as the v14.12 JSPath
-  DSL — only the leading `$` is new (CHANGELOG.md#L89). Upstream asserts the
+  DSL — only the leading `$` is new (CHANGELOG.md#L127). Upstream asserts the
   status only.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L129
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L129

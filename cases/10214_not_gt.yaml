@@ -16,4 +16,4 @@ notes: >
   not.gt is <=; the NOT token is emitted before the field reference, giving
   `NOT id > 2`. Mirrors QuerySpec.hs 'matches with inequality using not
   operator' (second assertion; case 1052 covers the first, not.lt).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L60
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L59

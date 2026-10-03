@@ -18,4 +18,4 @@ notes: >
   A spread nested inside a spread to-many: the one-to-one process_costs
   value joins the parallel arrays, null where the nested row is missing
   (process id 7 has no cost row) (SpreadQueriesSpec.hs:162).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162

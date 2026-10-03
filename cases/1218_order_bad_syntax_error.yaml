@@ -18,4 +18,4 @@ expect:
 notes: >
   meaningful error message on bad order syntax: 400 PGRST100 with parse-error
   details.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1173
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1329

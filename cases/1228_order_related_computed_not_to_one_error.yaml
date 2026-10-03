@@ -18,9 +18,9 @@ notes: >
   The to-one requirement for a related order applies to computed relationships
   too: `computed_videogames(test.designers) RETURNS SETOF test.videogames`
   carries no `ROWS 1`, so it is one-to-many and
-  `order=computed_videogames(id).desc` fails with 400 PGRST118 (Plan.hs#L886,
+  `order=computed_videogames(id).desc` fails with 400 PGRST118 (Plan.hs#L953,
   `RelatedOrderNotToOne (qiName from) name`). The details/message name the
   relation as addressed in the query string, i.e.
-  `fromMaybe relName relAlias` (Plan.hs#L883). Same schema rationale as
+  `fromMaybe relName relAlias` (Plan.hs#L949). Same schema rationale as
   case 1227.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L128
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L128

@@ -17,4 +17,4 @@ expect:
     details: null
     hint: null
 notes: "A CSV body whose lines have inconsistent field counts fails with PGRST102 / 400. Mirrors InsertSpec 'fails for too few'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L671
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L803

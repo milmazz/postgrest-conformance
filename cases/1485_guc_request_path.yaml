@@ -12,4 +12,4 @@ expect:
   status: 200
   body_exact: "/rpc/get_guc_value"
 notes: "request.path GUC carries the request path as a plain setting."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L938
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1059

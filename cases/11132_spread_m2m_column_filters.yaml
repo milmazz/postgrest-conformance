@@ -18,4 +18,4 @@ expect:
 notes: >
   Filters on an m2m spread embed (through the process_supervisor junction)
   narrow the arrays without dropping parents (SpreadQueriesSpec.hs:518).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L518
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L518

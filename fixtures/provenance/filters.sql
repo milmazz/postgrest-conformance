@@ -11,7 +11,7 @@
 
 -- ---------------------------------------------------------------------------
 -- entities / child_entities / grandchild_entities
--- schema.sql L1167-1189 ; data.sql L356-375
+-- schema.sql L1169-1191 ; data.sql L356-375
 -- ---------------------------------------------------------------------------
 
 create table entities (
@@ -56,7 +56,7 @@ insert into grandchild_entities values (5, '(grandchild,entity,5)', 2, null, nul
 
 -- ---------------------------------------------------------------------------
 -- ranges (range operators)
--- schema.sql L1193-1196 ; data.sql L377-382
+-- schema.sql L1195-1198 ; data.sql L377-382
 -- ---------------------------------------------------------------------------
 
 create table ranges (
@@ -72,7 +72,7 @@ insert into ranges values (5, null);
 
 -- ---------------------------------------------------------------------------
 -- simple_pk (like/ilike/match/imatch + not)
--- schema.sql L769-773 ; data.sql L185-186
+-- schema.sql L771-775 ; data.sql L185-186
 -- ---------------------------------------------------------------------------
 
 create table simple_pk (
@@ -86,7 +86,7 @@ insert into simple_pk values ('xYYx', 'v');
 
 -- ---------------------------------------------------------------------------
 -- no_pk (is null / is not_null / isdistinct)
--- schema.sql L688-691 ; data.sql L280-282
+-- schema.sql L690-693 ; data.sql L280-282
 -- ---------------------------------------------------------------------------
 
 create table no_pk (
@@ -100,7 +100,7 @@ insert into no_pk values ('2', '0');
 
 -- ---------------------------------------------------------------------------
 -- chores (is.true/false/unknown, case-insensitive trilean)
--- schema.sql L2457-2461 ; data.sql L736
+-- schema.sql L2459-2463 ; data.sql L736
 -- ---------------------------------------------------------------------------
 
 create table chores (
@@ -116,7 +116,7 @@ insert into chores (id, name, done) values
 
 -- ---------------------------------------------------------------------------
 -- json_table / json_arr / jsonb_test (JSON arrow filters)
--- schema.sql L655-657, L1548-1556 ; data.sql L263-266, L506-521
+-- schema.sql L657-659, L1550-1558 ; data.sql L263-266, L506-521
 -- ---------------------------------------------------------------------------
 
 create table json_table (

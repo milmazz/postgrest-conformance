@@ -19,4 +19,4 @@ notes: >
   applied. The 'simple' config keeps stop words, which is why the lexeme 'of'
   is present and matches. Mirrors QuerySpec.hs it "works with tsvector computed
   fields".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L295
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L329

@@ -13,4 +13,4 @@ expect:
 notes: >
   Filter on a nested json key with ->/->>. Mirrors JsonOperatorSpec
   "can filter by properties inside json column".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L167
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L191

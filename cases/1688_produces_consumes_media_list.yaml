@@ -13,7 +13,7 @@ expect:
 notes: >
   The document-level `produces` and `consumes` are the same four-element list,
   in this order: `makeMimeList [MTApplicationJSON, MTVndSingularJSON True,
-  MTVndSingularJSON False, MTTextCSV]` for both (OpenAPI.hs#L405 and #L406).
+  MTVndSingularJSON False, MTTextCSV]` for both (OpenAPI.hs#L507 and #L508).
   The two singular-JSON entries render as
   "application/vnd.pgrst.object+json;nulls=stripped" (the True/stripped one
   first) and "application/vnd.pgrst.object+json" (MediaType.hs toMime). The
@@ -23,7 +23,7 @@ notes: >
   array rather than four membership checks — because the list is produced by a
   literal Haskell list in source order. No upstream Feature it-block reads
   either key (they are only exercised through the whole-document schema
-  validation of SpecHelper.hs#L115-123), which is why openapi.yaml previously
+  validation of SpecHelper.hs#L120-131), which is why openapi.yaml previously
   recorded this as "not individually asserted by a Feature test"; that gap is
   closed by tracing to the generator lines instead of guessing.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L405
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L507

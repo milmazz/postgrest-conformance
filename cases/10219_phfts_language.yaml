@@ -15,4 +15,4 @@ notes: >
   phfts with a dictionary -> `@@ phraseto_tsquery('german', 'Art Spass')`.
   Mirrors QuerySpec.hs phraseto_tsquery 'finds matches with different
   dictionaries'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L273
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L303

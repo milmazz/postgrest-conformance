@@ -1,6 +1,6 @@
 # postgrest-conformance
 
-A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16.0. Every case is machine-verified against real PostgREST v16.0 in CI: the internal runner under `tools/oracle/` executes all 806 cases against the pinned release binary on every push to `main` and on every pull request. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
+A language-agnostic conformance suite for PostgreSQL-backed REST API servers, derived from PostgREST v16 and pinned to v16.4. Every case is machine-verified against real PostgREST v16.4 in CI: the internal runner under `tools/oracle/` executes all 824 cases against the pinned release binary on every push to `main` and on every pull request. Modeled after the [JSON Schema Test Suite](https://json-schema.org/draft/2020-12/json-schema-test-suite.html), each case describes a HTTP request, expected response, and optional assertions about response body structure and HTTP headers.
 
 **Derived from:** [milmazz/bier@6024c62](https://github.com/milmazz/bier/commit/6024c62)
 
@@ -29,7 +29,7 @@ Versions follow `v<postgrest-major>.<postgrest-minor>.<postgrest-patch>-suite.<s
 
 ## Divergences
 
-Conformance suites record what the reference implementation (PostgREST v16.0) does. Implementers may maintain their own skip list for cases that diverge from PostgREST's behavior by design. This suite itself does not track divergences — only the reference behavior.
+Conformance suites record what the reference implementation (PostgREST v16.4) does. Implementers may maintain their own skip list for cases that diverge from PostgREST's behavior by design. This suite itself does not track divergences — only the reference behavior.
 
 ## License
 

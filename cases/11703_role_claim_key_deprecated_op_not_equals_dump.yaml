@@ -1,0 +1,26 @@
+id: 11703
+feature: config/jwt-role-claim-key/deprecated-filter-not-equals
+request:
+  kind: cli
+  flag: "--dump-config"
+schema: config
+config:
+  file:
+    jwt-role-claim-key: '.roles[?(@ != "role1")]'
+expect:
+  exit_code: 0
+  dump_contains:
+    - 'jwt-role-claim-key = ".\"roles\"[?(@ != \"role1\")]"'
+notes: >
+  The `!=` (not-equals) string-comparison filter of the pre-v16 JSPath DSL
+  parses again since v16.2 (PostgREST#5171): the RFC 9535 parser rejects the
+  leading dot, parseRoleClaimKey falls back to pDeprecatedRoleClaimKey
+  (Config.hs#L468), and the operator is one of the five that
+  pFilterConditionParser accepts (Config/DeprecatedJSPath.hs#L128-L132).
+  --dump-config normalizes the value by quoting each key (`.roles` ->
+  `."roles"`) and leaves the filter as written. Mirrors upstream's
+  test_cli.py:test_expected_config over configs/jspath-str-op-dump2.config,
+  which tests one operator per file; the input and the golden dump line are
+  upstream's verbatim
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/jspath-str-op-dump2.config#L1).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/expected/jspath-str-op-dump2.config#L29

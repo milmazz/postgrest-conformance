@@ -20,18 +20,18 @@ expect:
 notes: >
   The single documented exception to "error responses carry Proxy-Status".
   Every response built by `Error.errorResponseFor` prepends
-  "Proxy-Status: PostgREST; error=<code>" unconditionally (Error.hs:86, assembled
-  at :88) — cases 1506, 1515, 1516, 1519 pin that. A 416
+  "Proxy-Status: PostgREST; error=<code>" unconditionally (Error.hs:89, assembled
+  at :91) — cases 1506, 1515, 1516, 1519 pin that. A 416
   InvalidRange/OutOfBounds response never reaches that function: `Response.hs`
   assembles it as an ordinary read response and only swaps the BODY for
   `Error.errorPayload configClientErrorVerbosity …` when the computed status is
-  416 (Response.hs:76 for a relation read, :180 for an RPC read). Its header
+  416 (Response.hs:82 for a relation read, :188 for an RPC read). Its header
   list is built independently and holds only Content-Range and Content-Location,
   then Content-Length, the negotiated Content-Type and Preference-Applied
-  (Response.hs:65-75) — no Proxy-Status anywhere in it. So this is a response
+  (Response.hs:70-81) — no Proxy-Status anywhere in it. So this is a response
   with a full error envelope in the body and no Proxy-Status header.
-  Body and Content-Range are the same ground truth as case 1257 (RangeSpec.hs:295),
+  Body and Content-Range are the same ground truth as case 1257 (RangeSpec.hs:352),
   re-pointed at the `test` schema, whose `items` table holds 15 rows in a freshly
-  loaded bier_test; `details` comes from Error.hs:206. Case 1522 is the
+  loaded bier_test; `details` comes from Error.hs:208. Case 1522 is the
   `client-error-verbosity: minimal` twin of this response.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response.hs#L65
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response.hs#L70

@@ -18,4 +18,4 @@ notes: >
   and configs/expected/no-defaults.config#L7 dumps it back. The HTTP-observable
   effect (details/hint omitted from the error envelope) is covered by the errors
   area, cases 1517/1518.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/expected/no-defaults.config#L7
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/expected/no-defaults.config#L7

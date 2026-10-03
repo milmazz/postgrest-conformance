@@ -1,4 +1,4 @@
-# Ordering behavior model for Bier (PostgREST v16.0 compatibility).
+# Ordering behavior model for Bier (PostgREST v16.4 compatibility).
 #
 # Scope: the `order` query parameter and its embedded variant `<embed>.order`.
 # Covers direction (asc/desc), null placement (nullsfirst/nullslast), JSON-path
@@ -40,7 +40,7 @@
 #     modelled by this area.
 
 area: ordering
-version: PostgREST v16.0
+version: PostgREST v16.4
 
 # Case schema: the conformance cases in this area validate against
 # spec/case.schema.json. All ordering cases use raw.githubusercontent.com source
@@ -49,53 +49,53 @@ version: PostgREST v16.0
 grammar:
   # The order value parser. Top-level order terms and per-relation order terms
   # are comma-separated; `try pOrderRelationTerm <|> pOrderTerm`.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L769
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L826
   order_value: "<term>[,<term>]*"
   term: "<field>[.<direction>][.<nulls>]   |   <relation>(<field>)[.<direction>][.<nulls>]"
   field: "<column>[<json-arrow><key-or-index>]*   (-> or ->> arrows)"
   # asc/desc are parsed by pOrdDir.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L790
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L849
   directions: [asc, desc]
   # nullsfirst/nullslast are parsed by pNulls.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L786
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L844
   nulls: [nullsfirst, nullslast]
   separator: "."   # the pDelimiter between field, direction and nulls
   # The parsed value is keyed by embed path: qsOrder :: [(EmbedPath, [OrderTerm])],
   # so `order=` targets the top relation and `<a>.<b>.order=` targets a nested
   # embed.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/QueryParams.hs#L81
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/QueryParams.hs#L120
 
 defaults:
   # When direction is omitted, no ASC/DESC is emitted to SQL; PostgreSQL's
   # default (ASC) applies. When nulls is omitted, nothing is emitted; PostgreSQL
   # default applies (NULLS LAST for ASC, NULLS FIRST for DESC).
   # The SQL fragment only emits a direction/null clause when present in the term.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L348
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L389
   direction_when_omitted: asc        # PostgreSQL default
   nulls_when_omitted_asc: nullslast  # PostgreSQL default for ASC
   nulls_when_omitted_desc: nullsfirst # PostgreSQL default for DESC
 
 sql_mapping:
   # OrderAsc -> "ASC", OrderDesc -> "DESC"
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L359
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L404
   asc: "ASC"
   desc: "DESC"
   # OrderNullsFirst -> "NULLS FIRST", OrderNullsLast -> "NULLS LAST"
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L362
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L407
   nullsfirst: "NULLS FIRST"
   nullslast: "NULLS LAST"
   # ORDER BY is emitted only when the term list is non-empty.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L526
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L574
   order_clause: "ORDER BY <term>[, <term>]*"
   # A field carrying a json path is emitted verbatim when the column's IR type is
   # json/jsonb, and wrapped in to_jsonb(...) for every other column type — this is
   # what makes `->`/`->>` work on composite-type and array columns.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L254
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L337
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L291
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L364
   json_path_arrow: "-> / ->>"
   # A numeric json-path segment is emitted with an explicit ::int cast, a string
   # segment as a plain unknown literal.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Query/SqlFragment.hs#L444
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L487
   json_path_index: "-><n>::int"
 
 embed_target_resolution:
@@ -106,81 +106,81 @@ embed_target_resolution:
   #     alias addresses it;
   #   * legacy (url-use-legacy-target-names=true, the default): the segment may
   #     equal either the relation name OR the alias.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L1027
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L1095
   #
   # Matching an ALIASED embed by its relation name flags the node
   # (relIsLegacyTargetNameMatch) and collects a deprecation warning.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L1032
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L151
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L1100
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L172
   #
   # The warning is surfaced as a response header only while the legacy mode is on:
   #   Warning: 299 <product-token> "<msg> Update `<relName>` to `<alias>` in query string filters, orders or limits."
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L213
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L270
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L233
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L293
   #
   # The header is emitted only when the config key is on AND the plan collected
   # at least one legacy match.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L215
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L235
   #
   # Config key gating it, default true.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L324
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config.hs#L356
   config_key: url-use-legacy-target-names
   default: true
   # With the legacy mode OFF, addressing an aliased embed by its relation name is
   # a 400 PGRST108 carrying an alias-specific details/hint pair (distinct from the
   # plain "not embedded" hint).
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L214
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L220
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L216
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L221
   #
   # NOTE: `order=<relation>(<col>)` (a *related* order, not an embed path) does
   # NOT go through matchTarget/updateNode — addRelatedOrders matches strictly on
   # `fromMaybe relName relAlias`, so an aliased relation is addressable only by
   # its alias there, with no legacy fallback and no Warning.
-  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L878
+  # source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L943
 
 entries:
   - id: order.asc
     claim: >
       `order=<col>.asc` sorts the result ascending by that column.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1079
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1233
     cases: [1200]
 
   - id: order.desc
     claim: >
       `order=<col>.desc` sorts the result descending by that column.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1087
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1240
     cases: [1201]
 
   - id: order.no_direction
     claim: >
       `order=<col>` with no direction or nulls clause sorts ascending
       (PostgreSQL default applies, no clause emitted).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1144
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1297
     cases: [1202]
 
   - id: order.nullsfirst
     claim: >
       `order=<col>.nullsfirst` (no direction) places NULL rows first; the
       remaining rows follow PostgreSQL's default (ascending) order.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1094
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1247
     cases: [1203]
 
   - id: order.asc.nullslast
     claim: >
       `order=<col>.asc.nullslast` sorts ascending with NULL rows last.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1104
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1257
     cases: [1204]
 
   - id: order.desc.nullsfirst
     claim: >
       `order=<col>.desc.nullsfirst` sorts descending with NULL rows first.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1113
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1266
     cases: [1205]
 
   - id: order.desc.nullslast
     claim: >
       `order=<col>.desc.nullslast` sorts descending with NULL rows last.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1122
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1275
     cases: [1206]
 
   - id: order.multi_column
@@ -188,7 +188,7 @@ entries:
       Multiple comma-separated terms order by each in turn; each term carries
       its own direction and nulls clause, e.g.
       `order=client_id.desc.nullslast,id.desc`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1131
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1284
     cases: [1207]
 
   - id: order.nulls.alongside_limits
@@ -202,30 +202,30 @@ entries:
       work alongside limits", CHANGELOG 13.0.2 — so it predates the previous
       v14.12 pin (RangeSpec.hs#L227 there) and is unchanged at v16.0; it was
       simply never covered by this spec tree. It is the nulls-carrying twin of
-      the plain nested-limit assertion at RangeSpec.hs#L202 (pagination case
+      the plain nested-limit assertion at RangeSpec.hs#L252 (pagination case
       1276), which carries no nulls clause.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L226
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L278
     cases: [1229]
 
   - id: order.computed_column
     claim: >
       Ordering by a computed (function) column works, e.g. `order=anti_id.desc`
       where anti_id(items) = id * -1, so desc on anti_id yields ascending id.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L515
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L593
     cases: [1208]
 
   - id: order.json_arrow_text
     claim: >
       Ordering by a JSON column with the `->>` (text) arrow works,
       e.g. `order=data->>id.asc`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L242
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L274
     cases: [1209]
 
   - id: order.json_arrow_nested_nulls
     claim: >
       Ordering by a two-level JSON path with nulls placement works,
       e.g. `order=data->foo->>bar.nullsfirst`; rows lacking the path sort first.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L247
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L280
     cases: [1210]
 
   - id: order.json_array_index
@@ -234,7 +234,7 @@ entries:
       `order=numbers->0.desc`, `order=numbers_mult->2->2.asc`. The column need not
       be json/jsonb — an int[]/int[][] column is wrapped with `to_jsonb(...)` and
       the index emitted as `-><n>::int`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L260
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L292
     cases: [1225, 1226]
 
   - id: order.composite_arrow
@@ -243,14 +243,14 @@ entries:
       `->` selects the field for sorting (`order=num->i.asc`) and `->>` sorts on
       its text form (`order=num->>i.desc`). This is a distinct grammar path from
       jsonb ordering (the arrow operates on a composite type, not jsonb).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L252
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L286
     cases: [1219, 1220]
 
   - id: order.embed
     claim: >
       `<embed>.order=<col>.<dir>` orders the rows of an embedded resource
       independently of the top-level resource, e.g. `tasks.order=name.asc`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1154
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1307
     cases: [1211]
 
   - id: order.embed.alias
@@ -259,7 +259,7 @@ entries:
       ALIAS: `select=the_tasks:tasks(...)&the_tasks.order=name.asc`. (In v14.12
       the canonical key was the relation name, `tasks.order=`.) The alias form
       emits no Warning header.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1159
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1313
     cases: [1212]
 
   - id: order.embed.alias.legacy_target_name
@@ -275,7 +275,7 @@ entries:
       and will stop working in a future release." and the relName/alias pair is
       rendered backtick-quoted. Upstream's product token is
       PostgRESTv<major.minor>.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1183
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1339
     cases: [1224]
 
   - id: order.embed.alias.legacy_disabled
@@ -287,7 +287,7 @@ entries:
       hint "Change 'tasks' to 'the_tasks' in filters, orders or limits."
       (contrast entry `order.related_not_embedded_error`, whose hint is the plain
       "Verify that '<rel>' is included in the 'select' query parameter.").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1709
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1957
     cases: []   # not runnable on the frozen harness — see gaps
 
   - id: order.embed.to_one_parent
@@ -295,14 +295,14 @@ entries:
       An `<embed>.order` on a to-one (many-to-one) embed is accepted and does not
       change the embed's shape: it still serializes as a single JSON object, e.g.
       `select=id,name,clients(id,name)&clients.order=name.asc`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1169
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1325
     cases: [1223]
 
   - id: order.embed.two_levels
     claim: >
       Embedded ordering can be applied at each nesting level via dotted embed
       paths, e.g. `tasks.order=name.asc&tasks.users.order=name.desc`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1164
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1319
     cases: [1213]
 
   - id: order.related_to_one
@@ -310,7 +310,7 @@ entries:
       `order=<relation>(<col>).<dir>` orders the top resource by a column of a
       to-one (many-to-one / one-to-one) embedded relation, e.g.
       `order=clients(name).nullsfirst`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L14
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L14
     cases: [1214]
 
   - id: order.related_to_one.alias
@@ -318,7 +318,7 @@ entries:
       A related order references an aliased to-one relation by its alias, e.g.
       `select=id,client:clients(name)&order=client(name).asc`. Unlike an embedded
       order path, a related order has no legacy relation-name fallback.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L25
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L25
     cases: [1215]
 
   - id: order.related_to_one.one_to_one_jsonb
@@ -328,7 +328,7 @@ entries:
       `select=id,trash_details(id,jsonb_col)&order=trash_details(jsonb_col->key).asc`
       (and `.desc`); trash_details.id references trash.id, forming a one-to-one
       relationship.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L47
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L47
     cases: [1221]
 
   - id: order.related.computed_relationship
@@ -340,7 +340,7 @@ entries:
       the computed to-one parent. The to-one requirement is enforced the same
       way as for FK relationships — the one-to-many twin
       `order=computed_videogames(id).desc` (no `ROWS 1`) is a 400 PGRST118.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L35
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L35
     cases: [1227, 1228]
 
   - id: order.embed.by_nested_related
@@ -350,7 +350,7 @@ entries:
       `select=name,tasks(id,name,projects(id,name))&tasks.order=projects(id).desc`,
       and the embedded order may carry multiple terms, e.g.
       `tasks.order=projects(id).desc,name`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L67
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L67
     cases: [1222]
 
   - id: order.spread_embed
@@ -366,7 +366,7 @@ entries:
       (`order=budget_categories(budget_owner)`, `order=process_categories(name)`).
       The last form is what lets an aggregate hoisted onto a spread be ordered
       by its own GROUP BY key.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L162
     cases: []   # asserted from the select band, not duplicated here — see gaps
 
   - id: order.mutation_representation
@@ -386,14 +386,14 @@ entries:
     # Additional anchors for the same behavior (one `source:` key per entry, so
     # the siblings are cited here):
     #   PATCH, embedded order:
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L739
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L870
     #   DELETE, top-level order:
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/DeleteSpec.hs#L159
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/DeleteSpec.hs#L187
     #   PUT, embedded order:
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L557
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L678
     #   batch POST upsert, top-level order:
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L569
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpdateSpec.hs#L443
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L691
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpdateSpec.hs#L529
     # Case 1230 asserts the top-level PATCH variant verbatim. The three variants
     # that need `web_content` / `artists`+`albums` have no fixture home — see the
     # gap of the same id.
@@ -404,7 +404,7 @@ entries:
       `order` is not restricted to table/view reads: it also orders a FUNCTION's
       result set on the `/rpc/<fn>` surface, alongside filters and limits.
       Ascending: `/rpc/getitemrange?order=id&min=0&max=15` returns ids 1..15 with
-      `Content-Range: 0-14/*` (RangeSpec.hs#L30). The direction and json-path
+      `Content-Range: 0-14/*` (RangeSpec.hs#L31). The direction and json-path
       grammar are the same as for a relation read: upstream's
       `/rpc/returns_complex?select=val->r&val->i=gt.0.5&order=val->>i.desc`
       (the `source` below) proves a `->>` json-arrow DESC order over a function
@@ -412,22 +412,22 @@ entries:
     # Additional anchors for the same behavior (one `source:` key per entry, so
     # the siblings are cited here):
     #   RPC top-level order, ascending (the request cases 1231/1232 mirror):
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L30
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L31
     #   Docs, order on an RPC call:
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/api/functions.rst#L283
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/docs/references/api/functions.rst#L283
     #   Docs, "will also inline filters, order and limits":
-    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/api/functions.rst#L290
+    #     https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/docs/references/api/functions.rst#L290
     # The only pre-existing on-disk coverage was incidental and outside this
     # band: pagination case 1271 (`/rpc/getallprojects?select=id&order=id`),
     # which asserts a count envelope, not ordering.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L318
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L356
     cases: [1231, 1232]
 
   - id: order.related_not_to_one_error
     claim: >
       A related order on a relation that is not many-to-one or one-to-one fails
       with 400 PGRST118 ("A related order on '<rel>' is not possible").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L107
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L107
     cases: [1216]
 
   - id: order.related_not_embedded_error
@@ -436,14 +436,14 @@ entries:
       (not embedded) fails with 400 PGRST108
       ("'<rel>' is not an embedded resource in this request"), hint
       "Verify that '<rel>' is included in the 'select' query parameter."
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L139
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L139
     cases: [1217]
 
   - id: order.bad_syntax_error
     claim: >
       An unparseable order value fails with 400 PGRST100 and a parse-error body
       ("failed to parse order (...)"), e.g. `order=id.asc.nullslasttt`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1173
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1329
     cases: [1218]
 
 gaps:
@@ -454,7 +454,7 @@ gaps:
       disk as `spec/conformance/cases/1139_embed_alias_target_name_pgrst108.yaml`
       (feature `select/embed/alias/target-name-disallowed-error`), which carries
       `config: {url-use-legacy-target-names: false}` and cites the same
-      QuerySpec.hs#L1709 it-block. Since that upstream request drives a filter,
+      QuerySpec.hs#L1957 it-block. Since that upstream request drives a filter,
       an order (`tasks.order=name.asc`) and a limit through the same target name,
       an ordering-band duplicate would assert nothing new, so this area models the
       behavior as an entry with `cases: []` and defers the assertion to 1139.
@@ -471,13 +471,13 @@ gaps:
   - id: order.mutation_representation
     why: >
       loader_exposure — PARTIAL, and narrowed this pass. The top-level PATCH
-      variant (UpdateSpec.hs#L443) is now asserted verbatim by case 1230; only
+      variant (UpdateSpec.hs#L529) is now asserted verbatim by case 1230; only
       three of the four upstream assertions remain uncovered, all for the same
       reason — the relations they drive do not exist anywhere in the
       consolidated fixture DB:
-        * the embedded-order variants (PATCH #L739, PUT #L557) need
+        * the embedded-order variants (PATCH #L870, PUT #L557) need
           `web_content` (a self-referencing parent/child table), and
-        * the DELETE (#L159) and batch-POST upsert (#L569) variants need
+        * the DELETE (#L188) and batch-POST upsert (#L663) variants need
           `artists` + `albums`.
       Verified against a freshly loaded `bier_test`:
       `select table_schema, table_name from information_schema.tables where
@@ -505,7 +505,7 @@ gaps:
       plain-column form by cases 1231/1232 (`/rpc/getitemrange?order=id[.desc]`,
       the `ordering` schema mirrors `getitemrange`). The stronger upstream
       assertion — `/rpc/returns_complex?select=val->r&val->i=gt.0.5&order=val->>i.desc`
-      (JsonOperatorSpec.hs#L318), which drives a json-arrow DESC order over a
+      (JsonOperatorSpec.hs#L356), which drives a json-arrow DESC order over a
       function returning a dynamic TABLE with a composite type — cannot be
       minted: `returns_complex` exists in no schema of the consolidated fixture
       DB (verified: zero rows in `pg_proc` for that name), and the function is an
@@ -534,10 +534,10 @@ gaps:
       disk, each by the case anchoring the `it` line one above the `get` this
       gap cited:
       SpreadQueriesSpec.hs#L163 (`...processes(...)&order=name&processes.order=name`)
-      by case 11105 at #L162; AggregateFunctionsSpec.hs#L146
-      (`order=budget_categories(budget_owner)`) by case 11115 at #L145;
-      AggregateFunctionsSpec.hs#L157 (`order=process_categories(name)`) by case
-      11117 at #L156. The nested twin `processes.supervisors.order=name`
+      by case 11105 at #L162; AggregateFunctionsSpec.hs#L158
+      (`order=budget_categories(budget_owner)`) by case 11115 at #L157;
+      AggregateFunctionsSpec.hs#L171 (`order=process_categories(name)`) by case
+      11117 at #L170. The nested twin `processes.supervisors.order=name`
       (SpreadQueriesSpec.hs#L196) is asserted by case 11108, and the select
       band adds seven further spread-ordering cases with no analogue in the
       list above: 11112–11114 and 11134–11137, including the JSON-path flavor
@@ -547,9 +547,9 @@ gaps:
       another band would assert nothing new, so entry `order.spread_embed`
       records the claim with `cases: []` and defers to those ids rather than
       minting copies.
-      RESIDUAL, and the only one: AggregateFunctionsSpec.hs#L168
+      RESIDUAL, and the only one: AggregateFunctionsSpec.hs#L184
       (`/process_supervisor?select=...processes(factory_id,...process_costs(cost.sum()))&order=processes(factory_id).desc`,
-      the `it` block at #L167) is uncased in any band. Its fixtures now exist,
+      the `it` block at #L183) is uncased in any band. Its fixtures now exist,
       so the fixture argument no longer applies to it either; what remains is
       only the band-ownership question — it is an aggregate-on-nested-spread
       assertion whose ordering clause is incidental, which puts it closer to
@@ -566,6 +566,6 @@ gaps:
       `order.spread_embed` (asserted from the select band), not here.
   - id: order.without_other_constraints
     why: >
-      QuerySpec.hs#L1151 ("without other constraints") only asserts status 200 for
+      QuerySpec.hs#L1304 ("without other constraints") only asserts status 200 for
       `/items?order=id.asc` with no body assertion; it adds nothing over case 1200,
       so no case was minted for it.

@@ -33,4 +33,4 @@ notes: >
   ("invalid", which the `json AS color` cast would reject) and it never surfaces,
   proving the columns check happens first and no row is written. Mirrors InsertSpec.hs
   'fails without parsing anything if at least one specified column doesn't exist'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L845
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1023

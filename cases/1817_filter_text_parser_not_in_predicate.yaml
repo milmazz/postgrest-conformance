@@ -17,4 +17,4 @@ notes: >
   row 4 has a NULL label_color (NOT IN over NULL is NULL, so it is excluded as well),
   leaving only row 2. Mirrors QuerySpec.hs "uses text parser for filter with 'NOT IN'
   predicates".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1643
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1886

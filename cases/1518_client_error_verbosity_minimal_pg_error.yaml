@@ -15,14 +15,14 @@ expect:
     code: "PT402"
     message: "Payment Required"
 notes: >
-  NEW in v16.0. `client-error-verbosity` is applied once, in App.hs:154
+  NEW in v16.0. `client-error-verbosity` is applied once, in App.hs:171
   (`Error.errorResponseFor configClientErrorVerbosity`), to every error the
   request pipeline produces — so it governs database errors too, not just the
   PGRSTxxx ApiRequest/SchemaCache errors. Under `minimal` the RAISE
   SQLSTATE 'PT402' error (case 1505: details "Quota exceeded", hint "Upgrade
   your plan" under the default verbose setting) collapses to just
   {code, message}; the details and hint keys are dropped, not nulled
-  (Error.hs:75-78). Status and the Proxy-Status header are unaffected —
-  Proxy-Status is built from `code err` in errorResponseFor (Error.hs:86,
-  assembled at :88) independently of the verbosity.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L75
+  (Error.hs:77-81). Status and the Proxy-Status header are unaffected —
+  Proxy-Status is built from `code err` in errorResponseFor (Error.hs:89,
+  assembled at :91) independently of the verbosity.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L77

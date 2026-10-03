@@ -38,4 +38,4 @@ notes: >
   to the base table's DEFAULT isodate '2018-01-01', formatted "2018-01-01T00:00:00Z";
   name is likewise absent from ?columns and comes back null. Body verified
   against a freshly loaded bier_test through the area's view mirror.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L891
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1083

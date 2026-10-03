@@ -8,4 +8,4 @@ schema: rpc
 expect:
   status: 405
 notes: "PATCH on /rpc/<fn> is unsupported -> 405 (InvalidRpcMethod)."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L629
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L730

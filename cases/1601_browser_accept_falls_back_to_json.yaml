@@ -12,4 +12,4 @@ expect:
   body_exact:
     - { "id": 1 }
 notes: "A browser-style Accept header containing */* resolves to JSON. Mirrors RawOutputTypesSpec Firefox/Chrome accept headers."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RawOutputTypesSpec.hs#L15
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RawOutputTypesSpec.hs#L16

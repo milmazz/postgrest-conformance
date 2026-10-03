@@ -16,4 +16,4 @@ notes: >
   FtsOperator accepts it, and pgFmtFtsLang prepends it as the first argument,
   giving `@@ plainto_tsquery('french', 'amusant impossible')`. Mirrors
   QuerySpec.hs 'finds matches with different dictionaries' (plfts assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L233
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L258

@@ -15,6 +15,6 @@ notes: >
   lacks a JWT secret yields 500, which is the single line logged at error
   level. The conformance case asserts the status that the filter keys on; the
   actual stdout line emission is verified at the io level (see gaps in
-  observability.yaml). Mirrors test_io.py:546-551 (test_log_level, error branch: exactly one
+  observability.yaml). Mirrors test_log.py:51-56 (test_log_level, error branch: exactly one
   access-log line, for the 500).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L546
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L51

@@ -14,4 +14,4 @@ expect:
 notes: >
   An m2m spread with no junction rows yields an empty array, and the embed
   is filterable with is.null (SpreadQueriesSpec.hs:382).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L382
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L382

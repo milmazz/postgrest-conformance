@@ -25,4 +25,4 @@ notes: >
   demonstrating the JSON-path flavor; the block's first get is case 11134.
   The one-to-many twin (factory_buildings, L302) stays traced-only in
   select.yaml (SpreadQueriesSpec.hs:551).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L551
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L551

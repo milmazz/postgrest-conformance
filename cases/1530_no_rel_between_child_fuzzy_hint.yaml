@@ -19,29 +19,29 @@ expect:
 notes: >
   The contrasting branch to 1527/1528/1529, and the reason those three need a
   relationship-free origin to reach the parent path at all. `noRelBetweenHint`
-  branches on `isJust findParent` (Error.hs:322): `test.clients` IS a key of the
+  branches on `isJust findParent` (Error.hs:325): `test.clients` IS a key of the
   relationships map (`projects.client_id` references it), so the `then` branch
   runs and the suggestion is drawn from `fuzzySetOfChildren` — the foreign tables
-  of THAT origin's relationships (Error.hs:328) — rendered as "Perhaps you meant
+  of THAT origin's relationships (Error.hs:332) — rendered as "Perhaps you meant
   '<match>' instead of '<child>'." with the CHILD, not the origin, in the second
-  slot (Error.hs:323).
+  slot (Error.hs:326).
 
   `clients` has exactly one relationship in `test` (verified by embedding each of
   the schema's 89 relations from `/clients`: only `projects` resolves), so
   `fuzzySetOfChildren` is the singleton {"projects"} and `Fuzzy.get` scores
   "project" against it at 0.875 — above the 0.33 default and strictly below 1.0,
-  which is what `headMay [snd k | k <- …, fst k < 1.0]` requires (Error.hs:331;
+  which is what `headMay [snd k | k <- …, fst k < 1.0]` requires (Error.hs:335;
   the < 1.0 guard is why an embed hint naming a relation that DOES exist yields
   no suggestion at all — case 1124).
 
   Mirrors the cited it-block "cannot request partitions as children from a
   partitioned table", which asserts the same rendering on the same branch
   (`{"hint":"Perhaps you meant 'car_model_sales' instead of
-  'car_model_sales_202101'."}`, QuerySpec.hs:848) with `code`/`message`/`details`
+  'car_model_sales_202101'."}`, QuerySpec.hs:975) with `code`/`message`/`details`
   in the same shape. Instantiated here on `clients`/`project` because this
   fixture set carries no partitioned tables: fixtures/02_base.sql defines
   `test.car_models` as a plain compound-PK table for the headers area and has no
   `car_model_sales` (nor its `car_model_sales_202101` partition) at all, so the
   upstream URL is not runnable here. Content-Length 306 was recounted against the
   body above.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L845
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L972

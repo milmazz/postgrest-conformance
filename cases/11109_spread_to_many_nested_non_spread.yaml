@@ -19,4 +19,4 @@ notes: >
   an array of objects (null where the nested row is missing), contrasting
   with the flat value array of the spread form in case 11105
   (SpreadQueriesSpec.hs:206).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L206
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L206

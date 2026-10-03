@@ -28,4 +28,4 @@ expect:
 notes: >
   order by computed column anti_id(items)=id*-1; desc on anti_id yields
   ascending id (1..15).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L515
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L593

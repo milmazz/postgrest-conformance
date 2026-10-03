@@ -16,9 +16,9 @@ expect:
 notes: >
   The Range header does not override limit/offset — the two windows are
   INTERSECTED: `headerAndLimitRange = rangeIntersection headerRange limitRange`
-  (ApiRequest.hs:185), and that intersection becomes the top-level range
-  (ApiRequest.hs:188, :191). Here limit=2 yields limitRange 0..1
-  (QueryParams.hs:181, :187 -> `Range (BoundaryBelow 0) (BoundaryAbove 1)`) and
+  (ApiRequest.hs:210), and that intersection becomes the top-level range
+  (ApiRequest.hs:213, :216). Here limit=2 yields limitRange 0..1
+  (QueryParams.hs:223, :229 -> `Range (BoundaryBelow 0) (BoundaryAbove 1)`) and
   'Range: 0-5' yields headerRange 0..5, so the effective window is 0..1: two
   rows, Content-Range '0-1/*'. An implementation that let the header override
   the params would return six rows with '0-5/*', which is what makes this case
@@ -27,4 +27,4 @@ notes: >
   and override agree. Derived from source (ground-truth priority 2). Verified
   against a freshly loaded bier_test: pagination.items holds ids 1..15 and
   exposes only `id`.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest.hs#L185
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest.hs#L210

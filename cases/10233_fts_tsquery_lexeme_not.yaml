@@ -15,9 +15,9 @@ notes: >
   The tsquery negation operator `!` is sent literally (only `&` needs
   percent-encoding) and reaches to_tsquery verbatim:
   `text_search_vector @@ to_tsquery('fun&!possible')`
-  (SqlFragment.hs#L412). This is a tsquery-level negation INSIDE the value and
+  (SqlFragment.hs#L455). This is a tsquery-level negation INSIDE the value and
   is unrelated to the URL-level `not.` prefix, which would instead emit a
-  leading SQL NOT before the field (SqlFragment.hs#L383). Mirrors QuerySpec.hs
+  leading SQL NOT before the field (SqlFragment.hs#L427). Mirrors QuerySpec.hs
   it "can use lexeme boolean operators(&=%26, |=%7C, !) in to_tsquery"
   (third assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L198
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L219

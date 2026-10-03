@@ -10,4 +10,4 @@ expect:
   headers:
     Content-Type: 'application/vnd.pgrst.plan+text; for="application/json"; charset=utf-8'
 notes: 'A bare application/vnd.pgrst.plan (no +suffix) defaults to the +text format and for=application/json. Mirrors PlanSpec ''outputs in text format by default''. Assumes: Requires db-plan-enabled = true.'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/PlanSpec.hs#L295
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/PlanSpec.hs#L367

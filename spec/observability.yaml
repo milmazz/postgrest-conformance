@@ -1,4 +1,4 @@
-# PostgREST v16.0 — Observability behavior model
+# PostgREST v16.4 — Observability behavior model
 #
 # Scope (this area only):
 #   - Server-Timing response header (jwt / parse / plan / transaction /
@@ -49,7 +49,7 @@
 # Conformance case band for this area: 1750..1799 (overflow 13000..13199).
 
 area: observability
-version: PostgREST v16.0
+version: PostgREST v16.4
 previous_version: PostgREST v14.12
 
 # ---------------------------------------------------------------------------
@@ -67,12 +67,12 @@ changes_since_v14_12:
       byte-identical to v14.12. The role shown in the user field now comes from
       a Writer that records `authRole` before the ExceptT short-circuits, so it
       survives error paths.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L95
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L97
   - change: >
       `log-level` is now read per observation (`getLogLevel loggerState`)
       instead of being captured once at startup, so it is reloadable at runtime
       (SIGUSR2 / in-db config reload).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L72
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L73
   - change: >
       Pool-acquisition-timeout diagnostics are debounced by a hand-rolled
       debouncer (PostgREST.Debounce.makeDebouncer + a 5 s cooldown) instead of
@@ -81,26 +81,26 @@ changes_since_v14_12:
       Observable count is the same shape: one line immediately, at most one more
       after the cooldown for a burst (6 timing-out requests produce 2 timeout
       lines but 6 access-log lines).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L57
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L57
   - change: >
       An observation may now render as MULTIPLE stderr lines: v14.12's
-      `observationMessage :: Observation -> Text` (Logger.hs:159 in v14.12)
+      `observationMessage :: Observation -> Text` (Logger.hs:162 in v14.12)
       became `observationMessages :: Observation -> [Text]` (the anchored line).
       Consequently `SchemaCacheSummaryObs` was folded into
       `SchemaCacheLoadedObs`, whose single case now emits BOTH the "Schema cache
       loaded <summary>" and the "Schema cache loaded in <ms> milliseconds" lines
-      (Logger.hs:168-172).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L132
+      (Logger.hs:175-178).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L135
   - change: >
       NEW: `SchemaCacheQueriedObs` carries per-query timings; at log-level=debug
       a second line "tables: <n> ms, keydeps: <n> ms, rels: <n> ms, funcs:
       <n> ms, comprels: <n> ms, dreps: <n> ms, mhandlers: <n> ms" is emitted.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L164
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L171
   - change: >
       NEW observations: `LegacyTargetNameWarningObs` (two WARNING lines when
       `url-use-legacy-target-names` is on and an embed alias is referenced by
       relation name) and `AdminServerCrashedObs`.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L196
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L204
   - change: >
       NEW: GHC RTS metrics (`ghc_*`) are registered on the admin /metrics
       endpoint, but only when the process is started with RTS statistics
@@ -108,12 +108,12 @@ changes_since_v14_12:
       new test/io/test_admin.py pair
       `test_admin_metrics_include_ghc_runtime_metrics` (L147) and
       `test_admin_metrics_exclude_ghc_runtime_metrics_by_default` (L161).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Metrics.hs#L48
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Metrics.hs#L48
   - change: >
       `client-error-verbosity` (NEW in v16.0, errors area) does NOT affect
       server diagnostics: Logger.hs pins `Error.errorPayload Verbose` for every
       stderr JSON payload, so PGRST00x diagnostic lines keep all four keys.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L249
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L265
   - change: >
       The Server-Timing header, its five metrics, their fixed order, the
       one-decimal millisecond rendering, its OPTIONS behavior (all five metrics
@@ -122,7 +122,7 @@ changes_since_v14_12:
       server-trace-header echo are UNCHANGED on the wire from v14.12. The whole
       Performance.hs module is byte-identical apart from an added `-- $setup`
       doctest preamble (+3 lines), so only line anchors and module paths moved.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/Performance.hs#L30
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/Performance.hs#L32
   - change: >
       Internal only, no wire change: the `jwt` metric is no longer measured by a
       dedicated Auth middleware and read back off the Wai vault
@@ -131,7 +131,7 @@ changes_since_v14_12:
       measures JWT verification inline with the same `withTiming` combinator
       used by the other four stages (the anchored line), so the metric is still
       present exactly when `server-timing-enabled` is true.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L159
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L176
 
 entries:
   # -------------------------------------------------------------------------
@@ -146,34 +146,34 @@ entries:
       decimal place). Present on GET (200), POST (201), PATCH (204), PUT (200),
       DELETE (204), and RPC (200) responses.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L25
-    source_line: 25
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L24
+    source_line: 24
     case_ids: [1750, 1751, 1752, 1753, 1754, 1755]
 
   - id: observability.server_timing.render_format
     claim: >
       serverTimingHeader renders the header by `BS.intercalate ", "` over the
       five metrics in the fixed order jwt, parse, plan, transaction, response
-      (the anchored line, Performance.hs:35-41). Each present metric becomes
+      (the anchored line, Performance.hs:37-45). Each present metric becomes
       "<name>;dur=<value>" where <value> uses one decimal of precision
-      (showFFloat (Just 1), Performance.hs:34). The module doctest pins the
+      (showFFloat (Just 1), Performance.hs:36). The module doctest pins the
       exact output: "jwt;dur=0.4, parse;dur=0.5, plan;dur=0.1,
-      transaction;dur=0.2, response;dur=0.3" (Performance.hs:28-29). The
+      transaction;dur=0.2, response;dur=0.3" (Performance.hs:30-31). The
       durations are MILLISECONDS, not seconds: `withTiming` uses
       PostgREST.TimeIt.timeItT, which multiplies the monotonic-clock delta by
-      1000 (TimeIt.hs:18) — so `showFFloat (Just 1)` yields exactly one
+      1000 (TimeIt.hs:19) — so `showFFloat (Just 1)` yields exactly one
       fractional digit of a millisecond value.
       ON THE WIRE THE HEADER ALWAYS CARRIES EXACTLY THE FIVE METRICS. All five
       stages are unconditionally timed when server-timing-enabled is true —
-      jwt (App.hs:159), parse (App.hs:209), plan (App.hs:210), transaction
-      (App.hs:225) and response (App.hs:238) — so every field of the
+      jwt (App.hs:176), parse (App.hs:228), plan (App.hs:229), transaction
+      (App.hs:247) and response (App.hs:260) — so every field of the
       ServerTiming record is `Just`; and error responses carry no Server-Timing
       header at all (see observability.server_timing.success_path_only). There
       is therefore no reachable wire state in which fewer than five metrics
       appear, including OPTIONS (see
       observability.server_timing.options_subset). Case 1770 pins that exact
       string.
-      Consequently `renderMetric`'s `maybe ""` branch (Performance.hs:34) — "a
+      Consequently `renderMetric`'s `maybe ""` branch (Performance.hs:36) — "a
       metric whose duration is Nothing renders as the empty string" — is
       code-accurate but UNREACHABLE on the wire. Do NOT read it as licence to
       emit a three-metric header. And note that if a metric ever were `Nothing`,
@@ -181,8 +181,8 @@ entries:
       would degrade to `jwt;dur=X, parse;dur=Y, , , response;dur=Z` — the
       separators are never dropped along with the metric.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/Performance.hs#L35
-    source_line: 35
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/Performance.hs#L37
+    source_line: 37
     case_ids: [1750, 1770]
 
   - id: observability.server_timing.root_spec
@@ -190,8 +190,8 @@ entries:
       The root spec (HEAD /) also emits the full set of Server-Timing metrics
       (jwt, parse, plan, transaction, response) when server-timing is enabled.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L77
-    source_line: 77
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L82
+    source_line: 82
     case_ids: [1756]
 
   # NOTE: the entry id is historical ("options_subset"). There is NO subset —
@@ -202,18 +202,18 @@ entries:
       `response` metrics are PRESENT; `plan` and `transaction` are ALSO emitted
       (with near-zero durations) because no stage is skipped. `withTiming`
       branches solely on `configServerTimingEnabled` (the anchored line,
-      App.hs:272-279) — it has no per-action branch — and BOTH the plan stage
-      (App.hs:210) and the transaction stage (App.hs:225) are wrapped in it for
+      App.hs:295-302) — it has no per-action branch — and BOTH the plan stage
+      (App.hs:229) and the transaction stage (App.hs:247) are wrapped in it for
       every action, OPTIONS included. For OPTIONS, `Plan.actionPlan` returns
-      `NoDb (RelInfoPlan | RoutineInfoPlan | SchemaInfoPlan)` (Plan.hs:173 /
-      174 / 177) and `MainTx.mainTx` returns `NoDbTx` (MainTx.hs:87), so no
+      `NoDb (RelInfoPlan | RoutineInfoPlan | SchemaInfoPlan)` (Plan.hs:194 /
+      174 / 177) and `MainTx.mainTx` returns `NoDbTx` (MainTx.hs:94), so no
       read plan is built and no database transaction is opened — but both
       stages are still timed, so `planTime` and `txTime` are `Just t` and
       `serverTimingHeader` renders all five metrics. A real v16.0
       `OPTIONS /organizations` response therefore contains `plan;dur=` and
-      `transaction;dur=`. Upstream's ServerTimingSpec.hs:87-111 asserts only
+      `transaction;dur=`. Upstream's ServerTimingSpec.hs:93-120 asserts only
       presence of jwt/parse/response, and its matcher
-      `matchServerTimingHasTiming` (SpecHelper.hs:76-82) is a presence-only
+      `matchServerTimingHasTiming` (SpecHelper.hs:81-89) is a presence-only
       regex over the header value — it never asserts that a metric is absent.
       CORRECTION (v16.0 re-sync): an earlier pass of this file claimed `plan`
       and `transaction` were ABSENT on OPTIONS. That claim is FALSE. v14.12 had
@@ -221,10 +221,10 @@ entries:
       pass, not a v16.0 behavior change. `lib/bier/plugs/observability.ex:159`
       currently implements the wrong (three-metric) behavior.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L272
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L295
     source_line: 272
-    upstream_assertion_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L87
-    matcher_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L76
+    upstream_assertion_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L93
+    matcher_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/SpecHelper.hs#L81
     case_ids: [1757, 1768, 1769]
 
   - id: observability.server_timing.disabled_default
@@ -234,8 +234,8 @@ entries:
       configServerTimingEnabled is true, and `withTiming` returns Nothing for
       every stage in that case so no timing is computed either.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L256
-    source_line: 256
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L278
+    source_line: 278
     case_ids: [1758]
 
   - id: observability.server_timing.transaction_accuracy
@@ -246,7 +246,7 @@ entries:
       this io test moved to test_settings.py and runs under a role with a 3 s
       statement timeout.)
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_settings.py#L462
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_settings.py#L462
     source_line: 462
     case_ids: [1759]
 
@@ -255,12 +255,12 @@ entries:
       The Server-Timing header is appended by `toWaiResponse`, which is only
       reached on the success path of `postgrestResponse`. An error
       short-circuits the ExceptT and its response is built by
-      `Error.errorResponseFor` (App.hs:154), which never adds Server-Timing —
+      `Error.errorResponseFor` (App.hs:171), which never adds Server-Timing —
       so error responses (e.g. 400/404/500) carry no Server-Timing header even
       when server-timing-enabled is true.
     response_header: Server-Timing
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L253
-    source_line: 253
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L275
+    source_line: 275
     case_ids: []   # source-derived, not asserted upstream — see gaps
 
   # -------------------------------------------------------------------------
@@ -271,21 +271,21 @@ entries:
       Every response carries a `Server` header whose value is the literal
       prefix "postgrest/" concatenated with the running version. It is set once
       as a Warp server setting (`setServerName ("postgrest/" <> prettyVersion)`,
-      App.hs:143), NOT per-response, so it is unconditional: it does not depend
+      App.hs:160), NOT per-response, so it is unconditional: it does not depend
       on method, status, content type, or any config key, and it is present on
       error responses and on the admin server's responses alike. The version
       component is `prettyVersion` = the first TWO dot-separated components of
       the build's package version, plus " (pre-release)" for pre-release builds
-      (Version.hs:23-26) — e.g. `Server: postgrest/16.0`. Upstream never
+      (Version.hs:25-28) — e.g. `Server: postgrest/16.0`. Upstream never
       hard-codes the digits: test_io.py reads the header back and derives the
-      expected version FROM it (test_io.py:1065 splits on "/", :1038 and :1056
+      expected version FROM it (test_log.py:226 splits on "/", test_connection.py:61 and :79
       rewrite "postgrest/" to "PostgREST "), so only the prefix is a fixed
       contract.
     response_header: Server
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L143
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L160
     source_line: 143
-    source_test: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1065
-    source_docs: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/observability.rst#L283
+    source_test: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L226
+    source_docs: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/docs/references/observability.rst#L283
     case_ids: [1771]
 
   # -------------------------------------------------------------------------
@@ -296,23 +296,23 @@ entries:
       When `server-trace-header` names a request header (e.g. X-Request-Id),
       the value of that incoming request header is copied verbatim onto the
       response under the same header name. Asserted for the root spec
-      (ObservabilitySpec.hs:18), a table read (ObservabilitySpec.hs:25) and an
-      RPC call (ObservabilitySpec.hs:32).
+      (ObservabilitySpec.hs:16), a table read (ObservabilitySpec.hs:25) and an
+      RPC call (ObservabilitySpec.hs:34).
     request_header: X-Request-Id
     response_header: X-Request-Id
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/ObservabilitySpec.hs#L17
-    source_line: 17
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/ObservabilitySpec.hs#L15
+    source_line: 15
     case_ids: [1760, 1761, 1762]
 
   - id: observability.trace_header.middleware_gate
     claim: >
       traceHeaderMiddleware is a no-op when `server-trace-header` is unset
-      (Nothing -> app req respond, App.hs:286); no such header is added to the
+      (Nothing -> app req respond, App.hs:309); no such header is added to the
       response. It is the OUTERMOST middleware (it wraps Cors.middleware), so
       it also stamps responses that never reach the request pipeline.
     response_header: X-Request-Id
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L286
-    source_line: 286
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L309
+    source_line: 309
     case_ids: [1763]
 
   - id: observability.trace_header.missing_value
@@ -321,8 +321,8 @@ entries:
       header, the middleware still adds it to the response with an EMPTY value
       (`fromMaybe mempty hdrVal`).
     response_header: X-Request-Id
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L289
-    source_line: 289
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L312
+    source_line: 312
     case_ids: []   # needs a dedicated variant instance — see gaps
 
   # -------------------------------------------------------------------------
@@ -335,8 +335,8 @@ entries:
       >= 400; info and debug log everything. The same predicate
       (shouldLogResponse) gates the QueryObs SQL log.
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L62
-    source_line: 62
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L63
+    source_line: 63
     case_ids: [1764, 1765, 1766, 1767]
 
   - id: observability.log.access_log_format
@@ -351,7 +351,7 @@ entries:
       test pins e.g.
       `- - postgrest_test_anonymous [..] "GET /unknown HTTP/1.1" 404 <n> "" "python-requests/.."`.
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger/Apache.hs#L20
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger/Apache.hs#L20
     source_line: 20
     case_ids: [1764, 1765, 1766]
 
@@ -363,8 +363,8 @@ entries:
       unlike every other observation, which goes to stderr with a
       "dd/Mon/yyyy:HH:MM:SS ±zzzz: " prefix.
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L95
-    source_line: 95
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L97
+    source_line: 97
     case_ids: []   # stdout-only; see gaps
 
   - id: observability.log.cors_preflight_not_logged
@@ -375,22 +375,22 @@ entries:
       emitted. At log-level=info, one plain OPTIONS plus one preflight yields
       exactly ONE log line.
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L836
-    source_line: 836
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L617
+    source_line: 617
     case_ids: []   # stdout-only; see gaps
 
   - id: observability.log_level.values
     claim: >
       Valid `log-level` values are crit, error, warn, info, debug (parsed
       case-sensitively from the config string). Only an ABSENT value (Nothing)
-      falls back to the default LogError (Config.hs:405); an UNRECOGNIZED value
+      falls back to the default LogError (Config.hs:443); an UNRECOGNIZED value
       does NOT fall back — parseLogLevel's `Just _` branch calls
       `fail "Invalid logging level. Check your configuration."`
-      (Config.hs:411), aborting startup. The same five values are rendered back
-      by dumpLogLevel (Config.hs:132-138).
+      (Config.hs:449), aborting startup. The same five values are rendered back
+      by dumpLogLevel (Config.hs:145-151).
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L411
-    source_line: 411
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config.hs#L449
+    source_line: 449
     case_ids: [1712, 1723]   # covered by the config area's CLI dump cases
 
   - id: observability.log_level.reloadable
@@ -402,8 +402,8 @@ entries:
       restart — e.g. switching error -> debug starts emitting
       "Trying to borrow a connection from pool".
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L72
-    source_line: 72
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L73
+    source_line: 73
     case_ids: []   # process-signal + stdout scraping; see gaps
 
   - id: observability.log_query.emits_sql
@@ -412,16 +412,16 @@ entries:
       logged: the tx-vars snippet, the optional pre-request, the main query,
       the three OpenAPI queries and the optional EXPLAIN, each flattened onto a
       single line, skipping empty snippets. The gate is
-      `when configLogQuery $ observer $ QueryObs mainQ s` (App.hs:223), and
+      `when configLogQuery $ observer $ QueryObs mainQ s` (App.hs:245), and
       whether a given request's query is logged still obeys log-level: QueryObs
       uses the same shouldLogResponse status filter as the access log
-      (Logger.hs:86-88). The anchored line is the QueryObs rendering itself:
+      (Logger.hs:87-90). The anchored line is the QueryObs rendering itself:
       the seven snippets (mqTxVars, mqPreReq, mqMain, the three mqOpenAPI
       queries, mqExplain) are rendered, the empty ones dropped, and each
-      remaining one flattened with showOnSingleLine (Logger.hs:192-195).
+      remaining one flattened with showOnSingleLine (Logger.hs:201-203).
     config_key: log-query
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L192
-    source_line: 192
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L201
+    source_line: 201
     case_ids: []   # stderr-only; see gaps
 
   - id: observability.log.pool_debug_observations
@@ -435,8 +435,8 @@ entries:
       JWT cache", JwtCacheEviction "Evicted entry from JWT cache" and
       WarpServerObs "Warp server: <txt>".
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L89
-    source_line: 89
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L91
+    source_line: 91
     case_ids: []   # stderr-only debug observations; see gaps
 
   - id: observability.log.pool_acq_timeout_debounced
@@ -448,7 +448,7 @@ entries:
       (504s) but only 2 "Timed out acquiring connection from connection pool."
       diagnostic lines.
     config_key: db-pool-acquisition-timeout
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L57
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L57
     source_line: 57
     case_ids: []   # stderr-only; see gaps
 
@@ -459,16 +459,16 @@ entries:
       a dropped connection logs
       {"code":"PGRST001","details":"no connection to the server\n","hint":null,
       "message":"Database client error. Retrying the connection."}
-      (test_pgrst_log_503_client_error_to_stderr, test_io.py:1224; literal at
-      :1238) and an empty schema cache on startup logs
+      (test_pgrst_log_503_client_error_to_stderr, test_log.py:556; literal at
+      :570) and an empty schema cache on startup logs
       {"code":"PGRST002","details":null,"hint":null,"message":"Could not query
       the database for the schema cache. Retrying."}
       (test_log_error_when_schema_cache_load_error_on_startup_to_stderr,
-      test_io.py:1243; literal at :1266).
+      test_log.py:295; literal at :318).
     # Two distinct upstream tests back the two examples; both are anchored.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1238
-    source_line: 1238
-    source_pgrst002: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1266
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L570
+    source_line: 570
+    source_pgrst002: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L318
     source_pgrst002_line: 1266
     case_ids: []
 
@@ -480,8 +480,8 @@ entries:
       PGRST00x diagnostic line always carries all four keys (code, message,
       details, hint) even when client-error-verbosity is minimal.
     config_key: client-error-verbosity
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L249
-    source_line: 249
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L265
+    source_line: 265
     case_ids: []
 
   - id: observability.log.schema_cache_load_lines
@@ -490,8 +490,8 @@ entries:
       SchemaCacheLoadedObs: "Schema cache loaded <summary>" followed by
       "Schema cache loaded in <ms> milliseconds" (one decimal). In v14.12 the
       first line came from a separate SchemaCacheSummaryObs observation.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L168
-    source_line: 168
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L175
+    source_line: 175
     case_ids: []
 
   - id: observability.log.schema_cache_query_timings
@@ -503,8 +503,8 @@ entries:
       comprels: <n> ms, dreps: <n> ms, mhandlers: <n> ms". Exactly one such
       line is emitted per startup at debug, and none at any other level.
     config_key: log-level
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L164
-    source_line: 164
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L171
+    source_line: 171
     case_ids: []
 
   - id: observability.log.legacy_target_name_warning
@@ -518,8 +518,8 @@ entries:
       `<alias>`[, ...] in `<METHOD> <path+query>`". With the config off the
       request is a 400 and neither line is logged.
     config_key: url-use-legacy-target-names
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L196
-    source_line: 196
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L204
+    source_line: 204
     case_ids: []   # log-only half; the Warning response header is select-area
 
   # -------------------------------------------------------------------------
@@ -538,7 +538,7 @@ entries:
       (Admin.hs:67-68), asserted by test_admin.py:84-89
       (`test_admin_not_found`).
     config_key: admin-server-port
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_admin.py#L138
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_admin.py#L138
     source_line: 138
     case_ids: []
 
@@ -552,8 +552,8 @@ entries:
       SUCCESS or FAIL), pgrst_schema_cache_query_time_seconds (gauge),
       pgrst_jwt_cache_requests_total (counter), pgrst_jwt_cache_hits_total
       (counter), pgrst_jwt_cache_evictions_total (counter).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Metrics.hs#L50
-    source_line: 50
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Metrics.hs#L51
+    source_line: 51
     case_ids: []
 
   - id: observability.metrics.schema_cache_loads_counts_once
@@ -561,19 +561,19 @@ entries:
       pgrst_schema_cache_loads_total{status="SUCCESS"} increments once per
       successful schema-cache load. Booting against an EMPTY schema cache
       (INTERNAL_SCHEMA_CACHE_QUERY_SLEEP=300, so the first request is refused
-      at the socket and raises ConnectionError, test_io.py:1282-1283) still
+      at the socket and raises ConnectionError, test_reloading.py:168-169) still
       loads the cache exactly once: after the retry window the read returns 200
       and /metrics reports exactly `1.0`. A schema-cache load failure increments
       the status="FAIL" label instead (SchemaCacheErrorObs).
     # NOTE: the enclosing test is test_no_double_schema_cache_reload_on_empty_schema
-    # (test_io.py:1271). An earlier revision of this entry said "even after a 503
+    # (test_reloading.py:157). An earlier revision of this entry said "even after a 503
     # empty-cache response" — that is a DIFFERENT test
     # (test_log_error_when_schema_cache_load_error_on_startup_to_stderr,
-    # test_io.py:1243, 503 asserted at :1262), which makes no metrics assertion.
-    # The claim above is scoped to what test_io.py:1271-1293 actually exercises.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1271
-    source_line: 1271
-    source_assertion: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1293
+    # test_log.py:295, 503 asserted at :314), which makes no metrics assertion.
+    # The claim above is scoped to what test_reloading.py:157-179 actually exercises.
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_reloading.py#L157
+    source_line: 157
+    source_assertion: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_reloading.py#L179
     case_ids: []
 
   - id: observability.metrics.pool_available_non_negative
@@ -581,8 +581,8 @@ entries:
       pgrst_db_pool_available is computed as connected - inUse from tracked
       pool connection observations (not statelessly), and stays >= 0 even when
       the database connection keeps failing at the network level.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1430
-    source_line: 1430
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_connection.py#L317
+    source_line: 317
     case_ids: []
 
   - id: observability.metrics.ghc_runtime_optional
@@ -598,9 +598,9 @@ entries:
       them present under `+RTS -T -RTS` with their HELP/TYPE preamble
       (test_admin.py:147-158) and both absent by default
       (test_admin.py:161-168).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_admin.py#L147
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_admin.py#L147
     source_line: 147
-    docs_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/observability.rst#L271
+    docs_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/docs/references/observability.rst#L271
     case_ids: []
 
 # Behaviors observed in PostgREST but NOT turned into black-box conformance
@@ -616,14 +616,14 @@ gaps:
     by the separate admin server (admin-server-port), not the main API. The
     conformance harness only knows the main API base URL, so no case can reach
     /metrics; these need io-level tests with a Prometheus text parser. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_admin.py#L132
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_admin.py#L132
   - >
     observability.log_level access-log assertions (line format, user field,
     byte count, per-level counts) depend on scraping the process's stdout
     line-by-line (test_io.py read_stdout/drain_stdout). Cases 1764-1767 assert
     only the request/response contract (the status codes the filter keys on);
     the actual log-line emission must be verified at the io level. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L523
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L28
   - >
     HARNESS LIMITATION — cases 1765, 1766 and 1767 declare
     `config: {log-level: warn|info|crit}` but that block is INERT: the frozen
@@ -637,19 +637,19 @@ gaps:
     log-level needs BOTH the `needed_assertion: log_capture` support below and
     their ids added to `@variant_case_ids` — the latter is frozen harness code
     the spec pass may not touch. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L523
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L28
   - >
     observability.log.cors_preflight_not_logged: distinguishing "one plain
     OPTIONS logged" from "preflight not logged" requires counting stdout lines;
     both requests return 200 on the wire, so there is no request/response
     signal. No conformance case. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L812
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L593
   - >
     observability.log_query.emits_sql: log-query=true emits the executed SQL to
     stderr (gated by log-level via shouldLogResponse). No request/response
     signal; verified by scraping the process output. No conformance case.
     Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L586
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L91
   - >
     observability.log.pool_debug_observations and
     observability.log.pool_acq_timeout_debounced: PoolRequest /
@@ -657,13 +657,13 @@ gaps:
     are logged only at log-level=debug, and the acquisition-timeout debounce is
     a line-count assertion over a 5 s cooldown. Both are process-output only.
     Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L450
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_connection.py#L254
   - >
     observability.log_level.reloadable: needs SIGUSR2 (or an in-db config
     NOTIFY) plus stdout scraping to observe that debug lines start appearing.
     The harness boots instances via Bier.start_link/1 and has no reload signal
     path. io-level. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1463
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_reloading.py#L416
   - >
     observability.log.json_error_to_stderr,
     observability.log.stderr_diagnostics_always_verbose,
@@ -672,15 +672,15 @@ gaps:
     stderr and inducing PGRST001/PGRST002 (dropped DB connection / empty schema
     cache on startup) or a debug-level startup. Not expressible as a
     request->response conformance case. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1224
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L556
   - >
     observability.log.legacy_target_name_warning: only the two WARNING stderr
     lines belong to this area and they are process-output only. The matching
     `Warning: 299 PostgRESTv<ver> "..."` RESPONSE header IS black-box
     observable but is owned by the select/embedding area (asserted at
-    test/spec/Feature/Query/QuerySpec.hs#L1187, config
+    test/spec/Feature/Query/QuerySpec.hs#L1343, config
     url-use-legacy-target-names). Recorded here so it is not lost. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L1434
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_config.py#L267
   - >
     observability.trace_header.missing_value: PostgREST echoes the configured
     trace header with an EMPTY value when the request omits it. A case for this
@@ -690,15 +690,15 @@ gaps:
     contradict each other. It needs its own variant instance, and
     Bier.ConformanceServer's `@variant_case_ids` list is frozen harness code.
     Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L289
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L312
   - >
     observability.server_timing.success_path_only: derived from the App.hs
-    control flow (errors are rendered by Error.errorResponseFor at App.hs#L154
-    and never reach toWaiResponse at App.hs#L253), but NOT asserted by any
+    control flow (errors are rendered by Error.errorResponseFor at App.hs#L171
+    and never reach toWaiResponse at App.hs#L275), but NOT asserted by any
     upstream PostgREST test. Left without a conformance case so the suite does
     not pin a behavior upstream never checks; promote to a case if the operator
     wants it enforced. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L154
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L171
   - >
     needed_assertion: log_capture — the whole "log format / log-level /
     log-query" half of this area is unassertable today. A case would need an
@@ -707,30 +707,30 @@ gaps:
     captured log output for the duration of the request. Every entry above
     whose case_ids is empty for a "stdout-only"/"stderr-only" reason becomes
     expressible the moment that exists. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Logger.hs#L95
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Logger.hs#L97
   - >
     needed_assertion: admin_endpoint_request — the metrics entries need a
     request shape that targets the ADMIN server rather than the API server
     (e.g. `request.kind: admin` + path /metrics), plus a body assertion able to
     match Prometheus text-format samples (`body_matches` regex list would
     suffice). Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Admin.hs#L64
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Admin.hs#L64
   - >
     server-timing transaction-duration accuracy (>=2000ms for a 2 s sleep) is
     captured as case 1759, but its duration-range assertion is timing-sensitive
     and is best validated at the io level; upstream runs it under a role with a
     3 s statement timeout, which the harness cannot configure per case. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_settings.py#L437
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_settings.py#L437
   - >
     v16.0 re-sync note (not a gap in coverage, a gap in what upstream asserts):
     the exact Server-Timing rendering — ", " between metrics and EXACTLY one
     fractional digit per duration — is pinned only by the Performance.hs module
     doctest, never by a Feature spec (matchServerTimingHasTiming's regex
-    `<name>;dur=[[:digit:]]+.[[:digit:]]+` at SpecHelper.hs:79 accepts any
+    `<name>;dur=[[:digit:]]+.[[:digit:]]+` at SpecHelper.hs:84 accepts any
     number of decimals and any separator). Case 1770 asserts the doctest form
     directly with an anchored regex; if it is ever found to over-constrain a
     real PostgREST response, the doctest is the line to re-read. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/SpecHelper.hs#L79
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/SpecHelper.hs#L84
   - >
     CORRECTED CLAIM (carried here so implementers see it): earlier passes of
     this area asserted that OPTIONS responses omit the `plan` and `transaction`
@@ -741,6 +741,6 @@ gaps:
     implements the three-metric OPTIONS behavior and must be fixed by the
     conformance pass; no case pins the five-metric OPTIONS shape because
     upstream asserts only presence of jwt/parse/response
-    (ServerTimingSpec.hs#L87-L111) and this area does not pin behavior upstream
+    (ServerTimingSpec.hs#L93-L120) and this area does not pin behavior upstream
     never checks. Source:
-    https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L272
+    https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L295

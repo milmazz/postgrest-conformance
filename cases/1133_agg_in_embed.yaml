@@ -19,5 +19,5 @@ expect:
     - {"name":"Orphan","project_invoices":[{"sum":null}]}
 notes: >
   Aggregates apply inside an embedded resource; the embed remains a JSON array
-  with one aggregated object (AggregateFunctionsSpec.hs:100).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L100
+  with one aggregated object (AggregateFunctionsSpec.hs:107).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L107

@@ -20,4 +20,4 @@ notes: >
   -- which a plain `neq` would drop (compare case 1081, which returns only
   2,3,4). Mirrors AndOrParamsSpec.hs 'can handle range operators' (isdistinct
   assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L150
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L157

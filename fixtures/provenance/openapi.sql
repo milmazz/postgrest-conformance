@@ -10,14 +10,14 @@
 -- cases in spec/conformance/cases/16xx_*.yaml.
 --
 -- Source anchors (v14.12 test/spec/fixtures/schema.sql):
---   schema "test" comment (title/description):   schema.sql#L20
---   entities / child_entities / view:            schema.sql#L1167 / #L1174 / #L1180
---   grandchild_entities (multi-line comment):    schema.sql#L1182 / #L1209
---   table+column+view comments:                  schema.sql#L1201 .. #L1214
---   openapi_types:                               schema.sql#L1829
---   openapi_defaults:                            schema.sql#L1853
+--   schema "test" comment (title/description):   schema.sql#L22
+--   entities / child_entities / view:            schema.sql#L1169 / #L1176 / #L1182
+--   grandchild_entities (multi-line comment):    schema.sql#L1184 / #L1211
+--   table+column+view comments:                  schema.sql#L1203 .. #L1216
+--   openapi_types:                               schema.sql#L1831
+--   openapi_defaults:                            schema.sql#L1855
 --   enum_menagerie_type / menagerie.enum:        (enum type used by varied_arguments_openapi)
---   varied_arguments_openapi function + comment:  schema.sql#L285 / #L330
+--   varied_arguments_openapi function + comment:  schema.sql#L287 / #L332
 --   authors_only (privileged table):             test/spec/fixtures/privileges.sql
 --   privileged_hello (privileged function):      test/spec/fixtures/privileges.sql
 
@@ -77,7 +77,7 @@ multiple lines$$;
 
 -- ---------------------------------------------------------------------------
 -- openapi_types: one column per PostgreSQL -> Swagger type mapping
--- Source: test/spec/fixtures/schema.sql#L1829
+-- Source: test/spec/fixtures/schema.sql#L1831
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE test.openapi_types(
@@ -106,7 +106,7 @@ CREATE TABLE test.openapi_types(
 
 -- ---------------------------------------------------------------------------
 -- openapi_defaults: default value detection
--- Source: test/spec/fixtures/schema.sql#L1853
+-- Source: test/spec/fixtures/schema.sql#L1855
 -- ---------------------------------------------------------------------------
 
 CREATE TABLE test.openapi_defaults(
@@ -136,7 +136,7 @@ CREATE TABLE test.menagerie(
 
 -- ---------------------------------------------------------------------------
 -- RPC: varied_arguments_openapi (IMMUTABLE -> GET + POST) with comment
--- Source: test/spec/fixtures/schema.sql#L285 / #L330
+-- Source: test/spec/fixtures/schema.sql#L287 / #L332
 -- ---------------------------------------------------------------------------
 
 CREATE FUNCTION test.varied_arguments_openapi(

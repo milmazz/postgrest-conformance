@@ -16,6 +16,6 @@ notes: >-
   row against max-affected=0 exceeds the cap, so the mutation is rolled back
   with PGRST124 and the affected count is reported verbatim in `details`
   ("The query affects 1 rows"). Mirrors
-  Preferences/MaxAffectedSpec.hs#L31-L37 ("should fail if items updated more
+  Preferences/MaxAffectedSpec.hs#L35-L42 ("should fail if items updated more
   than 0"), including its single-element-array PATCH payload.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L32
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/MaxAffectedSpec.hs#L36

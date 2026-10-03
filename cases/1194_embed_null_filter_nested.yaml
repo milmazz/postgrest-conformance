@@ -22,7 +22,7 @@ notes: >
   least one such child. `addNullEmbedFilters` rewrites each `is null` /
   `not.is null` filter whose field names an embed into a
   CoercibleFilterNullEmbed over that embed's aggregate alias, at every depth
-  of the tree (Plan.hs#L959-L963 recurses into the forest). Both embeds are
+  of the tree (Plan.hs#L1027-L1031 recurses into the forest). Both embeds are
   projected empty/partially so the related arrays stay out of the body.
   Mirrors RelatedQueriesSpec "related conditions through null operator on
   embed" > "works on nested embeds" (v16.0 L217-L223) verbatim, request and
@@ -31,4 +31,4 @@ notes: >
   Fixture check against the consolidated bier_test: grandchild_entities
   parent_ids are 1,1,2,2,2, so child_entities 1 and 2 are the only ones with
   grandchildren, and both belong to entity 1 — the sole surviving parent.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RelatedQueriesSpec.hs#L217
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RelatedQueriesSpec.hs#L217

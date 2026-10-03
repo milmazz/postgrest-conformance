@@ -186,7 +186,7 @@
 --       REPLACED IN PLACE: `RETURNS bytea` -> `RETURNS
 --       public."application/octet-stream"`. The old transcription made case 1622
 --       unreachable (no handler => 406/PGRST107); upstream declares the routine
---       over the mime DOMAIN (schema.sql#L2372). Body/volatility otherwise
+--       over the mime DOMAIN (schema.sql#L2374). Body/volatility otherwise
 --       unchanged. The delta shipped a `DROP FUNCTION IF EXISTS` guard so a
 --       blind append would also converge; that guard is dropped here because the
 --       definition is edited in place and this file loads into a fresh DB.
@@ -200,7 +200,7 @@
 --             No name collided with an existing object, so nothing was renamed:
 --   * The delta's sole object: `id public.devil_int DEFAULT 420, name text` —
 --       a COLUMN default over the domain's own DEFAULT 666, mirroring upstream
---       schema.sql#L3232-L3235 (v16.0). Case 1822.
+--       schema.sql#L3234-L3237 (v16.0). Case 1822.
 --   * No seed rows (the section 8 note is extended) and no GRANT (section 9
 --       untouched): case 1822 POSTs its own row on the no-auth instance as the
 --       owning role, exactly like test.evil_friends / case 1814.
@@ -209,6 +209,20 @@
 --       case is deliberately labelled `schema: test` because an auto-updatable
 --       view resolves the missing INSERT column against the VIEW's devil_int
 --       default (666) before the base table's column default (420) can fire.
+--
+-- 2026-10-02  openapi.delta.sql -> the mixed-case schema "SCHEMA_v3" (v16.4
+--             re-pin; PostgREST#5158). No name collided, nothing renamed:
+--   * CREATE SCHEMA "SCHEMA_v3" (section 2, beside openapi_no_comment), its
+--       COMMENT 'v3 schema' (section 7) and a USAGE grant to the same three
+--       roles as openapi_no_comment (section 9) -- upstream test/spec/fixtures
+--       schema.sql#L16 + #L20 and privileges.sql#L13 + #L25 at v16.4. The
+--       schema holds NO relations: upstream creates none in it either, and the
+--       root document only needs the schema, its comment and USAGE. Case 1690
+--       boots a variant instance with db-schemas = SCHEMA_v3 (HARNESS.md 2.5).
+--   * Through v16.3 the root endpoint failed on this schema (its name was
+--       cast with ::regnamespace unquoted, so the lookup folded case and
+--       raised "schema does not exist"); v16.4 wraps it in quote_ident
+--       (SqlFragment.hs#L642, #L657, #L675).
 -- ----------------------------------------------------------------------------
 
 BEGIN;
@@ -261,6 +275,7 @@ CREATE SCHEMA IF NOT EXISTS v2;                       -- url_grammar / headers
 CREATE SCHEMA IF NOT EXISTS "تست";                    -- url_grammar (unicode)
 CREATE SCHEMA IF NOT EXISTS "SPECIAL ""@/\#~_-";      -- headers (special-named)
 CREATE SCHEMA IF NOT EXISTS openapi_no_comment;       -- openapi.sql (case 1654: default title, no schema COMMENT)
+CREATE SCHEMA IF NOT EXISTS "SCHEMA_v3";              -- openapi.delta.sql (case 1690: mixed-case schema name)
 
 -- Reachable: test first, then public for shared casts/extensions.
 SET search_path = test, public;
@@ -405,9 +420,9 @@ CREATE DOMAIN public."text/tab-separated-values" AS text;
 
 -- application/octet-stream is NOT a built-in producer: PostgREST's
 -- initialMediaHandlers map ships json / csv / geo+json / "*/*" and nothing else
--- (SchemaCache.hs#L1016). It becomes negotiable ONLY where a routine's RETURN
+-- (SchemaCache.hs#L1082). It becomes negotiable ONLY where a routine's RETURN
 -- TYPE is this domain — which is how upstream declares
--- test.unnamed_bytea_param (schema.sql#L2372) and the sole reason case 1622
+-- test.unnamed_bytea_param (schema.sql#L2374) and the sole reason case 1622
 -- gets 200 + a bare `application/octet-stream` instead of 406/PGRST107.
 -- Deliberately NOT wired to an aggregate: test.add_them (case 1623) and
 -- test.get_lines (case 1624) must keep answering 406, so no anyelement handler
@@ -815,10 +830,10 @@ CREATE TABLE test.organizations (
 -- factories family: spread to-many embeds + aggregates on spreads
 -- (select.delta.sql, folded 2026-08-23 in two passes; upstream
 -- test/spec/fixtures/schema.sql — factories/process_categories/processes/
--- process_costs/supervisors/process_supervisor at #L3713-L3744,
--- factory_buildings at #L3815, budget_categories/budget_expenses at
--- #L3588-L3599, and from the second fold operators/process_operator at
--- #L3803-L3813).
+-- process_costs/supervisors/process_supervisor at #L3715-L3746,
+-- factory_buildings at #L3817, budget_categories/budget_expenses at
+-- #L3590-L3601, and from the second fold operators/process_operator at
+-- #L3805-L3815).
 --
 -- Mirrored structurally, not byte-for-byte: column names, types, order,
 -- constraints and NULL-ability are exact, but every statement is
@@ -989,7 +1004,7 @@ CREATE TABLE test.evil_friends(
 -- INSERT target list and Postgres applies the COLUMN default, which wins over
 -- the domain default (case 1822 expects 420; case 1814 gets 666 from
 -- test.evil_friends, whose column has no default of its own). Mirrors upstream
--- test/spec/fixtures/schema.sql#L3232-L3235 (v16.0). Like evil_friends it is
+-- test/spec/fixtures/schema.sql#L3234-L3237 (v16.0). Like evil_friends it is
 -- seeded EMPTY (section 8) and takes no GRANT (section 9): case 1822 runs on
 -- the no-auth instance as the owning role.
 CREATE TABLE test.evil_friends_with_column_default (
@@ -1340,7 +1355,7 @@ $$;
 -- ----------------------- test (content_negotiation.sql) --------------------
 -- getproject / getallprojects are consolidated below (shared with rpc.sql).
 -- Returns the public."application/octet-stream" DOMAIN (section 3c), NOT plain
--- `bytea` — mirroring upstream's schema.sql#L2372. The return type is what
+-- `bytea` — mirroring upstream's schema.sql#L2374. The return type is what
 -- registers the octet-stream handler for this one routine; with `RETURNS bytea`
 -- case 1622 would negotiate to 406/PGRST107. IMMUTABLE is upstream's.
 CREATE FUNCTION test.unnamed_bytea_param(bytea)
@@ -1791,6 +1806,10 @@ My API description
 that spans
 multiple lines$$;
 
+-- openapi.delta.sql (case 1690): the mixed-case schema's comment is what the
+-- root document's info.title must come back as (upstream schema.sql#L20).
+COMMENT ON SCHEMA "SCHEMA_v3" IS 'v3 schema';
+
 COMMENT ON TABLE test.child_entities IS 'child_entities comment';
 COMMENT ON COLUMN test.child_entities.id IS 'child_entities id comment';
 COMMENT ON COLUMN test.child_entities.name IS 'child_entities name comment. Can be longer than sixty-three characters long';
@@ -2198,6 +2217,7 @@ GRANT USAGE ON SCHEMA test, public, jwt, postgrest TO postgrest_test_anonymous;
 GRANT USAGE ON SCHEMA test TO postgrest_test_author;
 GRANT USAGE ON SCHEMA test TO postgrest_test_default_role;
 GRANT USAGE ON SCHEMA openapi_no_comment TO postgrest_test_anonymous, postgrest_test_author, postgrest_test_default_role;
+GRANT USAGE ON SCHEMA "SCHEMA_v3" TO postgrest_test_anonymous, postgrest_test_author, postgrest_test_default_role;
 
 -- anonymous reads (auth.sql / config.sql)
 GRANT SELECT ON TABLE test.items TO postgrest_test_anonymous;

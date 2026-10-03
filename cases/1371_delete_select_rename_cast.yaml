@@ -12,4 +12,4 @@ expect:
   status: 200
   body_exact: [{ "ciId": "3", "ciName": "Three" }]
 notes: 'DELETE return=rep with ?select supports column rename + cast. Assumes: DELETE FROM test.complex_items WHERE id = 3; INSERT INTO test.complex_items (id, name, settings, arr_data) VALUES (3, ''Three'', ''{"foo":{"int":1,"bar":"baz"}}'', ''{1,2,3}'');'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/DeleteSpec.hs#L68
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/DeleteSpec.hs#L81

@@ -14,4 +14,4 @@ notes: >
   The empty `in.()` list is type-agnostic: `= ANY('{}')` is emitted for a text
   column exactly as for an integer one, with no per-type coercion. Mirrors
   QuerySpec.hs "IN and NOT IN empty set" / "works for text".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1365
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1569

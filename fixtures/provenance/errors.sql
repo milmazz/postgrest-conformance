@@ -26,7 +26,7 @@ set search_path = test, public;
 -- ---------------------------------------------------------------------------
 -- unique_violation (SQLSTATE 23505 -> HTTP 409)
 -- A second insert of the same primary key triggers the violation.
--- schema.sql:769 ; data.sql:185
+-- schema.sql:771 ; data.sql:185
 -- ---------------------------------------------------------------------------
 create table test.simple_pk (
   k     varchar not null,
@@ -39,7 +39,7 @@ insert into test.simple_pk values ('xyyx', 'u');
 -- foreign_key_violation (SQLSTATE 23503 -> HTTP 409)
 -- Inserting a child row referencing a missing parent triggers the violation.
 -- (table_a / table_b shape mirrors schema.sql table_a/table_b)
--- schema.sql:3645
+-- schema.sql:3647
 -- ---------------------------------------------------------------------------
 create table test.fk_parent (
   id int primary key
@@ -51,7 +51,7 @@ create table test.fk_child (
 
 -- ---------------------------------------------------------------------------
 -- PTxxx custom error: RAISE SQLSTATE 'PTnnn' maps to HTTP status nnn.
--- schema.sql:1289
+-- schema.sql:1291
 -- ---------------------------------------------------------------------------
 create or replace function test.raise_pt402() returns void as $$
 begin
@@ -62,7 +62,7 @@ end;
 $$ language plpgsql;
 
 -- PT followed by a non-numeric suffix -> defaults to HTTP 500.
--- schema.sql:1297
+-- schema.sql:1299
 create or replace function test.raise_bad_pt() returns void as $$
 begin
   raise sqlstate 'PT40A' using message = 'Wrong';
@@ -72,7 +72,7 @@ $$ language plpgsql;
 -- ---------------------------------------------------------------------------
 -- RAISE SQLSTATE 'PGRST' custom error: full response control via JSON in the
 -- MESSAGE (code/message/details/hint) and DETAIL (status/status_text/headers).
--- schema.sql:3312
+-- schema.sql:3314
 -- ---------------------------------------------------------------------------
 create or replace function test.raise_sqlstate_test1() returns void
   language plpgsql as $$
@@ -84,7 +84,7 @@ end
 $$;
 
 -- Minimal MESSAGE (no details/hint) -> details/hint serialize as null.
--- schema.sql:3322
+-- schema.sql:3324
 create or replace function test.raise_sqlstate_test2() returns void
   language plpgsql as $$
 begin
@@ -95,7 +95,7 @@ end
 $$;
 
 -- status 404 with no status_text -> standard reason phrase "Not Found".
--- schema.sql:3332
+-- schema.sql:3334
 create or replace function test.raise_sqlstate_test3() returns void
   language plpgsql as $$
 begin
@@ -106,7 +106,7 @@ end
 $$;
 
 -- status 404 WITH custom status_text -> "My Not Found".
--- schema.sql:3342
+-- schema.sql:3344
 create or replace function test.raise_sqlstate_test4() returns void
   language plpgsql as $$
 begin
@@ -117,7 +117,7 @@ end
 $$;
 
 -- MESSAGE is not valid JSON -> PGRST121 parse error (HTTP 500).
--- schema.sql:3352
+-- schema.sql:3354
 create or replace function test.raise_sqlstate_invalid_json_message() returns void
   language plpgsql as $$
 begin
@@ -128,7 +128,7 @@ end
 $$;
 
 -- DETAIL is not valid JSON -> PGRST121 parse error (HTTP 500).
--- schema.sql:3362
+-- schema.sql:3364
 create or replace function test.raise_sqlstate_invalid_json_details() returns void
   language plpgsql as $$
 begin
@@ -139,7 +139,7 @@ end
 $$;
 
 -- DETAIL missing entirely -> PGRST121 parse error (HTTP 500).
--- schema.sql:3372
+-- schema.sql:3374
 create or replace function test.raise_sqlstate_missing_details() returns void
   language plpgsql as $$
 begin
@@ -150,7 +150,7 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- plpgsql RAISE with no explicit SQLSTATE -> default code P0001 -> HTTP 400.
--- schema.sql:421
+-- schema.sql:423
 -- ---------------------------------------------------------------------------
 create or replace function test.problem() returns void
   language plpgsql as $$
@@ -160,7 +160,7 @@ end;
 $$;
 
 -- plpgsql ASSERT failure -> SQLSTATE P0004 (class P0) -> HTTP 500.
--- schema.sql:408
+-- schema.sql:410
 create or replace function test.assert() returns void
   language plpgsql as $$
 begin
@@ -171,7 +171,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- cardinality_violation (SQLSTATE 21000) from a scalar subquery returning
 -- more than one row -> generic server error HTTP 500.
--- (mirrors upstream `bad_subquery` view; schema.sql:3662)
+-- (mirrors upstream `bad_subquery` view; schema.sql:3664)
 -- ---------------------------------------------------------------------------
 create table test.cv_rows (
   id int primary key

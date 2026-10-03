@@ -16,5 +16,5 @@ expect:
 notes: >
   With only aggregates supplied on the spread fields there is no GROUP BY —
   a single row aggregates over everything. Requires
-  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:152).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L152
+  db-aggregates-enabled=true (AggregateFunctionsSpec.hs:165).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AggregateFunctionsSpec.hs#L165

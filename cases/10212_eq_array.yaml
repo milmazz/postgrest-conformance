@@ -15,4 +15,4 @@ notes: >
   `arr = '{1,2,3}'` compares whole integer[] values (element order and length
   included), not membership. Mirrors AndOrParamsSpec.hs 'can handle array
   operators' (eq assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L154
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L161

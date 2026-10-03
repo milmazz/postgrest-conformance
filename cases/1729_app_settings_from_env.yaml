@@ -12,4 +12,4 @@ expect:
   dump_contains:
     - 'app.settings.FOO = "bar"'
 notes: "PGRST_APP_SETTINGS_<NAME> env vars are normalized into app.settings.<NAME> GUCs. `normalize` only strips the PGRST_APP_SETTINGS_ prefix and prepends 'app.settings.', so the remainder is kept verbatim with no case folding."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Config.hs#L348
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config.hs#L383

@@ -15,4 +15,4 @@ notes: >
   A spread to-many with no matching children yields an empty array (not
   null); filtering the embed is.null keeps only such parents
   (SpreadQueriesSpec.hs:135).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L135
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L135

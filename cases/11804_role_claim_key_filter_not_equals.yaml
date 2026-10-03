@@ -16,9 +16,11 @@ expect:
 notes: >-
   Negated RFC 9535 filter selector: the only non-"other" element is
   `postgrest_test_author`, which becomes the role. Upstream asserts the status
-  only. NOTE the v16.0 migration (CHANGELOG.md#L91): the v14.12 string
-  comparison operators `^==` / `==^` / `*==` no longer exist — the equivalent is
-  now `$.roles[?search(@, "^postgrest_test_")]`. No upstream fixture exercises
+  only. NOTE the v16.0 migration (CHANGELOG.md#L131): RFC 9535 has no
+  string-comparison operators `^==` / `==^` / `*==`; the equivalent is
+  `$.roles[?search(@, "^postgrest_test_")]`, and no upstream fixture exercises
   `search()` end-to-end, so no case is authored for it (see spec/auth.yaml
-  gaps).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/fixtures/fixtures.yaml#L162
+  gaps). v16.2 (PostgREST#5171) restored the three operators inside the
+  deprecated leading-dot syntax only: cases 11702-11706 (parse) and 11820
+  (evaluation).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L162

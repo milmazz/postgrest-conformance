@@ -21,13 +21,13 @@ notes: >-
   status, but only the explicit `return=minimal` echoes
   `Preference-Applied: return=minimal` (case 1302). prefAppliedHeader collects
   the applied preferences into `prefsVals` and returns Nothing when that list
-  is empty, so no header is emitted (Preferences.hs#L174-L176 with the
-  collection at #L179-L188). Location is likewise absent: the SQL builder only
+  is empty, so no header is emitted (Preferences.hs#L176-L178 with the
+  collection at #L182-L192). Location is likewise absent: the SQL builder only
   computes a location expression when the requested representation is exactly
-  HeadersOnly (Statements.hs#L45-L52), which the upstream no-representation
+  HeadersOnly (Statements.hs#L63-L75), which the upstream no-representation
   insert into a compound-PK relation confirms with matchHeaderAbsent hLocation
-  (InsertSpec.hs#L745-L753). Content-Length: 0 is present because the
+  (InsertSpec.hs#L894-L903). Content-Length: 0 is present because the
   MutationCreate clause prepends contentLengthHeader unconditionally
-  (Response.hs#L116), and Content-Range is the insert range base 1 0 with no
-  count preference => "*/*" (Response.hs#L100-L101).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest/Preferences.hs#L174
+  (Response.hs#L126), and Content-Range is the insert range base 1 0 with no
+  count preference => "*/*" (Response.hs#L109-L110).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest/Preferences.hs#L176

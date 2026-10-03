@@ -17,4 +17,4 @@ notes: >
   'amusant')`. Mirrors QuerySpec.hs it "finds matches with different
   dictionaries and uses them as configuration for to_tsvector()"
   (jsonb_search assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L407
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L463

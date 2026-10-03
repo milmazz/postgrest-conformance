@@ -13,4 +13,4 @@ expect:
 notes: >
   Negative json array indexes are supported (-3 == element 0 of a 3-element
   array). Mirrors JsonOperatorSpec "can filter with negative indexes".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L294
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L326

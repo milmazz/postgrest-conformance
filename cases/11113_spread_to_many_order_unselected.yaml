@@ -18,4 +18,4 @@ notes: >
   The spread ordering columns need not be selected — category_id orders the
   name arrays without appearing in the output
   (SpreadQueriesSpec.hs:312).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L312
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L312

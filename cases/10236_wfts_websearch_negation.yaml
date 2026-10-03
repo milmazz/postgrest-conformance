@@ -14,8 +14,8 @@ expect:
 notes: >
   websearch_to_tsquery's `-` negation prefix survives the round trip:
   `text_search_vector @@ websearch_to_tsquery('fun and -possible')`
-  (SqlFragment.hs#L412). The leading `-` is part of the VALUE, so it must not
+  (SqlFragment.hs#L455). The leading `-` is part of the VALUE, so it must not
   be confused with a filter-level negation (that is spelled `not.` before the
   operator token). Mirrors QuerySpec.hs it "can use boolean operators(and, or,
   -) in websearch_to_tsquery" (third assertion).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L224
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L248

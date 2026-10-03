@@ -15,7 +15,7 @@
 -- type's default JSON rendering (see domain `devil_int` below).
 --
 -- Sources (PostgREST v14.12 test/spec/fixtures):
---   schema.sql: color domain+casts L3053-3073, isodate L3075-3092,
+--   schema.sql: color domain+casts L3055-3075, isodate L3077-3094,
 --               bytea_b64 L3096-3114, unixtz L3117-3135, monetary L3138-3154,
 --               datarep_todos L3157, datarep_next_two_todos L3165,
 --               datarep_todos_computed L3172, devil_int L3224, evil_friends L3227
@@ -185,6 +185,6 @@ INSERT INTO test.datarep_next_two_todos VALUES (1, 2, 3, 'school related');
 INSERT INTO test.datarep_next_two_todos VALUES (2, 1, 3, 'do these first');
 
 -- evil_friends intentionally has NO seed rows. Upstream data.sql seeds no rows
--- for it; the only citable behavior (InsertSpec.hs#L572 "inserts a default on a
+-- for it; the only citable behavior (InsertSpec.hs#L681 "inserts a default on a
 -- DOMAIN with default", case 1814) is a POST that relies on the devil_int DEFAULT
 -- 666, not on any pre-existing rows.

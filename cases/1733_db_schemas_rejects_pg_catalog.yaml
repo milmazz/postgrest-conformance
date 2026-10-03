@@ -11,8 +11,8 @@ expect:
   exit_code: nonzero
   stderr_contains: "db-schemas does not allow schema: 'pg_catalog'"
 notes: >
-  NEW in v16.0. parseDbSchemas rejects pg_catalog outright (Config.hs#L366,
-  message at #L371); v14.12 accepted it. Mirrors
+  NEW in v16.0. parseDbSchemas rejects pg_catalog outright (Config.hs#L402,
+  message at #L407); v14.12 accepted it. Mirrors
   test_cli.py:test_restricted_db_schemas over
   fixtures.yaml `restrictedschemas`, single-schema form.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L293
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_cli.py#L307

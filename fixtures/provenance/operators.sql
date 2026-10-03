@@ -10,7 +10,7 @@
 -- Loads cleanly into Postgres 14/15/16.
 
 -- ---------------------------------------------------------------------------
--- items  (schema.sql:126 ; data.sql:205)
+-- items  (schema.sql:128 ; data.sql:205)
 -- ---------------------------------------------------------------------------
 CREATE TABLE items (
     id bigserial primary key
@@ -19,7 +19,7 @@ INSERT INTO items VALUES
   (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15);
 
 -- ---------------------------------------------------------------------------
--- simple_pk  (schema.sql:769 ; data.sql:184)
+-- simple_pk  (schema.sql:771 ; data.sql:184)
 -- ---------------------------------------------------------------------------
 CREATE TABLE simple_pk (
     PRIMARY KEY (k),
@@ -30,7 +30,7 @@ INSERT INTO simple_pk VALUES ('xyyx', 'u');
 INSERT INTO simple_pk VALUES ('xYYx', 'v');
 
 -- ---------------------------------------------------------------------------
--- no_pk  (schema.sql:688 ; data.sql:279)
+-- no_pk  (schema.sql:690 ; data.sql:279)
 -- ---------------------------------------------------------------------------
 CREATE TABLE no_pk (
     a character varying,
@@ -41,7 +41,7 @@ INSERT INTO no_pk VALUES ('1', '0');
 INSERT INTO no_pk VALUES ('2', '0');
 
 -- ---------------------------------------------------------------------------
--- nullable_integer  (schema.sql:701 ; data.sql:289)
+-- nullable_integer  (schema.sql:703 ; data.sql:289)
 -- ---------------------------------------------------------------------------
 CREATE TABLE nullable_integer (
     a integer
@@ -49,7 +49,7 @@ CREATE TABLE nullable_integer (
 INSERT INTO nullable_integer VALUES (NULL);
 
 -- ---------------------------------------------------------------------------
--- chores  (schema.sql:2457 ; data.sql:735)
+-- chores  (schema.sql:2459 ; data.sql:735)
 -- ---------------------------------------------------------------------------
 CREATE TABLE chores (
   id int primary key
@@ -62,7 +62,7 @@ INSERT INTO chores (id, name, done) values
   (3, 'wash the dishes', null);
 
 -- ---------------------------------------------------------------------------
--- complex_items  (schema.sql:555 ; data.sql:168)
+-- complex_items  (schema.sql:557 ; data.sql:168)
 -- ---------------------------------------------------------------------------
 CREATE TABLE complex_items (
     id bigint NOT NULL primary key,
@@ -76,7 +76,7 @@ INSERT INTO complex_items VALUES (2, 'Two', '{"foo":{"int":1,"bar":"baz"}}', '{1
 INSERT INTO complex_items VALUES (3, 'Three', '{"foo":{"int":1,"bar":"baz"}}', '{1,2,3}', 3);
 
 -- ---------------------------------------------------------------------------
--- projects  (schema.sql:719 ; data.sql:97)
+-- projects  (schema.sql:721 ; data.sql:97)
 -- NOTE: upstream references clients(id); we make client_id a plain integer
 -- here because no operator case embeds clients. Rows are identical.
 -- ---------------------------------------------------------------------------
@@ -92,7 +92,7 @@ INSERT INTO projects VALUES (4, 'OSX', 2);
 INSERT INTO projects VALUES (5, 'Orphan', NULL);
 
 -- ---------------------------------------------------------------------------
--- articles  (schema.sql:843 private.articles ; data.sql:31)
+-- articles  (schema.sql:845 private.articles ; data.sql:31)
 -- Exposed as /articles. owner column kept for fidelity.
 -- ---------------------------------------------------------------------------
 CREATE TABLE articles (
@@ -105,7 +105,7 @@ INSERT INTO articles VALUES (2, 'Stop talking, brain thinking. Hush.', 'diogo');
 INSERT INTO articles VALUES (3, 'It''s a fez. I wear a fez now. Fezes are cool.', 'diogo');
 
 -- ---------------------------------------------------------------------------
--- tsearch  (schema.sql:878 ; data.sql:297)
+-- tsearch  (schema.sql:880 ; data.sql:297)
 -- ---------------------------------------------------------------------------
 CREATE TABLE tsearch (
     text_search_vector tsvector
@@ -117,7 +117,7 @@ INSERT INTO tsearch VALUES (to_tsvector('french', 'C''est un peu amusant de fair
 INSERT INTO tsearch VALUES (to_tsvector('german', 'Es ist eine Art Spaß, das Unmögliche zu machen'));
 
 -- ---------------------------------------------------------------------------
--- entities  (schema.sql:1167 ; data.sql:356)
+-- entities  (schema.sql:1169 ; data.sql:356)
 -- ---------------------------------------------------------------------------
 CREATE TABLE entities (
   id integer primary key,
@@ -131,7 +131,7 @@ INSERT INTO entities VALUES (3, 'entity 3', '{1,2,3}', null);
 INSERT INTO entities VALUES (4, null, null, null);
 
 -- ---------------------------------------------------------------------------
--- ranges  (schema.sql:1193 ; data.sql:377)
+-- ranges  (schema.sql:1195 ; data.sql:377)
 -- ---------------------------------------------------------------------------
 CREATE TABLE ranges (
     id integer primary key,

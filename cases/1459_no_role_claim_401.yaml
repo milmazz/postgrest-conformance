@@ -10,4 +10,4 @@ schema: auth
 expect:
   status: 401
 notes: "Token with claims but no role member -> 401."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AuthSpec.hs#L133
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AuthSpec.hs#L139

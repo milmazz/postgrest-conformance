@@ -16,7 +16,7 @@ expect:
     message: "column factories_processes_1.process_costs does not exist"
 notes: >
   An EMPTY EMBED nested inside a spread does not "contribute nothing" — it
-  is a 400. `generateSpreadSelectFields` (Plan.hs:704) folds every nested
+  is a 400. `generateSpreadSelectFields` (Plan.hs:757) folds every nested
   relation into the spread's projection via `relSelectToSpread`, and its
   `JsonEmbed` branch (L716) emits one `SpreadSelectField` named after the
   embed unconditionally — it never consults the `rsEmptyEmbed` flag that
@@ -42,4 +42,4 @@ notes: >
   the behavior, and its body was read off a live run of the pinned v16.0
   binary against this suite's fixtures rather than off an upstream
   assertion.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Plan.hs#L716
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L769

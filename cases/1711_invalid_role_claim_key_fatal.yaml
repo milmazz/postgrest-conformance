@@ -6,9 +6,22 @@ request:
 schema: config
 config:
   env:
-    PGRST_JWT_ROLE_CLAIM_KEY: ".role.other"
+    PGRST_JWT_ROLE_CLAIM_KEY: "@@.role.other"
 expect:
   exit_code: nonzero
-  stderr_contains: "failed to parse role-claim-key value (.role.other)"
-notes: "An invalid jwt-role-claim-key JSPath aborts startup. Mirrors test_cli.py:test_invalid_role_claim_key over fixtures.yaml invalidroleclaimkeys[0]. v16.0 moved to RFC 9535 JSONPath, so a leading-dot expression (the v14.12 grammar) is now itself invalid — the query must start with '$'."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_cli.py#L216
+  stderr_contains: "failed to parse role-claim-key value (@@.role.other)"
+notes: >
+  A jwt-role-claim-key that neither the RFC 9535 parser nor the deprecated
+  JSPath fallback accepts aborts startup (parseRoleClaimKey fails with the
+  fallback's error, Config.hs#L469). Mirrors test_cli.py:test_invalid_role_claim_key
+  over fixtures.yaml invalidroleclaimkeys. REWRITTEN at the v16.4 re-pin:
+  through v16.1 this case used `.role.other`, then upstream's
+  invalidroleclaimkeys[0], because v16.0 had made the leading-dot grammar
+  itself invalid. v16.2 (PostgREST#5171) accepts that grammar again as
+  deprecated syntax, so `.role.other` now loads (see 11700) and upstream
+  rewrote the fixture entry to `@@.role.other`
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/fixtures.yaml#L190).
+  The deprecated grammar has its own invalid list
+  (deprecatedinvalidroleclaimkeys, fixtures.yaml#L289, e.g. `role.other`),
+  which fails with the same message.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_cli.py#L216

@@ -17,11 +17,11 @@ expect:
     hint: "Perhaps you meant the table 'test.projects'"
 notes: >
   PGRST205's `hint` is a fuzzy suggestion, not a constant: TableNotFound's hint
-  is `tableNotFoundHint` (Error.hs:286 -> :386), which looks the requested name
+  is `tableNotFoundHint` (Error.hs:290 -> :389), which looks the requested name
   up in the schema's FuzzySet (SchemaCache.dbTablesFuzzyIndex) and returns
   "Perhaps you meant the table '<schema>.<match>'" only when the best match
-  scores at least 0.75 (getFuzzyHint, Error.hs:400). `details` stays null.
-  Mirrors ErrorSpec.hs "show hint when similarity score is at least 75%" (L80),
+  scores at least 0.75 (getFuzzyHint, Error.hs:403). `details` stays null.
+  Mirrors ErrorSpec.hs "show hint when similarity score is at least 75%" (L86),
   whose first request is GET /projectx (L81) and which asserts this exact body
   plus Content-Length 160 (L83-L86).
   Fixture derivation: upstream exposes the same `test` schema, so the expected
@@ -31,4 +31,4 @@ notes: >
   within the 0.75 threshold of "projectx" is "projects" (edit distance 1, i.e.
   0.875) — the next closest names ("project_invoices", "big_projects",
   "get_projects_above_view", "getallprojects_view") are far below it.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ErrorSpec.hs#L80
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ErrorSpec.hs#L86

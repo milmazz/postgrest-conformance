@@ -15,15 +15,15 @@ notes: >
   `toWaiResponse` — the outer handler maps a Left straight to a response
   (`handleError = fmap (either (Error.errorResponseFor
   configClientErrorVerbosity) identity)`,
-  src/library/PostgREST/App.hs#L154), and `errorResponseFor` builds it with a
+  src/library/PostgREST/App.hs#L171), and `errorResponseFor` builds it with a
   closed header list: Content-Type, Content-Length, Proxy-Status, plus the
-  error's own `headers err` (src/library/PostgREST/Error.hs#L88). No Vary
+  error's own `headers err` (src/library/PostgREST/Error.hs#L91). No Vary
   appears in that list, and no middleware supplies one either — the CORS
-  middleware sets `corsVaryOrigin = False` (src/library/PostgREST/Cors.hs#L39)
+  middleware sets `corsVaryOrigin = False` (src/library/PostgREST/Cors.hs#L47)
   and `hVary` occurs nowhere else in src/ than App.hs' toWaiResponse. The
   request reuses case 1560's verified 406/PGRST106 scenario (an Accept-Profile
   naming a non-exposed schema) purely as a cheap, side-effect-free error; the
   body/hint assertions stay in 1560 so this case pins only the header rule.
   Upstream asserts no it-block for it (HttpHeaderSpec.hs covers only the 200
   path), so this is derived from the source funnel above.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L88
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L91

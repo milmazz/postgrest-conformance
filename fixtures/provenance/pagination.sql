@@ -6,20 +6,20 @@
 --
 -- Sources (PostgREST v14.12):
 --   test/spec/fixtures/schema.sql  (table/function/view definitions)
---     - items table:            schema.sql#L126-L128
---     - getitemrange function:  schema.sql#L214-L219
---     - clients table:          schema.sql#L546-L549
---     - menagerie table:        schema.sql#L673-L681
---     - projects table:         schema.sql#L719-L723
---     - users table:            schema.sql#L781-L784
---     - tasks table:            schema.sql#L792-L796
---     - users_tasks table:      schema.sql#L809-L813
---     - entities table:         schema.sql#L1167-L1172
---     - child_entities table:   schema.sql#L1174-L1178
---     - get_projects_above fn:  schema.sql#L1031-L1035 (ROWS 1)
---     - getallprojects fn:      schema.sql#L1037-L1041 (ROWS 2019)
---     - getallprojects_view:    schema.sql#L1906-L1907
---     - get_projects_above_view: schema.sql#L1909-L1910
+--     - items table:            schema.sql#L128-L130
+--     - getitemrange function:  schema.sql#L216-L221
+--     - clients table:          schema.sql#L548-L551
+--     - menagerie table:        schema.sql#L675-L683
+--     - projects table:         schema.sql#L721-L725
+--     - users table:            schema.sql#L783-L786
+--     - tasks table:            schema.sql#L794-L798
+--     - users_tasks table:      schema.sql#L811-L815
+--     - entities table:         schema.sql#L1169-L1174
+--     - child_entities table:   schema.sql#L1176-L1180
+--     - get_projects_above fn:  schema.sql#L1033-L1037 (ROWS 1)
+--     - getallprojects fn:      schema.sql#L1039-L1043 (ROWS 2019)
+--     - getallprojects_view:    schema.sql#L1908-L1909
+--     - get_projects_above_view: schema.sql#L1911-L1912
 --   test/spec/fixtures/data.sql   (row data)
 --     - items 1..15:            data.sql#L206-L220
 --     - users 1..3:             data.sql#L44-L46

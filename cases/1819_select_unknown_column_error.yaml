@@ -24,4 +24,4 @@ notes: >
   selecting fields that don't exist'. Upstream also asserts Content-Length 98; this
   case asserts the body instead, consistently with the other error case in this area
   (1809).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1556
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1787

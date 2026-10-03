@@ -20,6 +20,6 @@ notes: >
   The whole table is therefore returned; this fixture happens to hold a single
   row (int_data = 1), so the body alone does not discriminate the two readings.
   The empty-list emission `[""] -> "= ANY('{}') "` is
-  SqlFragment.hs#L409. Mirrors QuerySpec.hs "returns all results for not.in
+  SqlFragment.hs#L453. Mirrors QuerySpec.hs "returns all results for not.in
   when no value is present".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1387
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1591

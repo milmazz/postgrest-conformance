@@ -15,4 +15,4 @@ notes: >
   (computed_designers(test.videogames)) is embeddable as a many-to-one single
   object, aliased here as "designer"
   (ComputedRelsSpec.hs:13, "can define a many-to-one relationship with SETOF and ROWS 1 and embed").
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ComputedRelsSpec.hs#L13
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ComputedRelsSpec.hs#L13

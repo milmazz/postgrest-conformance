@@ -18,4 +18,4 @@ expect:
 notes: >
   A one-to-one spread nested inside an m2m spread joins the parallel
   arrays, null where the nested row is missing (SpreadQueriesSpec.hs:410).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L410
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L410

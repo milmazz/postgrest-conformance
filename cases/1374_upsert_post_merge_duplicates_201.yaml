@@ -23,5 +23,5 @@ expect:
     - { "name": "Javascript", "rank": 6 }
     - { "name": "Java", "rank": 2 }
     - { "name": "C", "rank": 1 }
-notes: 'resolution=merge-duplicates upserts on pk; status is 201 because at least one row (Javascript, not seeded) was inserted. Mirrors UpsertSpec.hs#L19-L32. Assumes: DELETE FROM test.tiobe_pls; INSERT INTO test.tiobe_pls (name, rank) VALUES (''Java'', 1), (''C'', 2), (''Python'', 4);'
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/UpsertSpec.hs#L19
+notes: 'resolution=merge-duplicates upserts on pk; status is 201 because at least one row (Javascript, not seeded) was inserted. Mirrors UpsertSpec.hs#L19-L36. Assumes: DELETE FROM test.tiobe_pls; INSERT INTO test.tiobe_pls (name, rank) VALUES (''Java'', 1), (''C'', 2), (''Python'', 4);'
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/UpsertSpec.hs#L19

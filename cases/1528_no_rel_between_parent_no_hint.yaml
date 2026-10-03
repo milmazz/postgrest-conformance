@@ -18,7 +18,7 @@ expect:
     hint: null
 notes: >
   The negative half of case 1527: when `Fuzzy.getOne fuzzySetOfParents parent`
-  (Error.hs:329) finds nothing at or above fuzzyset-0.2.4's default 0.33 minimum
+  (Error.hs:333) finds nothing at or above fuzzyset-0.2.4's default 0.33 minimum
   score it returns Nothing, `noRelBetweenHint` is Nothing and the envelope's
   `hint` is null. `details`, `message`, status and `Proxy-Status` are unchanged
   from 1527 — only `hint` moves.
@@ -28,16 +28,16 @@ notes: >
   threshold by the normalized edit-distance similarity 1 - levenshtein/max(len)
   that `Fuzzy.getOne` ranks by — `no_pk` at 0.5714 and `simple_pk` at 0.4444 —
   but NEITHER participates in any foreign key, so neither is among
-  `HM.keys allRels` and neither is in `fuzzySetOfParents` (Error.hs:327). Of the
+  `HM.keys allRels` and neither is in `fuzzySetOfParents` (Error.hs:331). Of the
   names that ARE in that set, the closest to "only_pk" is `process_operator` at
   0.1875, barely half the threshold, so the fuzzy search comes back empty.
 
   Mirrors the doctest `>>> noRelBetweenHint "noclosealternative" "roles" "api"
-  rels` (cited line), whose expected value on the next line (Error.hs:312) is
+  rels` (cited line), whose expected value on the next line (Error.hs:315) is
   `Nothing`: the parent is absent from the map's keys AND no key is close enough.
   Upstream asserts this branch nowhere in `test/spec/`.
 
   Fixture derivation: `test.only_pk`, `test.no_pk` and `test.simple_pk` are all
   defined in fixtures/02_base.sql and none of the three appears on either side of
   a foreign key. Content-Length 266 was recounted against the body above.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L311
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L314

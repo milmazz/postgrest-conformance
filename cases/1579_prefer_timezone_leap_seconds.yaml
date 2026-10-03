@@ -20,8 +20,8 @@ notes: >
   ignored. A seconds-precision offset raises SQLSTATE 22023 with a DETAIL,
   and the DETAIL is carried through into the error envelope's `details`
   (the generic PgError path, not a PGRST* one); 22023 maps to 400 via
-  Error.hs#L561-L564. No Preference-Applied is emitted because the request
-  fails. Mirrors the exact it-block at Preferences/TimezoneSpec.hs:80-86
+  Error.hs#L559-L563. No Preference-Applied is emitted because the request
+  fails. Mirrors the exact it-block at Preferences/TimezoneSpec.hs:102-109
   ("fails on leap seconds"). Message and detail text re-verified against a
   loaded bier_test (PostgreSQL 17).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L80
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L102

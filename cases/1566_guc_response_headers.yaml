@@ -15,7 +15,7 @@ expect:
 notes: >
   response.headers GUC (JSON array of single-key objects) becomes response
   headers. Mirrors the second of the three requests in the "succeeds setting
-  the headers" it-block (RpcSpec.hs:1031), namely
+  the headers" it-block (RpcSpec.hs:1169), namely
   GET /rpc/get_int_and_guc_headers?num=1 with its assertions at
-  RpcSpec.hs:1038-1043.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RpcSpec.hs#L1038
+  RpcSpec.hs:1178-1183.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RpcSpec.hs#L1178

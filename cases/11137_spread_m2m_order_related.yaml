@@ -18,4 +18,4 @@ expect:
 notes: >
   An m2m spread's arrays can be ordered by a column of a nested related
   table (processes.order=process_costs(cost)) (SpreadQueriesSpec.hs:589).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L589
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L589

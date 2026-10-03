@@ -18,4 +18,4 @@ expect:
 notes: >
   Each column selected in an m2m spread becomes its own parallel JSON array
   (SpreadQueriesSpec.hs:359).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L359
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L359

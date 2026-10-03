@@ -13,4 +13,4 @@ expect:
 notes: >
   ->> extracts a top-level json key as text for comparison. Mirrors
   JsonOperatorSpec "can filter by properties inside json column using ->>".
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L180
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L207

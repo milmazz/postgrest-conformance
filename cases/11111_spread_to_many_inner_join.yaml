@@ -17,4 +17,4 @@ notes: >
   `!inner` on a spread to-many drops parents with no children (Factory D
   disappears). The same it-block's second get (L282) asserts the equivalent
   processes=not.is.null form (SpreadQueriesSpec.hs:272).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L272
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L272

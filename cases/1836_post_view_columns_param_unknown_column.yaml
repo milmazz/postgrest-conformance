@@ -38,4 +38,4 @@ notes: >
   (datarep_todos_computed), before any body value is handed to a
   `json AS <domain>` cast: the body's "label_color": "invalid" would fail that
   cast and that error never surfaces, and no row is written through the view.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L901
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L1097

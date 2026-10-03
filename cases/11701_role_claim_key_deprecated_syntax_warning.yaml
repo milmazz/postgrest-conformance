@@ -1,0 +1,24 @@
+id: 11701
+feature: config/jwt-role-claim-key/deprecated-syntax-warning
+request:
+  kind: cli
+  flag: "--dump-config"
+schema: config
+config:
+  env:
+    PGRST_JWT_ROLE_CLAIM_KEY: ".roles.user_role"
+expect:
+  exit_code: 0
+  stderr_contains: 'WARNING: The config `jwt-role-claim-key=."roles"."user_role"` is using the deprecated JSPath syntax.'
+notes: >
+  Loading a deprecated-syntax jwt-role-claim-key emits DeprecatedJSPathSyntaxObs,
+  which the logger renders as two lines: this WARNING and an "Update ... to
+  the new JSONPath syntax" pointer to the v16 migration guide
+  (Logger.hs#L208-L211). Upstream asserts both lines on the server's log
+  output (test_config.py:302-318); the lines are emitted while the config
+  loads, so --dump-config writes them to stderr as well (confirmed against the
+  pinned v16.4 binary), which is what makes the warning assertable without a
+  running server. Only the WARNING line is asserted: the second line embeds a
+  URL into upstream's main-branch CHANGELOG that the suite does not want to
+  pin. Same input as 11700.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_config.py#L314

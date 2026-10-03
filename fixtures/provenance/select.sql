@@ -4,7 +4,7 @@
 -- tables/data exercised by spec/conformance/cases/1100..1149.
 --
 -- Sources (PostgREST v14.12 test/spec/fixtures):
---   schema.sql: complex_items L555, clients L546, projects L719, tasks L792,
+--   schema.sql: complex_items L557, clients L548, projects L721, tasks L794,
 --               users L781, users_tasks L809, items L126 + always_true L145,
 --               entities L1167, child_entities L1174, json_arr L1548,
 --               project_invoices L3582, students L2785, students_info L2792,
@@ -156,7 +156,7 @@ INSERT INTO project_invoices VALUES (8, 4000, 4);
 -- sites / big_projects / jobs: ambiguous embed (PGRST201 / 300) ------------
 -- Produces exactly three candidate relationships between sites and
 -- big_projects: main_project (m2o), jobs (m2m), main_jobs (m2m).
--- schema.sql L1943-L1965.
+-- schema.sql L1945-L1967.
 CREATE TABLE big_projects (
     big_project_id serial PRIMARY KEY,
     name text
@@ -184,7 +184,7 @@ CREATE VIEW main_jobs AS
 -- students / students_info: one-to-one via pk-as-fk -------------------------
 -- students_info shares its (id, code) primary key with students and also uses
 -- it as the FK, so the relationship is one-to-one (a single object embed).
--- schema.sql L2785-L2798; data.sql L795, L798.
+-- schema.sql L2787-L2800; data.sql L795, L798.
 CREATE TABLE students (
     id integer,
     code text,
@@ -205,7 +205,7 @@ INSERT INTO students_info (id, code, address) VALUES (1, '0001', 'Street 1'), (2
 -- country / capital: one-to-one via a UNIQUE-constraint FK ------------------
 -- capital.country_id is a UNIQUE FK to country, so each country has at most one
 -- capital; embedding either side yields a single object.
--- schema.sql L2800-L2810; data.sql L801, L804.
+-- schema.sql L2802-L2812; data.sql L801, L804.
 CREATE TABLE country (
     id integer PRIMARY KEY,
     name text
@@ -226,7 +226,7 @@ INSERT INTO capital (id, name, country_id) VALUES (1, 'Kabul', 1), (2, 'Algiers'
 -- inverse one-to-many. (designers.name uses a titlecasetext domain upstream;
 -- simplified to text here since no data-representation behavior is asserted by
 -- the cited L15/L43 tests.)
--- schema.sql L2735-L2757; data.sql L789, L792.
+-- schema.sql L2737-L2759; data.sql L789, L792.
 CREATE TABLE designers (
     id integer PRIMARY KEY,
     name text

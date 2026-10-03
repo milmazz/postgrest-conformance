@@ -19,11 +19,11 @@ notes: >
   server's default zone and no Preference-Applied; v16.0 hands the value to
   PostgreSQL, which raises SQLSTATE 22023 -> 400
   (src/library/PostgREST/ApiRequest/Preferences.hs#L138 removed the
-  pg_timezone_names gate; Error.hs#L561-L564 maps the SQLSTATE). The docs
+  pg_timezone_names gate; Error.hs#L559-L563 maps the SQLSTATE). The docs
   now say plainly "For an invalid time zone, PostgREST returns a database
   error" and show `HTTP/1.1 400 Bad Request`
   (docs/references/api/preferences.rst#L114-L123). Mirrors the exact it-block
-  at Preferences/TimezoneSpec.hs:35-41 ("should throw error without
+  at Preferences/TimezoneSpec.hs:43-50 ("should throw error without
   handling"). Compare 1554 (handling=strict) and 1581 (handling=lenient):
   all three now produce this identical response.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L35
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/Preferences/TimezoneSpec.hs#L43

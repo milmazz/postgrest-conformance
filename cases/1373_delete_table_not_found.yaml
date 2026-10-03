@@ -8,5 +8,5 @@ schema: mutations
 expect:
   status: 404
   body_exact: { "code": "PGRST205", "details": null, "hint": null, "message": "Could not find the table 'mutations.foozle' in the schema cache" }
-notes: "DELETE on unknown table -> 404 PGRST205. Message is qualified by the request's active schema (here 'mutations'); upstream's DeleteSpec.hs#L113 shows 'test.' only because its sole exposed schema is named test."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Error.hs#L255
+notes: "DELETE on unknown table -> 404 PGRST205. Message is qualified by the request's active schema (here 'mutations'); upstream's DeleteSpec.hs#L133 shows 'test.' only because its sole exposed schema is named test."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Error.hs#L255

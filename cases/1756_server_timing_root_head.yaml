@@ -15,5 +15,5 @@ expect:
   body_exact: null
 notes: >
   HEAD on the root spec emits the full Server-Timing metric set. Mirrors
-  ServerTimingSpec.hs:77-85.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/ServerTimingSpec.hs#L77
+  ServerTimingSpec.hs:82-91.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/ServerTimingSpec.hs#L82

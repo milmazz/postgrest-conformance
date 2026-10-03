@@ -1,0 +1,28 @@
+id: 1690
+feature: openapi/root/mixed-case-schema-name
+request:
+  method: GET
+  path: /
+schema: SCHEMA_v3
+expect:
+  status: 200
+  body_jsonpath:
+    - { path: "$.info.title", equals: "v3 schema" }
+notes: >
+  The default OpenAPI root document works when the exposed schema's name is
+  mixed case. Through v16.3 the root's schema-description, accessible-tables
+  and accessible-functions queries cast the schema name with `$1::regnamespace`;
+  regnamespace input is parsed as an identifier, so the unquoted `SCHEMA_v3`
+  folded to `schema_v3` and the request failed with "schema does not exist".
+  v16.4 (PostgREST#5158) wraps the parameter in quote_ident first
+  (SqlFragment.hs#L642, #L657, #L675). The assertion is upstream's: 200 and
+  info.title equal to the schema's COMMENT, 'v3 schema' — which can only come
+  back if obj_description found the right namespace. No Accept header is sent
+  (upstream sends none; the harness's Accept-Profile injection names the
+  instance's only schema, a no-op) and the document has no relations, since upstream's
+  "SCHEMA_v3" holds none. Fixture: the schema, its COMMENT and a USAGE grant,
+  folded into 02_base.sql via openapi.delta.sql (upstream
+  https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/fixtures/schema.sql#L16). Routed like 1654: a variant instance
+  whose db-schemas is overridden to SCHEMA_v3 (HARNESS.md §2.5). This case
+  fails against v16.0-v16.3 by design.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/RootSpec.hs#L50

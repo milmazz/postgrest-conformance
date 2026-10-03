@@ -1,0 +1,38 @@
+id: 11707
+feature: config/sources/db-role-settings-jwt-cache-max-entries
+request:
+  kind: cli
+  flag: "--dump-config"
+schema: config
+config:
+  env:
+    PGRST_DB_CONFIG: "true"
+    PGUSER: db_config_authenticator
+  preconditions_sql:
+    - "CREATE ROLE db_config_authenticator LOGIN NOINHERIT"
+    - "ALTER ROLE db_config_authenticator SET pgrst.jwt_cache_max_entries = '123'"
+  file:
+    jwt-cache-max-entries: 86400
+expect:
+  exit_code: 0
+  dump_contains:
+    - 'jwt-cache-max-entries = 123'
+notes: >
+  jwt-cache-max-entries is RELOADABLE from the in-database source as of v16.4
+  (PostgREST#5269). Through v16.3, dbSettingsNames listed
+  `jwt_cache_max_lifetime` (a key no parser reads) instead of
+  `jwt_cache_max_entries`, so the role setting was never queried and the
+  file value stood: this case fails against v16.0-v16.3, by design. v16.4
+  replaced the entry (the source anchor). The values are upstream's and
+  were changed in the same fix so that a missing override is detectable: the
+  file says 86400
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/no-defaults.config#L27),
+  the role setting says 123
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/fixtures/db_config.sql#L18),
+  and the golden dump says 123
+  (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/expected/no-defaults-with-db.config#L30).
+  Mirrors test_cli.py:test_expected_config_from_db_settings for
+  db_config_authenticator; its other_authenticator parametrization (456,
+  db_config.sql#L76) asserts the same mechanism and is not cased separately.
+  Same shape as 1749 (db-aggregates-enabled) and 1724.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Config/Database.hs#L63

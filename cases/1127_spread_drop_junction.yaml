@@ -26,4 +26,4 @@ notes: >
   first `get` (L65) asserts the keep-junction form
   (users_tasks(*,...tasks(*))), so only L78 demonstrates this case's request
   and body.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/SpreadQueriesSpec.hs#L78
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/SpreadQueriesSpec.hs#L78

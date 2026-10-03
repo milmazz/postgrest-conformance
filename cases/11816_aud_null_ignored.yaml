@@ -15,4 +15,4 @@ expect:
 notes: >-
   An explicit `aud: null` is ignored even when jwt-aud is set -> 200. Its own
   upstream it-block, separate from the empty-array branch pinned by case 1473.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L129
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Auth/AudienceJwtSecretSpec.hs#L144

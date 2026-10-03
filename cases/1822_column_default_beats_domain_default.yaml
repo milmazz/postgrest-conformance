@@ -18,7 +18,7 @@ notes: >
   Upstream InsertSpec "inserts a COLUMN default before a DOMAIN default with
   missing=default". `evil_friends_with_column_default.id` is the domain
   devil_int (int DEFAULT 666, no `<domain> AS json` cast) but the COLUMN also
-  carries `default 420` (schema.sql#L3232-L3235). The id key is omitted from
+  carries `default 420` (schema.sql#L3234-L3237). The id key is omitted from
   the body, so `Prefer: missing=default` leaves the column out of the INSERT
   target list and Postgres applies the COLUMN default, which wins over the
   domain default: the returned representation is 420, not the 666 that case
@@ -43,5 +43,5 @@ notes: >
   to_regclass('test.evil_friends_with_column_default')` is NULL on a loaded
   bier_test and this case answers 404, not 201. Check that before treating a
   1822 failure as an implementation bug; the delta DDL matches upstream
-  schema.sql#L3232-L3235 verbatim.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/InsertSpec.hs#L571
+  schema.sql#L3234-L3237 verbatim.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/InsertSpec.hs#L680

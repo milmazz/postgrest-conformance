@@ -16,4 +16,4 @@ notes: >
   `not` negates lt, gte and cd inside a nested and()/or() logic tree.
   Mirrors AndOrParamsSpec.hs 'operators with not' / 'lt, gte, cd can be
   negated'.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/AndOrParamsSpec.hs#L190
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/AndOrParamsSpec.hs#L197

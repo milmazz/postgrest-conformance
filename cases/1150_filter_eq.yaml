@@ -14,4 +14,4 @@ notes: >
   Equality horizontal filter. Mirrors QuerySpec "matches with equality"
   (uses /items there; reproduced against entities fixture to stay
   self-contained).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L40
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L36

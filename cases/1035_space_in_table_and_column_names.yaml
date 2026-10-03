@@ -25,24 +25,24 @@ notes: >
   `%20`/`+` sits in a filter VALUE rather than an identifier. WAI
   percent-decodes the path into `pathInfo` before `getResource` sees it
   (`getResource conf $ pathInfo req`,
-  src/library/PostgREST/ApiRequest.hs#L78; the single-segment clause
-  `[table] -> Right $ ResourceRelation table` at #L126 takes the decoded
+  src/library/PostgREST/ApiRequest.hs#L106; the single-segment clause
+  `[table] -> Right $ ResourceRelation table` at #L154 takes the decoded
   segment verbatim), and `HTTP.parseQueryReplacePlus True` decodes the query
-  string (src/library/PostgREST/ApiRequest/QueryParams.hs#L157), so both the
+  string (src/library/PostgREST/ApiRequest/QueryParams.hs#L197), so both the
   relation `Server Today` and the column `Just A Server Model` arrive as plain
   names with spaces and no quoting is involved — `pFieldName` (QueryParams.hs
-  #L359-L363) parses an unquoted `identifier with spaces` verbatim, per its own
-  doctest at #L331-L332 (it trims only *edge* spaces, #L354-L355, which is the
+  #L404-L408) parses an unquoted `identifier with spaces` verbatim, per its own
+  doctest at #L376-L377 (it trims only *edge* spaces, #L399-L400, which is the
   one thing case 1029's `  col  w  space  ` needs `%22` for). The `like.*91*`
   filter shows the space-bearing name working as a filter key too: `*` is
   rewritten to the SQL `%` wildcard
-  (src/library/PostgREST/Query/SqlFragment.hs#L415), so it selects the four
+  (src/library/PostgREST/Query/SqlFragment.hs#L458), so it selects the four
   rows whose model string contains `91`, skipping `IBM,8406-71Y (P7-PS701)`.
   Mirrors QuerySpec "will select and filter a column that has spaces" (it at
   L1281, get at L1282, body at L1283-L1287). Fixture: test."Server Today" is
   new here, added in fixtures/url_grammar.delta.sql, mirroring upstream
-  test/spec/fixtures/schema.sql#L1816-L1819 and data.sql#L562-L569; the leading
+  test/spec/fixtures/schema.sql#L1818-L1821 and data.sql#L562-L569; the leading
   space in every value comes from upstream's `COPY ... CSV DELIMITER '|'`
   padding and was reproduced and verified against a loaded bier_test (the row
   order below is the insertion order the unordered SELECT returns).
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/QuerySpec.hs#L1281
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/QuerySpec.hs#L1468

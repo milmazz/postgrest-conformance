@@ -11,8 +11,8 @@ expect:
   status: 200
 notes: >
   Upstream `test_log_level` (the anchored parametrized test): at log-level=crit,
-  `shouldLogResponse` is `const False` (Logger.hs#L63) and NO access-log line is
-  emitted for any status — `assert len(output) == 0` (test_io.py#L544-L545).
+  `shouldLogResponse` is `const False` (Logger.hs#L64) and NO access-log line is
+  emitted for any status — `assert len(output) == 0` (test_log.py#L49-L50).
   The requests themselves still succeed normally.
   WHAT THIS CASE ACTUALLY ASSERTS: only that the request still returns 200 while
   logging is suppressed. It does NOT exercise log-level at all, for two reasons:
@@ -26,4 +26,4 @@ notes: >
   the upstream configuration the log-line assertion would need. The asserted 200
   is independent of log-level, so the case is sound as written — it is simply
   narrower than its feature name suggests.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/test_io.py#L523
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/test_log.py#L28

@@ -3,9 +3,9 @@
 # Area scope: OpenAPI 3.0 (emitted as Swagger 2.0) document generation rules,
 # descriptions sourced from COMMENTs, and security schemes.
 #
-# PostgREST version pinned: v16.0
+# PostgREST version pinned: v16.4 (re-pinned from v16.0 on 2026-10-02)
 # Primary source: src/library/PostgREST/Response/OpenAPI.hs
-#   https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs
+#   https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs
 # Behavior tests: test/spec/Feature/OpenApi/*.hs
 # Docs: https://postgrest.org/en/v16/references/api/openapi.html
 #
@@ -32,15 +32,15 @@
 #     `SpecWithConfig` / `withConfig <cfg>`. Every it-block body and every
 #     assertion is unchanged; the configs are the same values (e.g. v14.12's
 #     `testIgnorePrivOpenApiCfg = baseCfg { configOpenApiMode = OAIgnorePriv,
-#     configDbSchemas = fromList ["test","v1"] }`, SpecHelper.hs#L189-190, is
-#     byte-equal to v16.0's inline withConfig at IgnorePrivOpenApiSpec.hs#L21-26).
+#     configDbSchemas = fromList ["test","v1"] }`, SpecHelper.hs#L198-199, is
+#     byte-equal to v16.0's inline withConfig at IgnorePrivOpenApiSpec.hs#L17-22).
 #   * docs/references/api/openapi.rst: ZERO diff between the pins. The
 #     configuration docs for openapi-mode / openapi-security-active /
 #     openapi-server-proxy-uri / db-root-spec are unchanged, and the CHANGELOG
 #     mentions nothing in this area.
 #
 # The only wire-visible delta is externalDocs.url, which embeds docsVersion
-# ("v14" -> "v16", Version.hs#L32-35).
+# ("v14" -> "v16", Version.hs#L33-36).
 #
 # READ THAT AS A CLAIM ABOUT CHANGE, NOT ABOUT COVERAGE. The scaffolding-only
 # finding is what let the previous pass stop looking; this pass audited the
@@ -59,9 +59,9 @@
 #   * openapi/rpc/post-body (and case 1683) claimed an all-OUT routine
 #     documents `properties: {}`. It documents no such key; the swagger2
 #     encoder drops every field left at its default.
-#   * case 1662 cited OpenApiSpec.hs#L117 for five assertions when that anchor
+#   * case 1662 cited OpenApiSpec.hs#L127 for five assertions when that anchor
 #     supports only three; GET 200/206 descriptions are asserted by no upstream
-#     test and are now cited to the generator (OpenAPI.hs#L321-323).
+#     test and are now cited to the generator (OpenAPI.hs#L403-407).
 #   * the openapi-server-proxy-uri gap claimed no value-level expectation was
 #     traceable; the configuration docs print the exact fragment. Modelled in
 #     the openapi/root/server-proxy-uri entry (its case was later HELD — see
@@ -74,17 +74,17 @@
 # than behavior errors, and all fixed here:
 #   * openapi/table/response-status claimed per-method gating
 #     ("POST/PATCH/DELETE are emitted only when the table is
-#     insertable/updatable/deletable") on an anchor (#L321, `at 206`) that
+#     insertable/updatable/deletable") on an anchor (#L403, `at 206`) that
 #     supports no gating claim at all. makePathItem gates ONCE on the
-#     DISJUNCTION (#L309) and the True arm sets all three methods together
-#     (#L339), so an insert-only table still documents PATCH and DELETE. An
+#     DISJUNCTION (#L388) and the True arm sets all three methods together
+#     (#L428), so an insert-only table still documents PATCH and DELETE. An
 #     implementer building three independent checks would have diverged.
-#     Reworded; source re-pointed to #L309.
-#   * openapi/rpc/post-body cited OpenApiSpec.hs#L514 (the a_json COLUMN
+#     Reworded; source re-pointed to #L388.
+#   * openapi/rpc/post-body cited OpenApiSpec.hs#L530 (the a_json COLUMN
 #     schema) for a claim about the RPC POST path item. That anchor supports
-#     only the swagger2 default-drop sub-claim. Source re-pointed to #L875,
-#     the it-block that asserts the POST body schema; #L514 kept in the prose.
-#   * case 1682's source (RootSpec.hs#L27) CONTRADICTED its own body_exact —
+#     only the swagger2 default-drop sub-claim. Source re-pointed to #L892,
+#     the it-block that asserts the POST body schema; #L530 kept in the prose.
+#   * case 1682's source (RootSpec.hs#L35) CONTRADICTED its own body_exact —
 #     that it-block asserts upstream's "PostgREST API" root() document, not
 #     the "Overridden" one this case expects. Source promoted to the docs
 #     anchor that prints the expected body; RootSpec kept in notes for the
@@ -97,7 +97,7 @@
 #     harness change recorded as an open gap.
 # ---------------------------------------------------------------------------
 
-version: v16.0
+version: v16.4
 
 entries:
   # -------------------------------------------------------------------------
@@ -110,16 +110,16 @@ entries:
       `application/openapi+json; charset=utf-8` in BOTH cases. inspectPlan
       treats the Accept header as a gate only: `producedMTs = [MTOpenAPI,
       MTApplicationJSON, MTAny]`, and any non-empty intersection yields
-      `Right MTOpenAPI` (Plan.hs#L247-250). The response builder then ignores
+      `Right MTOpenAPI` (Plan.hs#L270-275). The response builder then ignores
       the planned media type and hard-codes
-      `MediaType.toContentType MTOpenAPI` (Response.hs#L208).
+      `MediaType.toContentType MTOpenAPI` (Response.hs#L218).
       HEAD / with application/openapi+json returns 200 with an empty body and
-      no Content-Length header (OpenApiSpec.hs#L21-28: methodHead "/",
+      no Content-Length header (OpenApiSpec.hs#L20-31: methodHead "/",
       matchStatus 200, matchHeaderAbsent hContentLength).
       Under db-root-spec the root is a routine instead and negotiates normally
       — that is where `application/json; charset=utf-8` comes from
-      (RootSpec.hs#L27-34, cased as 1682).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response.hs#L208
+      (RootSpec.hs#L35-45, cased as 1682).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response.hs#L218
     cases: [1650, 1651, 1681]
 
   - id: openapi/root/non-root-406
@@ -127,8 +127,8 @@ entries:
       Requesting application/openapi+json on a non-root path (e.g. /items)
       yields 406 Not Acceptable. An unsupported media type (e.g. text/csv) on
       the root path also yields 406 — it is the empty-intersection branch of
-      inspectPlan, `Left . ApiRequestErr . MediaTypeError` (Plan.hs#L251).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L30
+      inspectPlan, `Left . ApiRequestErr . MediaTypeError` (Plan.hs#L276).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L33
     cases: [1652, 1653]
 
   - id: openapi/root/swagger-version-info
@@ -136,34 +136,48 @@ entries:
       The document has top-level `"swagger": "2.0"`, and `info.title` defaults
       to "PostgREST API" and `info.description` to "This is a dynamic API
       generated by PostgREST" when the exposed schema has no COMMENT
-      (OpenAPI.hs#L396-397). `info.version` is the running PostgREST version:
+      (OpenAPI.hs#L495-496). `info.version` is the running PostgREST version:
       `prettyVersion`, the first two components joined by "."
-      (Version.hs#L22-24), wired at OpenAPI.hs#L395.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L396
+      (Version.hs#L24-26), wired at OpenAPI.hs#L494.
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L495
     cases: [1654]
+
+  - id: openapi/root/mixed-case-schema-name
+    claim: >
+      The default root document is produced for an exposed schema whose name
+      is mixed case, and its info.title is that schema's COMMENT. FIXED in
+      v16.4 (PostgREST#5158): through v16.3 the schema-description,
+      accessible-tables and accessible-functions queries cast the name with an
+      unquoted `::regnamespace`, which folds case, so the root failed with
+      "schema does not exist"; v16.4 applies quote_ident first
+      (SqlFragment.hs#L642, #L657, #L675). Upstream exercises it with schema
+      "SCHEMA_v3", COMMENT 'v3 schema', and asserts 200 + info.title.
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/RootSpec.hs#L50
+    fix_source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Query/SqlFragment.hs#L642
+    cases: [1690]
 
   - id: openapi/root/external-docs
     claim: >
       `externalDocs.url` is `https://postgrest.org/en/<docsVersion>/references/api.html`
       and externalDocs.description is "PostgREST Documentation"
-      (OpenAPI.hs#L399-400). `docsVersion` is "v" plus the first component of
-      the running version (Version.hs#L32-35), so under the v16.0 pin the url
+      (OpenAPI.hs#L500-501). `docsVersion` is "v" plus the first component of
+      the running version (Version.hs#L33-36), so under the v16.0 pin the url
       is `https://postgrest.org/en/v16/references/api.html` (it was
       `.../en/v14/...` under the v14.12 pin — the one wire-visible delta of
       this re-sync).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L400
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L501
     cases: [1655]
 
   - id: openapi/root/introspection-path
     claim: >
       The document documents itself. makePathItems prepends makeRootPathItem to
-      the table and routine items (OpenAPI.hs#L378-380), producing a fixed "/"
+      the table and routine items (OpenAPI.hs#L472-476), producing a fixed "/"
       path item whose GET has tags ["Introspection"], summary "OpenAPI
       description (this document)", produces
       [application/openapi+json, application/json] and one 200 "OK" response
-      (OpenAPI.hs#L367-376). Built from `mempty :: Operation` with no
+      (OpenAPI.hs#L460-470). Built from `mempty :: Operation` with no
       `parameters` lens set, so the operation has no parameters key.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L367
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L460
     cases: [1687]
 
   - id: openapi/root/media-list
@@ -171,13 +185,13 @@ entries:
       The document-level `produces` and `consumes` are the same four-element
       list in source order — `makeMimeList [MTApplicationJSON,
       MTVndSingularJSON True, MTVndSingularJSON False, MTTextCSV]` at
-      OpenAPI.hs#L405 and #L406 — i.e. ["application/json",
+      OpenAPI.hs#L507 and #L508 — i.e. ["application/json",
       "application/vnd.pgrst.object+json;nulls=stripped",
       "application/vnd.pgrst.object+json", "text/csv"]. Static: it does not
       vary with the schema, the role, or the database's media handlers. Not to
       be confused with the two-element per-operation `produces` of the "/"
       path item.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L405
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L507
     cases: [1688]
 
   - id: openapi/root/db-root-spec
@@ -186,36 +200,36 @@ entries:
       alias root-spec) overrides the entire root OpenAPI document with a
       function's return value. getResource maps the root path [] to
       `ResourceRoutine (qiName qi)` when configDbRootSpec is `Just qi`
-      (ApiRequest.hs#L123), otherwise to ResourceSchema (#L124) — so the root
+      (ApiRequest.hs#L152), otherwise to ResourceSchema (#L153) — so the root
       goes through the ordinary routine path and its ordinary media
       negotiation. NOTE the arm ORDER: `(OADisabled,_) -> Left
-      OpenAPIDisabled` is matched first (#L122), so openapi-mode=disabled wins
+      OpenAPIDisabled` is matched first (#L151), so openapi-mode=disabled wins
       over db-root-spec. The documented example function returns
       {"swagger":"2.0","info":{"title":"Overridden","description":"This is a my
       own API"}} and `curl http://localhost:3000` returns exactly that
       (docs/references/api/openapi.rst#L71-101).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/ApiRequest.hs#L123
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/ApiRequest.hs#L152
     cases: [1682]
 
   - id: openapi/root/server-proxy-uri
     claim: >
       Without openapi-server-proxy-uri the document's schemes/host/basePath
       describe the server itself: proxyUri falls through to
-      `("http", configServerHost, configServerPort, "/")` (OpenAPI.hs#L445-451,
-      the Nothing arm at #L451).
+      `("http", configServerHost, configServerPort, "/")` (OpenAPI.hs#L550-556,
+      the Nothing arm at #L556).
       With openapi-server-proxy-uri set, pickProxy parses the URI and those
-      three keys are taken from it (OpenAPI.hs#L416-443), wired into the
-      document as `basePath ?~ T.unpack b` (#L392), `schemes ?~ [s']` (#L393,
-      with `s' = if s == "http" then Http else Https` at #L410) and
-      `host .~ h'` (#L401, with `h' = Just $ Host (escapeHostName h) (Just p)`
-      at #L411 — swagger2 renders that pair as "<host>:<port>"). The port is
+      three keys are taken from it (OpenAPI.hs#L519-548), wired into the
+      document as `basePath ?~ T.unpack b` (#L490), `schemes ?~ [s']` (#L491,
+      with `s' = if s == "http" then Http else Https` at #L512) and
+      `host .~ h'` (#L503, with `h' = Just $ Host (escapeHostName h) (Just p)`
+      at #L513 — swagger2 renders that pair as "<host>:<port>"). The port is
       implied by the scheme when the URI omits it: `("", "https") -> 443`
-      (#L442). An empty URI path becomes "/" (#L432). The docs print the exact
+      (#L547). An empty URI path becomes "/" (#L537). The docs print the exact
       resulting fragment for `openapi-server-proxy-uri = https://postgrest.com`
       — `"host": "postgrest.com:443"`, `"basePath": "/"`,
-      `"schemes": ["https"]` (docs/references/configuration.rst#L856-870).
+      `"schemes": ["https"]` (docs/references/configuration.rst#L860-874).
       A malformed URI never reaches here: the CLI rejects it at startup
-      (`isMalformedProxyUri`, guarded at OpenAPI.hs#L422).
+      (`isMalformedProxyUri`, guarded at OpenAPI.hs#L525).
       UNCASED ON PURPOSE, `cases: []`. The previous pass shipped this as case
       1689 with a `config: {openapi-server-proxy-uri: ...}` block, but the
       frozen harness routes a config-carrying case to a dedicated instance
@@ -229,7 +243,7 @@ entries:
       citations live here in full, and the case can be re-added verbatim from
       this entry the moment the harness owner allocates the variant id. See
       the matching `gaps` entry for the one-line harness change required.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/docs/references/configuration.rst#L854
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/docs/references/configuration.rst#L858
     cases: []
 
   # -------------------------------------------------------------------------
@@ -240,7 +254,7 @@ entries:
       The COMMENT on the exposed schema seeds info.title/info.description:
       the first line (up to the first "\n") becomes info.title, the remainder
       (after stripping leading newlines) becomes info.description.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L413
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L515
     cases: [1656]
 
   - id: openapi/comments/table-summary-description
@@ -248,9 +262,9 @@ entries:
       A table/view COMMENT seeds each operation's summary (first line) and
       description (remaining lines, leading newlines stripped). A single-line
       COMMENT yields summary only and no description key — the description is
-      `mfilter (/="") tDesc` (OpenAPI.hs#L318), so an empty remainder drops the
+      `mfilter (/="") tDesc` (OpenAPI.hs#L399), so an empty remainder drops the
       key rather than emitting "".
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L313
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L392
     cases: [1657, 1658]
 
   - id: openapi/comments/column-description
@@ -260,14 +274,14 @@ entries:
       and a blank line if a comment exists). For a single-column M2O/O2O foreign
       key the FK note "This is a Foreign Key to `<tbl>.<col>`.<fk table='<tbl>'
       column='<col>'/>" is appended.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L139
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L156
     cases: [1659, 1660]
 
   - id: openapi/rpc/summary-description
     claim: >
       A function COMMENT seeds the RPC path-item operation summary/description
       the same way (first line -> summary, rest -> description).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L351
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L440
     cases: [1670]
 
   # -------------------------------------------------------------------------
@@ -279,11 +293,11 @@ entries:
       $ref:#/parameters/rowFilter.<table>.<col> per column, then select, order,
       range, rangeUnit, offset, limit, preferCount. POST parameters are
       body.<table>, select, preferPost. The shared parameter definitions are
-      built by makeParamDefs (OpenAPI.hs#L225-231); the four prefer* ones come
+      built by makeParamDefs (OpenAPI.hs#L254-260); the four prefer* ones come
       from makePreferParam, whose `enum` key is omitted when the family has no
-      literal values (OpenAPI.hs#L177-185) — which is why preferParams alone
+      literal values (OpenAPI.hs#L197-206) — which is why preferParams alone
       has no enum.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L320
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L402
     cases: [1661, 1686]
 
   - id: openapi/table/response-status
@@ -291,30 +305,30 @@ entries:
       Which METHODS a table path item carries is decided ONCE, by a
       DISJUNCTION — not per method. makePathItem is
       `("/" ++ T.unpack tn, p $ tableInsertable t || tableUpdatable t ||
-      tableDeletable t)` (OpenAPI.hs#L309): the False arm emits GET alone
-      (`pr = (mempty :: PathItem) & get ?~ getOp`, #L338, selected at #L340)
+      tableDeletable t)` (OpenAPI.hs#L388): the False arm emits GET alone
+      (`pr = (mempty :: PathItem) & get ?~ getOp`, #L427, selected at #L429)
       and the True arm adds POST, PATCH and DELETE TOGETHER
       (`pw = pr & post ?~ postOp & patch ?~ patchOp & delete ?~ deletOp`,
-      #L339, selected at #L341). CONSEQUENCE an implementer must not miss: an
+      #L428, selected at #L430). CONSEQUENCE an implementer must not miss: an
       insert-only relation (insertable, NOT updatable, NOT deletable) still
       documents PATCH and DELETE, and a relation that is none of the three
       documents none of them. Do NOT gate the three methods independently on
       tableInsertable/tableUpdatable/tableDeletable respectively — that
       diverges from PostgREST on every asymmetric relation.
       Statuses, all emitted by the same function: GET has 206 "Partial
-      Content" (#L321) and 200 "OK" whose schema is an array of
-      `#/definitions/<table>` (#L322-328); POST has 201 "Created" (#L331);
-      PATCH has 204 "No Content" (#L334); DELETE has 204 "No Content"
-      (#L337). Upstream asserts only the POST/PATCH/DELETE descriptions
-      (OpenApiSpec.hs#L117, #L119, #L121); the two GET ones rest on the
+      Content" (#L403) and 200 "OK" whose schema is an array of
+      `#/definitions/<table>` (#L404-414); POST has 201 "Created" (#L418);
+      PATCH has 204 "No Content" (#L422); DELETE has 204 "No Content"
+      (#L426). Upstream asserts only the POST/PATCH/DELETE descriptions
+      (OpenApiSpec.hs#L127, #L129, #L131); the two GET ones rest on the
       generator alone — see case 1662's notes.
       CORRECTED this pass: the entry previously claimed "POST/PATCH/DELETE are
       emitted only when the table is insertable/updatable/deletable", which
       reads as three independent gates and is not what makePathItem does; its
-      `source:` also pointed at #L321 (`at 206`), which supports neither
+      `source:` also pointed at #L403 (`at 206`), which supports neither
       gating claim. Case 1662's notes already stated the disjunction
       correctly.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L309
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L388
     cases: [1662, 1663]
 
   - id: openapi/table/definition
@@ -323,7 +337,7 @@ entries:
       COMMENT, a property per column, and a `required` array of the NOT NULL
       columns. Views produce the same shape but with no `required` key when no
       column is non-nullable.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L100
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L111
     cases: [1664]
 
   # -------------------------------------------------------------------------
@@ -338,14 +352,14 @@ entries:
       items typed from the element type (json[]/jsonb[] items are {}). format is
       the verbatim column type except smallint/integer->int32, bigint->int64.
       character(n) carries maxLength n.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L56
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L67
     cases: [1665, 1666, 1667]
 
   - id: openapi/types/enum
     claim: >
       An enum column gets `type: string`, `format: <enum type name>`, and an
       `enum` array listing the labels in declaration order.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L112
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L125
     cases: [1668]
 
   - id: openapi/defaults/detection
@@ -354,7 +368,7 @@ entries:
       text default -> "default" (string), boolean false -> false, integer 42 ->
       42, numeric 42.2 -> 42.2, date -> "1900-01-01", time -> "13:00:00". String
       types strip the `::type` cast suffix and the surrounding quotes.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L90
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L101
     cases: [1669]
 
   # -------------------------------------------------------------------------
@@ -367,29 +381,29 @@ entries:
       array args use type:string (format <type>[]); a VARIADIC arg uses
       type:array with collectionFormat:multi and a typed items. `required` is
       true for args without a DEFAULT, false otherwise. OUT params are omitted.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L187
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L208
     cases: [1671, 1672]
 
   - id: openapi/rpc/post-body
     claim: >
       The POST path-item has parameters [args (body), $ref preferParams]
-      (OpenAPI.hs#L216-223). Upstream asserts that body schema DIRECTLY, and
+      (OpenAPI.hs#L244-252). Upstream asserts that body schema DIRECTLY, and
       that it-block — not the a_json one — is this entry's source: "includes
       function summary/description and body schema for arguments in the post
       path item" reads
       `paths./rpc/varied_arguments_openapi.post.parameters[0].schema`
-      (OpenApiSpec.hs#L875, binding at #L879) and compares it to a literal
-      object carrying `required` (#L892-908), `properties` (#L909-1003),
-      `"type": "object"` (#L1004) and the COMMENT-derived `description`
-      (#L1005) — nth 0 of the parameters array being the `args` body param,
+      (OpenApiSpec.hs#L892, binding at #L897) and compares it to a literal
+      object carrying `required` (#L910-926), `properties` (#L927-1021),
+      `"type": "object"` (#L1022) and the COMMENT-derived `description`
+      (#L1023) — nth 0 of the parameters array being the `args` body param,
       which is why the $ref preferParams sits at index 1.
       The args body schema is an object with a property
-      per argument (OpenAPI.hs#L157) and a `required` array holding exactly the
-      params for which `ppReq` holds (OpenAPI.hs#L158) — the no-DEFAULT,
+      per argument (OpenAPI.hs#L174) and a `required` array holding exactly the
+      params for which `ppReq` holds (OpenAPI.hs#L175) — the no-DEFAULT,
       non-OUT ones. An INOUT param with no DEFAULT is both a property and
       required. A routine whose params are ALL OUT has NO input arguments at
       all — the routines query keeps only input arguments (`WHERE type IS NOT
-      NULL`, SchemaCache.hs#L427) — so `pdParams` is empty and BOTH lenses are
+      NULL`, SchemaCache.hs#L473) — so `pdParams` is empty and BOTH lenses are
       left at their aeson defaults (empty map, empty list). The swagger2
       encoder drops every field still equal to its default
       (Data/Swagger/Internal/AesonUtils.hs, `| Just x == def = rest`), so such
@@ -399,28 +413,28 @@ entries:
       previously claimed `properties: {}` was emitted. Upstream proves the
       default-drop in this same spec file: the `a_json` column schema is
       asserted to equal EXACTLY `{"format":"json"}`, with no `properties`, no
-      `required` and no `type` (OpenApiSpec.hs#L514-526), and the
+      `required` and no `type` (OpenApiSpec.hs#L530-542), and the
       child_entities_view definition is asserted as a whole object with no
-      `required` key (#L179-209). The schema description is the function
-      COMMENT (title + "\n\n" + description), asserted at #L1005 as
+      `required` key (#L192-222). The schema description is the function
+      COMMENT (title + "\n\n" + description), asserted at #L1023 as
       "An RPC function\n\nJust a test for RPC function arguments".
-      RE-POINTED this pass: `source:` used to be OpenApiSpec.hs#L514, the
+      RE-POINTED this pass: `source:` used to be OpenApiSpec.hs#L530, the
       `it "json to any"` block asserting the a_json COLUMN schema. That anchor
       supports ONLY the ancillary swagger2 default-drop sub-claim above and
       says nothing about the RPC POST path item, its `parameters` list or its
       args schema — the entry's headline claim. It stays cited in the prose
       as the supporting evidence it always was; the primary anchor is now the
       it-block that actually asserts the POST body schema.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L875
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L892
     cases: [1673, 1683, 1684]
 
   - id: openapi/rpc/volatility-methods
     claim: >
       VOLATILE functions emit a POST path item only; every other volatility
       emits both GET and POST. The switch has exactly two arms, `Volatile ->
-      post` and `_ -> get + post` (OpenAPI.hs#L363-365), so STABLE and
+      post` and `_ -> get + post` (OpenAPI.hs#L456-458), so STABLE and
       IMMUTABLE share one arm.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/Response/OpenAPI.hs#L363
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Response/OpenAPI.hs#L456
     cases: [1674, 1685]
 
   # -------------------------------------------------------------------------
@@ -430,21 +444,21 @@ entries:
     claim: >
       In the default openapi-mode (follow-privileges) a table/function the
       request role lacks privileges on is omitted from paths. The privileged
-      TABLE #/paths//authors_only is hidden for anonymous (OpenApiSpec.hs#L211
-      "doesn't include privileged table for anonymous", Nothing at #L215) and
-      appears with the privileged JWT (#L217, tag at #L222). The privileged
+      TABLE #/paths//authors_only is hidden for anonymous (OpenApiSpec.hs#L224
+      "doesn't include privileged table for anonymous", Nothing at #L228) and
+      appears with the privileged JWT (#L230, tag at #L239). The privileged
       FUNCTION #/paths//rpc/privileged_hello is hidden for anonymous
-      (OpenApiSpec.hs#L1009 "doesn't include privileged function for anonymous",
-      Nothing at #L1013) and appears with the privileged JWT (#L1015, tag at
-      #L1018).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1009
+      (OpenApiSpec.hs#L1027 "doesn't include privileged function for anonymous",
+      Nothing at #L1031) and appears with the privileged JWT (#L1033, tag at
+      #L1036).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1027
     cases: [1675, 1676]
 
   - id: openapi/mode/ignore-privileges
     claim: >
       With openapi-mode=ignore-privileges every exposed table/function is
       included regardless of the request role's privileges.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/IgnorePrivOpenApiSpec.hs#L41
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/IgnorePrivOpenApiSpec.hs#L41
     cases: [1677]
 
   - id: openapi/mode/disabled
@@ -452,7 +466,7 @@ entries:
       With openapi-mode=disabled, GET / returns 404 with the PGRST126 error
       body {"code":"PGRST126","details":null,"hint":null,"message":"Root
       endpoint metadata is disabled"}.
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L17
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/DisabledOpenApiSpec.hs#L15
     cases: [1678]
 
   # -------------------------------------------------------------------------
@@ -463,8 +477,8 @@ entries:
       By default the document has neither a top-level `security` nor a
       `securityDefinitions` key: makeSecurityDefinitions returns `mempty` and
       the security list is a comprehension guarded by the same flag
-      (OpenAPI.hs#L382-385, #L407-408).
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1094
+      (OpenAPI.hs#L479-482, #L509-510).
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/OpenApiSpec.hs#L1138
     cases: [1679]
 
   - id: openapi/security/active
@@ -473,8 +487,8 @@ entries:
       `security: [ { "JWT": [] } ]` and `securityDefinitions.JWT` =
       { type: apiKey, in: header, name: Authorization, description:
       'Add the token prepending "Bearer " (without quotes) to it' }
-      (OpenAPI.hs#L387-388 for the scheme, #L412 for the name "JWT").
-    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/OpenApi/SecurityOpenApiSpec.hs#L21
+      (OpenAPI.hs#L484-485 for the scheme, #L514 for the name "JWT").
+    source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/OpenApi/SecurityOpenApiSpec.hs#L17
     cases: [1680]
 
 # ---------------------------------------------------------------------------
@@ -490,7 +504,7 @@ fixture_notes:
       RETURNS json (conformance/fixtures.sql#L1621), transcribed from the
       DOCUMENTED example (docs/references/api/openapi.rst#L71) rather than from
       upstream's fixture, which declares `returns "application/openapi+json"`
-      (test/spec/fixtures/schema.sql#L1867). Body is the "Overridden" document,
+      (test/spec/fixtures/schema.sql#L1869). Body is the "Overridden" document,
       not upstream's "PostgREST API" one.
     breaks: >
       Case 1682's body_exact is the Overridden document and its Accept is
@@ -498,15 +512,15 @@ fixture_notes:
       type is plain json and not the mime-named domain, the routine registers
       no application/openapi+json handler (only the built-in {*/*,
       application/json, text/csv, application/geo+json} of
-      SchemaCache.hs#L1016-1022), so an Accept of application/openapi+json is
+      SchemaCache.hs#L1082-1090), so an Accept of application/openapi+json is
       406/PGRST107 upstream. The case asked for exactly that until this pass.
   - object: test.jwt_test()
     property: >
       VOLATILE — `LANGUAGE sql SECURITY DEFINER` with no volatility keyword
       (conformance/fixtures.sql#L1099). Upstream's is IMMUTABLE
-      (test/spec/fixtures/schema.sql#L347-349).
+      (test/spec/fixtures/schema.sql#L349-351).
     breaks: >
-      The upstream immutable-volatility it-block (OpenApiSpec.hs#L1078) reads
+      The upstream immutable-volatility it-block (OpenApiSpec.hs#L1121) reads
       /rpc/jwt_test and asserts GET and POST are both present. Transcribed
       literally against this fixture it would assert the OPPOSITE of upstream
       (POST only). Case 1685 uses test.three_defaults (IMMUTABLE) instead.
@@ -515,10 +529,10 @@ fixture_notes:
   - object: test.variadic_param(VARIADIC v text[] DEFAULT '{}')
     property: >
       The DEFAULT '{}' (conformance/fixtures.sql#L1372), matching upstream
-      test/spec/fixtures/schema.sql#L1277.
+      test/spec/fixtures/schema.sql#L1279.
     breaks: >
       Case 1672 asserts `required: false` on the VARIADIC query parameter.
-      That comes from the DEFAULT (`& required ?~ r`, OpenAPI.hs#L191), NOT
+      That comes from the DEFAULT (`& required ?~ r`, OpenAPI.hs#L213), NOT
       from the parameter being VARIADIC. Dropping the DEFAULT flips the
       assertion while leaving collectionFormat/items untouched.
   - object: test.many_out_params / test.single_inout_param
@@ -561,22 +575,22 @@ gaps:
     each of those cases shipped `Accept-Profile: openapi`. Under PostgREST the
     root document is generated for the REQUESTED profile — upstream asserts
     exactly that: `request methodGet "/" [("Accept-Profile","v1")]` changes
-    which paths and which /rpc/ items appear (IgnorePrivOpenApiSpec.hs#L49-58
-    for tables, #L81-89 for functions) — so with `openapi` listed in db-schemas
+    which paths and which /rpc/ items appear (IgnorePrivOpenApiSpec.hs#L53-62
+    for tables, #L89-97 for functions) — so with `openapi` listed in db-schemas
     but empty in the database, every path/definition assertion in this area
     would describe an empty document. They passed only because Bier does not
     resolve the profile for the root path today, i.e. for a reason the spec
     must not depend on.
     `test` is also the FAITHFUL label: OpenApiSpec runs under baseCfg's
-    `configDbSchemas = fromList ["test"]` (SpecHelper.hs#L151) and all of its
+    `configDbSchemas = fromList ["test"]` (SpecHelper.hs#L160) and all of its
     it-blocks issue a bare `get "/"` with no Accept-Profile, which is what the
     harness's suppression of the `test` label reproduces on the wire.
     Case 1654 is untouched: its `openapi_no_comment` label names a schema that
     DOES exist and that its variant instance exposes as the only db-schema.
   - >
     RESOLVED this pass. The previous entry read: "The `preferParams`
-    empty-enum suppression (OpenApiSpec.hs#L1087) and the Prefer enum value
-    lists (OpenAPI.hs#L168) are real but the parameters block requires the full
+    empty-enum suppression (OpenApiSpec.hs#L1131) and the Prefer enum value
+    lists (OpenAPI.hs#L186) are real but the parameters block requires the full
     param-definition table; covered indirectly by the table path-parameter
     $ref case rather than a dedicated enum-values assertion." It is now cased
     directly as 1686, which asserts the whole preferParams definition object
@@ -585,9 +599,9 @@ gaps:
     JSONPath into the emitted document.
   - >
     RESOLVED this pass. The previous entry read: "the full produces/consumes
-    media list (OpenAPI.hs#L405) is not individually asserted by a Feature
+    media list (OpenAPI.hs#L507) is not individually asserted by a Feature
     test". True, and irrelevant — PostgREST source is ground truth in its own
-    right. Cased as 1688 from OpenAPI.hs#L405-406. The other half of that
+    right. Cased as 1688 from OpenAPI.hs#L507-508. The other half of that
     entry (CSV at root is 406) was already cased as 1653.
 
   - >
@@ -596,13 +610,13 @@ gaps:
     validates against the OpenAPI schema; it does not assert the resulting
     host/basePath/schemes values, so no precise black-box body assertion can be
     traced to a source line." The premise about ProxySpec is true; the
-    conclusion is not. docs/references/configuration.rst#L854 PRINTS the exact
+    conclusion is not. docs/references/configuration.rst#L858 PRINTS the exact
     resulting document fragment for this option — `"host":
     "postgrest.com:443"`, `"basePath": "/"`, `"schemes": ["https"]` (the
-    ``.. code:: json`` block at #L856-870) — and every one of those three
+    ``.. code:: json`` block at #L860-874) — and every one of those three
     values is independently re-derivable from pickProxy/proxyUri
-    (OpenAPI.hs#L416-443, #L445-451) plus postgrestSpec's basePath/schemes/host
-    wiring (#L392-393, #L401, #L410-411). The values are stated against the
+    (OpenAPI.hs#L519-548, #L550-556) plus postgrestSpec's basePath/schemes/host
+    wiring (#L490-491, #L503, #L512-513). The values are stated against the
     DOCUMENTED URI `https://postgrest.com`, not ProxySpec's
     `https://postgrest.com/openapi.json` (which would give basePath
     "/openapi.json", a value no source states). Cases 1687/1688 still do not
@@ -633,12 +647,12 @@ gaps:
     `config: {openapi-server-proxy-uri: "https://postgrest.com"}`, expecting
     200 and body_jsonpath `$.host == "postgrest.com:443"`,
     `$.basePath == "/"`, `$.schemes == ["https"]`, sourced to
-    docs/references/configuration.rst#L854. This is the one deliverable of
+    docs/references/configuration.rst#L858. This is the one deliverable of
     this pass that a `spec/`-only edit cannot complete.
   - >
     Schema scoping of the document (only objects of the requested profile are
     documented; Accept-Profile switches which schema is described) is asserted
-    upstream at IgnorePrivOpenApiSpec.hs#L49 (tables) and #L81 (functions),
+    upstream at IgnorePrivOpenApiSpec.hs#L53 (tables) and #L89 (functions),
     under configDbSchemas = ["test","v1"]. Not new in v16.0 (identical blocks
     ran under v14.12's testIgnorePrivOpenApiCfg, SpecHelper.hs#L189-190) and
     still uncased: the shared Bier conformance instance exposes 17 schemas at
@@ -650,7 +664,7 @@ gaps:
     profile" is checkable.
   - >
     info.version is the running PostgREST version string ("16.0" =
-    `take 2` of the version, Version.hs#L22-24, wired at OpenAPI.hs#L395). It
+    `take 2` of the version, Version.hs#L24-26, wired at OpenAPI.hs#L494). It
     is version-specific by construction and no upstream Feature test asserts
     its literal value, so it stays uncased — a case would pin Bier to
     reporting a PostgREST version number.
@@ -659,7 +673,7 @@ gaps:
     including the root OpenAPI document and the openapi-mode=disabled
     PGRST126 error, now carries `Vary: Accept, Prefer, Range` unless the
     handler already set a Vary header
-    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/src/library/PostgREST/App.hs#L253).
+    (https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/App.hs#L275).
     The openapi cases assert Content-Type/Content-Length only and are
     unaffected; the Vary contract belongs to the headers area, which owns
     docs/references/api/vary_header.rst (new in v16.0).
@@ -667,21 +681,21 @@ gaps:
     FIVE upstream it-blocks in this area describe relation KINDS the
     consolidated fixtures do not contain, and none can be cased without new
     objects. Each names the missing relation and the assertion it blocks:
-    (a) OpenApiSpec.hs#L242-270 "includes foreign table properties" — needs a
+    (a) OpenApiSpec.hs#L259-288 "includes foreign table properties" — needs a
     FOREIGN TABLE `projects_dump` with the COMMENT "A temporary projects
     dump\n\nJust a test for foreign tables"; asserts it gets the same
     rowFilter/select/order/... GET parameter list as a table.
-    (b) #L274-294 "includes partitioned table properties" — needs a PARTITIONED
+    (b) #L291-311 "includes partitioned table properties" — needs a PARTITIONED
     table `car_models` commented "A partitioned table\n\nA test for partitioned
     tables". `test.car_models` EXISTS (fixtures.sql#L740) but is an ordinary
     compound-PK table built for the headers area's multi-PK Location, with no
     COMMENT and different columns, so the assertion is not transcribable onto
     it and renaming/altering it would break the headers cases.
-    (c) #L298-326 "includes materialized view properties" — needs a
+    (c) #L314-343 "includes materialized view properties" — needs a
     MATERIALIZED VIEW `materialized_projects`.
-    (d) #L330-343 "VIEW that has a source FK based on a UNIQUE key" — needs
+    (d) #L346-360 "VIEW that has a source FK based on a UNIQUE key" — needs
     `referrals`/`pages` where the FK targets a UNIQUE (not primary) key.
-    (e) #L225-238 "includes a fk description for a O2O relationship" — needs
+    (e) #L242-256 "includes a fk description for a O2O relationship" — needs
     the `first`/`second` O2O pair; case 1660 covers the M2O shape only.
     loader_exposure: these are five new relations in the `test` schema plus
     their COMMENTs and anon GRANTs. Every one is inert for the rest of the
@@ -689,7 +703,7 @@ gaps:
     fixture objects, not a delta over existing ones, and this pass declines to
     invent them.
   - >
-    OpenApiSpec.hs#L347-360 ("fk points to destination TABLE instead of the
+    OpenApiSpec.hs#L363-377 ("fk points to destination TABLE instead of the
     VIEW") reads definitions.projects.properties.client_id and asserts the FK
     note names `clients`, the TABLE, even though a view over it exists.
     `test.projects` and `test.clients` DO exist with exactly that FK
@@ -705,15 +719,15 @@ gaps:
     relation with no view over its destination would re-assert case 1660 under
     a new id.
   - >
-    The DEFAULT half of OpenApiSpec.hs#L1032-1038 is uncased. Upstream's
+    The DEFAULT half of OpenApiSpec.hs#L1060-1072 is uncased. Upstream's
     `many_inout_params(INOUT num int, INOUT str text, INOUT b bool DEFAULT
-    true)` (schema.sql#L1265) witnesses two things at once: INOUT-with-no-
+    true)` (schema.sql#L1267) witnesses two things at once: INOUT-with-no-
     DEFAULT is required (cased as 1684 over test.single_inout_param) and
     INOUT-WITH-DEFAULT is a property but not required. The second leg needs a
     routine with both kinds of INOUT param; the consolidated fixtures have
     none (test.single_inout_param has exactly one, no DEFAULT).
     loader_exposure: `test.many_inout_params` transcribed from
-    test/spec/fixtures/schema.sql#L1265.
+    test/spec/fixtures/schema.sql#L1267.
   - >
     operator_action: the `preconditions:` key is inert — the harness parses it
     and never executes it. This pass emptied the two non-empty lists this area
@@ -740,7 +754,7 @@ gaps:
     config-carrying case would otherwise be served by the shared instance with
     its config silently ignored — i.e. it would fail for the wrong reason. Two
     behaviors in this area are blocked on that and are NOT cased: (a) the
-    openapi-mode=disabled / db-root-spec precedence of ApiRequest.hs#L122
+    openapi-mode=disabled / db-root-spec precedence of ApiRequest.hs#L151
     (OADisabled matched before `Just qi`), which needs BOTH keys set at once;
     (b) any second openapi-mode=ignore-privileges case beyond 1677. Recorded
     rather than written-and-broken.

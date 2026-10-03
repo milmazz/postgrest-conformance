@@ -13,7 +13,7 @@ expect:
 notes: >
   A jsonb sub-document obtained via -> can be compared with eq to a JSON
   literal. Mirrors JsonOperatorSpec "can filter jsonb" (it-block starts at
-  L208); the data->a=eq.{"b":2} sub-assertion's get/shouldRespondWith spans
-  L212-L214 (the anchor below is the get line, L212). The L209 row of the same
+  L241); the data->a=eq.{"b":2} sub-assertion's get/shouldRespondWith spans
+  L246-L244 (the anchor below is the get line, L246). The L242 row of the same
   it-block is the unrelated data=eq.{"e":1} assertion.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/JsonOperatorSpec.hs#L212
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/JsonOperatorSpec.hs#L246

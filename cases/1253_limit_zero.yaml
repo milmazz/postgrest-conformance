@@ -10,5 +10,5 @@ expect:
   headers:
     Content-Range: "*/*"
   body_exact: []
-notes: "limit=0 succeeds and returns an empty array with Content-Range '*/*'. Mirrors RangeSpec.hs:259."
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/spec/Feature/Query/RangeSpec.hs#L259
+notes: "limit=0 succeeds and returns an empty array with Content-Range '*/*'. Mirrors RangeSpec.hs:313."
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/spec/Feature/Query/RangeSpec.hs#L313

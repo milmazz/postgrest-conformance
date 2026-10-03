@@ -19,4 +19,4 @@ notes: >
   (configs/expected/defaults.config) is the plain default set. The same holds
   for in-database settings: db_config.sql#L22 sets `pgrst.not_existing` and the
   expected golden never mentions it.
-source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.0/test/io/configs/defaults.config#L4
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/test/io/configs/defaults.config#L4
