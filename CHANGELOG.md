@@ -2,7 +2,24 @@
 
 ## Unreleased
 
-**The oracle runner is now idempotent against an unreloaded fixture database**
+**824 -> 828 cases.** No fixture change, no pin change (still v16.4).
+
+- **select: unresolvable empty embeds — 4 cases (11141-11144).** 11139 only
+  ever exercised a nested empty embed whose relation resolves, so an
+  implementer that skips empty embeds before relationship resolution passed
+  every case. An empty embed naming no relationship is a **400 PGRST200** with
+  a null hint in every position: nested in a spread (`...processes(bogus())`
+  11141, and the real-but-unrelated `...processes(clients())` 11142), nested
+  in a plain embed (`processes(bogus())` 11143), and at the root (`bogus()`
+  11144). `addRels` resolves each node through `findRel` before `rsEmptyEmbed`
+  is ever consulted. Bodies read off a live run of the pinned v16.4 binary;
+  the issue's guess that `clients()` might draw a fuzzy hint is wrong. Closes
+  #31.
+
+Verified: `scripts/check` green (the three Go corpus pins 824 -> 828) and
+`scripts/fresh-db` **TOTAL 828/828**.
+
+Tooling: **The oracle runner is now idempotent against an unreloaded fixture database**
 (closes #22). Postgres sequences are non-transactional, so the runner's
 `db-tx-end=rollback` discarded rows but not `nextval()` advances, and case 1305
 failed on every repeat run without `db-setup`. `oracle db-setup` now records
