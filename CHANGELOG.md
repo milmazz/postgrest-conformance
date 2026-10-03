@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+**824 -> 828 cases.** No fixture change, no pin change (still v16.4).
+
+- **select: unresolvable empty embeds — 4 cases (11141-11144).** 11139 only
+  ever exercised a nested empty embed whose relation resolves, so an
+  implementer that skips empty embeds before relationship resolution passed
+  every case. An empty embed naming no relationship is a **400 PGRST200** with
+  a null hint in every position: nested in a spread (`...processes(bogus())`
+  11141, and the real-but-unrelated `...processes(clients())` 11142), nested
+  in a plain embed (`processes(bogus())` 11143), and at the root (`bogus()`
+  11144). `addRels` resolves each node through `findRel` before `rsEmptyEmbed`
+  is ever consulted. Bodies read off a live run of the pinned v16.4 binary;
+  the issue's guess that `clients()` might draw a fuzzy hint is wrong. Closes
+  #31.
+
+Verified: `scripts/check` green (the three Go corpus pins 824 -> 828) and
+`scripts/fresh-db` **TOTAL 828/828**.
+
 ## v16.4.0-suite.1
 
 **The pin moves v16.0 → v16.4, and 812 -> 824 cases.** Spans upstream v16.1,

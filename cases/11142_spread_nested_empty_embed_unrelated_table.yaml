@@ -1,0 +1,45 @@
+id: 11142
+feature: select/spread/nested-empty-embed-unrelated-table
+request:
+  method: GET
+  path: /factories?select=name,...processes(clients())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "262"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'processes' and 'clients' in the schema cache"
+    details: "Searched for a foreign key relationship between 'processes' and 'clients' in the schema 'test', but no matches were found."
+    hint: null
+notes: >
+  11141 with the embed naming a table that EXISTS in `test` but has no
+  foreign key to `processes`. The answer is the same PGRST200 from the same
+  `findRel` branch (cited line): resolution looks for a relationship between
+  origin and target, not for the target relation, so a real table is no
+  more resolvable than a made-up name. This rules out an implementer that
+  validates only that the embedded name is a known relation before
+  skipping an empty embed.
+
+  `hint` is null, which is worth pinning rather than inferring.
+  `test.processes` is a key of the relationships map, so `noRelBetweenHint`
+  takes the CHILD branch (Error.hs:326) and runs `Fuzzy.get` over
+  `fuzzySetOfChildren` — the foreign tables of processes' own relationships
+  (Error.hs:332) — keeping only a match scoring strictly below 1.0
+  (Error.hs:335). Issue #31 speculated that "clients" might fuzzy-match one
+  of processes' children (`process_costs`, `process_categories`, ...) and
+  draw a "Perhaps you meant ..." hint; the live run shows none does at
+  fuzzyset's default threshold, so the envelope's hint is null, the same as
+  for 11141's `bogus`. Content-Length 262 was recounted against the body
+  above.
+
+  EXTRAPOLATION beyond upstream's own coverage, for the same reason as
+  11141: no it-block in SpreadQueriesSpec.hs's `empty spreads embeds`
+  context (L602-L631) names an unresolvable relation. The body was read off
+  a live run of the pinned v16.4 binary against this suite's fixtures
+  (issue #31). Contrast 1530, the same child branch WITH a hint.
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L655

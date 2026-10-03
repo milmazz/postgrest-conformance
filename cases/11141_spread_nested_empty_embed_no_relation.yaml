@@ -1,0 +1,52 @@
+id: 11141
+feature: select/spread/nested-empty-embed-no-relation
+request:
+  method: GET
+  path: /factories?select=name,...processes(bogus())
+  headers: { Accept: application/json }
+schema: test
+expect:
+  status: 400
+  headers:
+    Content-Type: application/json; charset=utf-8
+    Proxy-Status: "PostgREST; error=PGRST200"
+    Content-Length: "258"
+  body_exact:
+    code: "PGRST200"
+    message: "Could not find a relationship between 'processes' and 'bogus' in the schema cache"
+    details: "Searched for a foreign key relationship between 'processes' and 'bogus' in the schema 'test', but no matches were found."
+    hint: null
+notes: >
+  The unresolvable half of 11139: an empty embed nested in a spread that
+  names NO relation at all must still be resolved, and fails resolution with
+  PGRST200 — not with 11139's 42703, and not with a 200 that treats the empty
+  parens as "contributes nothing". Emptiness plays no part in resolution.
+  `addRels` resolves every non-root node through
+  `rel = findRel schema allRels origin relName relHint` (Plan.hs:602) and
+  recurses into the children with `updateForest` (L604, L620); `findRel`
+  answers `Left $ SchemaCacheErr $ NoRelBetween ...` on no match (cited line).
+  Nothing on that path reads the node's select list — `rsEmptyEmbed`
+  (L750) is computed afterwards, in `generateRelSelectField` under
+  `addRelSelects` (L732), and only decides how an ALREADY-resolved embed
+  renders. The origin in both strings is `processes`, the spread's own
+  table: at depth 2 `origin` is `qiName parentNodeQi` (L601), not the root.
+
+  `hint` is null although `test.processes` IS a key of the relationships
+  map: `noRelBetweenHint` takes its CHILD branch (Error.hs:326, the branch
+  case 1530 pins) and fuzzy-matches "bogus" against the foreign tables of
+  processes' relationships, none of which scores high enough. Content-Length
+  258 was recounted against the body above.
+
+  The ordering is what this case pins. An implementer that short-circuits
+  empty embeds before resolving them — the obvious optimization, since an
+  empty embed projects nothing — still passes 11139 (its relation is real)
+  and every other case in the tree, while answering this request with
+  11139's phantom-column 42703 or with a silent 200 (milmazz/bier#161).
+  EXTRAPOLATION beyond upstream's own coverage: SpreadQueriesSpec.hs's
+  `empty spreads embeds` context (L602, `it` at L603) has three gets and
+  every one names a real relationship, so there is no it-block to
+  transcribe. This case anchors the Plan.hs line that raises the error and
+  its body was read off a live run of the pinned v16.4 binary against this
+  suite's fixtures (issue #31). Siblings: 11142 (a REAL but unrelated table),
+  11143 (the same request without the spread), 11144 (the root spelling).
+source: https://raw.githubusercontent.com/PostgREST/postgrest/v16.4/src/library/PostgREST/Plan.hs#L655
